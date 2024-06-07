@@ -1,0 +1,71 @@
+import React from "react";
+import styled, { keyframes } from "styled-components";
+import { useRef } from "react";
+
+const initBox = keyframes`
+  from {
+    transform: scale(110%);
+  }
+
+  to {
+    transform: scale(100%);
+  }
+`;
+
+const initLayout = keyframes`
+  from {
+    background-color: rgba(0, 0, 0, 0.0);
+  }
+
+  to {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+`;
+
+const Layout = styled.div`
+  position: fixed;
+  top: 0%;
+  left: 0%;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: ${initLayout} 0.15s linear;
+  z-index: 99999;
+`;
+
+export default function PopUp({ className, children, action }) {
+  const popUpRef = useRef();
+
+  const onClick = (ev) => {
+    if (!popUpRef.current.contains(ev.target)) {
+      action();
+    }
+  };
+
+  return (
+    <Layout className="layout" onClick={onClick}>
+      <PopUpBox useRef={popUpRef} className={className} children={children} />
+    </Layout>
+  );
+}
+
+const Container = styled.div`
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 1.3rem;
+  border-radius: 3px;
+  padding: 2rem 2rem;
+  animation: ${initBox} 0.15s linear;
+`;
+
+const PopUpBox = ({ className, children, useRef }) => {
+  return (
+    <Container ref={useRef} className={className}>
+      {children}
+    </Container>
+  );
+};
