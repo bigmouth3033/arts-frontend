@@ -11,6 +11,7 @@ export default function useCreateProductReducer() {
     CHANGE_VARIANTS: "CHANGE_VARIANTS",
     CHANGE_UNIT: "CHANGE_UNIT",
     CHANGE_ACTIVE_DAY: "CHANGE_ACTIVE_DAY",
+    CHANGE_VARIANT_DETAIL: "CHANGE_VARIANT_DETAIL",
   };
 
   function reducer(state, action) {
@@ -31,6 +32,8 @@ export default function useCreateProductReducer() {
         return { ...state, activeDay: action.next };
       case ACTIONS.CHANGE_SALE_PRICE:
         return { ...state, salePrice: action.next };
+      case ACTIONS.CHANGE_VARIANT_DETAIL:
+        return { ...state, variant_detail: action.next };
     }
   }
 
@@ -41,6 +44,7 @@ export default function useCreateProductReducer() {
     salePrice: 0,
     images: [],
     variants: [],
+    variant_detail: [],
     unit: "",
     activeDay: new Date(),
   });

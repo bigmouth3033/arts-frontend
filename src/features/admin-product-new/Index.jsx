@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { useState, useRef } from "react";
 import TextEditor from "./components/TextEditor/TextEditor";
-import TextInput from "@/shared/components/Input/TextInput";
+import CustomInput from "./components/Input/CustomInput";
 import SelectInput from "@/shared/components/Input/SelectInput";
 import { css } from "styled-components";
 import variant_options from "./data/variant_options";
@@ -14,6 +14,13 @@ import useCreateProductReducer from "./hooks/useCreateProduct";
 import { readCategoriesData } from "@/shared/utils/readCategoriesData";
 import { ReadTypeRequest } from "@/shared/api/typeApi";
 import { readTypesData } from "@/shared/utils/readTypesData";
+import variant_detail_sample from "./data/variant_detail_sample";
+import cartesian from "./utils/cartesian";
+import { CiImageOn } from "react-icons/ci";
+import PopUp from "@/shared/components/PopUp/PopUp";
+import TextInput from "@/shared/components/Input/TextInput";
+import ErrorPopUp from "@/shared/components/PopUp/ErrorPopUp";
+import ImagePopUp from "./components/CustomPopUp/ImagePopUp";
 
 const Container = styled.div`
   max-width: 75rem;
@@ -124,6 +131,7 @@ const VariantItemContainer = styled.div`
   display: grid;
   grid-template-columns: 1fr 1.3fr;
   gap: 3rem;
+  padding: 0 10px;
 
   & h5 {
     padding-bottom: 5px;
@@ -153,7 +161,7 @@ const SelectVariant = styled.div`
   > div {
     display: grid;
     align-items: center;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr 35px;
     column-gap: 1rem;
 
     > svg {
@@ -267,12 +275,97 @@ const UnitContainer = styled.div`
 
 const VariantDetailContainer = styled.div``;
 
+const VariantDetail = styled.div`
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  align-items: center;
+
+  > div:nth-of-type(1) {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+
+    > svg {
+      font-size: 3rem;
+      opacity: 0.4;
+      border: 1px solid rgba(0, 0, 0, 0.4);
+      padding: 10px;
+      cursor: pointer;
+    }
+  }
+
+  > div:nth-of-type(2) {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: flex-end;
+
+    > p:nth-of-type(1) {
+      font-weight: 500;
+    }
+
+    > p:nth-of-type(2) {
+      opacity: 0.6;
+      font-size: 13px;
+    }
+  }
+
+  & img {
+    width: 3rem;
+    height: 3rem;
+  }
+`;
+
+const DoneContainer = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 1rem;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+
+  > p {
+    font-weight: 600;
+  }
+
+  > div:nth-of-type(1) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    > button {
+      border: none;
+      padding: 2px 15px;
+      box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+    }
+  }
+
+  > div:nth-of-type(2) {
+    text-align: right;
+    > button {
+      cursor: pointer;
+      border-radius: 5px;
+      padding: 2px 10px;
+      border: none;
+      background-color: white;
+      box-shadow: rgba(255, 255, 255, 0.2) 0px 0px 0px 1px inset, rgba(0, 0, 0, 0.9) 0px 0px 0px 1px;
+    }
+
+    > button:hover {
+      background-color: #edeff2;
+    }
+  }
+`;
+
 export default function AdminProductNew() {
   const readCategoryRequest = ReadCategoryRequest();
   const readTypeRequest = ReadTypeRequest();
 
   const [showVariant, setShowVariant] = useState(false);
   const [showUnit, setShowUnit] = useState(false);
+  const [addNewStatus, setAddNewStatus] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [variantImagePopUp, setVariantImagePopUp] = useState(false);
 
   const [state, dispatch, ACTIONS] = useCreateProductReducer();
   const inputRef = useRef();
@@ -329,7 +422,7 @@ export default function AdminProductNew() {
       );
 
       if (!isValidFileType) {
-        alert("Invalid file type! Please select a valid image file.");
+        setImageError(true);
         // Clear the file input if the file type is invalid
         ev.target.value = null;
         return;
@@ -366,51 +459,84 @@ export default function AdminProductNew() {
     return state.variants.find((item) => item.value.find((itemValue) => itemValue != ""));
   };
 
-  const onShowVariantDetail = () => {
-    const variants = state.variants.filter((item) =>
-      item.value.find((valueItem) => valueItem != "")
-    );
+  const transformToVariantDetail = () => {
+    const allVariants = [];
 
-    const detail = [];
-    if (variants.length == 1) {
-      for (let i = 0; i < variants[0].value.length; i++) {
-        detail.push(variants[0].value[i]);
+    const generateVariantKey = (item) => {
+      if (Array.isArray(item)) {
+        return item.join("_");
+      } else {
+        return item;
       }
+    };
+
+    for (let variant of state.variants) {
+      if (!variant.value.find((item) => item != "")) {
+        continue;
+      }
+      allVariants.push(variant.value.filter((item) => item != ""));
     }
 
-    if (variants.length == 2) {
-      for (let i = 0; i < variants[0].value.length; i++) {
-        for (let j = 0; j < variants[1].value.length; j++) {
-          if (variants[0].value[i] == "" || variants[1].value[j] == "") {
-            continue;
-          }
-          detail.push(`${variants[0].value[i]}/${variants[1].value[j]}`);
+    const variantDetail = cartesian(...allVariants);
+    console.log(variantDetail);
+
+    dispatch({
+      type: ACTIONS.CHANGE_VARIANT_DETAIL,
+      next: variantDetail.map((variant) => {
+        const key = generateVariantKey(variant);
+        let oldVariant;
+        if (
+          (oldVariant = state.variant_detail.find(
+            (item) => generateVariantKey(item.variant) == key
+          ))
+        ) {
+          return { ...oldVariant, variant: Array.isArray(variant) ? variant : [variant] };
+        } else {
+          return {
+            variant: Array.isArray(variant) ? variant : [variant],
+            ...variant_detail_sample,
+          };
         }
-      }
+      }),
+    });
+  };
+
+  const onAddNewTypeVariant = (value) => {
+    for (let item of state.variant_detail) {
+      item.variant.push(value);
     }
 
-    if (variants.length == 3) {
-      for (let i = 0; i < variants[0].value.length; i++) {
-        for (let j = 0; j < variants[1].value.length; j++) {
-          for (let z = 0; z < variants[2].value.length; z++) {
-            if (
-              variants[0].value[i] == "" ||
-              variants[1].value[j] == "" ||
-              variants[2].value[z] == ""
-            ) {
-              continue;
-            }
-            detail.push(`${variants[0].value[i]}/${variants[1].value[j]}/${variants[2].value[z]}`);
-          }
-        }
-      }
+    dispatch({ type: ACTIONS.CHANGE_VARIANT_DETAIL, next: state.variant_detail });
+  };
+
+  const checkIfNewVariantType = (variant) => {
+    const slice = variant.value.filter((item, index) => index != 0);
+
+    if (!slice.find((item) => item != "")) {
+      return true;
     }
 
-    return detail;
+    return false;
+  };
+
+  const checkRemoveable = (value) => {
+    if (value.length == 1 || (value.length == 2 && value[1] == "")) {
+      return true;
+    }
+
+    return false;
   };
 
   return (
     <Container>
+      {imageError && (
+        <ErrorPopUp
+          header={"Invalid Type"}
+          message={"Invalid file type! Please select a valid image file"}
+          action={() => setImageError(false)}
+        />
+      )}
+
       <h4>Create new product</h4>
       <Content>
         <Left>
@@ -419,7 +545,7 @@ export default function AdminProductNew() {
             <hr />
             <ContentItem>
               <h5>Product name</h5>
-              <TextInput
+              <CustomInput
                 placeholder={"Input product name"}
                 state={state.productName}
                 setState={(value) => dispatch({ type: ACTIONS.CHANGE_NAME, next: value })}
@@ -446,9 +572,9 @@ export default function AdminProductNew() {
             <ImageContainer>
               {state.images.length > 0 && (
                 <Images>
-                  {state.images.map((item) => {
+                  {state.images.map((item, index) => {
                     return (
-                      <div>
+                      <div key={index}>
                         <img src={URL.createObjectURL(item)} />
                       </div>
                     );
@@ -531,6 +657,11 @@ export default function AdminProductNew() {
                       });
                     }
 
+                    if (showVariant == true) {
+                      dispatch({ type: ACTIONS.CHANGE_VARIANTS, next: [] });
+                      dispatch({ type: ACTIONS.CHANGE_VARIANT_DETAIL, next: [] });
+                    }
+
                     setShowVariant((prev) => !prev);
                   }}
                   type="checkbox"
@@ -552,7 +683,35 @@ export default function AdminProductNew() {
                                 options={getRemainVariant(transformTypeData())}
                                 state={variant.option}
                               />
-                              <FaTrash onClick={() => onDeleteVariant(variantIndex)} />
+                              {checkRemoveable(variant.value) && (
+                                <FaTrash
+                                  onClick={() => {
+                                    if (variant.value != "") {
+                                      state.variant_detail.forEach((variantDetail) => {
+                                        variantDetail.variant = variantDetail.variant.filter(
+                                          (item, index) => {
+                                            if (
+                                              item != variant.value.slice(0, -1) ||
+                                              index != variantIndex
+                                            ) {
+                                              return true;
+                                            }
+                                          }
+                                        );
+                                      });
+                                      state.variant_detail = state.variant_detail.filter(
+                                        (item) => item.variant.length != 0
+                                      );
+
+                                      dispatch({
+                                        type: ACTIONS.CHANGE_VARIANT_DETAIL,
+                                        next: state.variant_detail,
+                                      });
+                                    }
+                                    onDeleteVariant(variantIndex);
+                                  }}
+                                />
+                              )}
                             </div>
                           </SelectVariant>
                           <VariantValue>
@@ -560,7 +719,7 @@ export default function AdminProductNew() {
                             {variant.value.map((item, valueIndex) => {
                               return (
                                 <div key={valueIndex}>
-                                  <TextInput
+                                  <CustomInput
                                     state={item}
                                     setState={(value) => {
                                       if (variant.value[valueIndex + 1] == null) {
@@ -575,11 +734,58 @@ export default function AdminProductNew() {
                                         type: ACTIONS.CHANGE_VARIANTS,
                                         next: [...state.variants],
                                       });
+                                      if (item != "") {
+                                        const allVariants = [];
+                                        for (let variant of state.variants) {
+                                          if (!variant.value.find((item) => item != "")) {
+                                            continue;
+                                          }
+                                          allVariants.push(
+                                            variant.value.filter((item) => item != "")
+                                          );
+                                        }
+
+                                        const variantDetail = cartesian(...allVariants);
+
+                                        let n = 0;
+                                        state.variant_detail.map((detail) => {
+                                          detail.variant = variantDetail[n++];
+                                          if (!Array.isArray(detail.variant)) {
+                                            detail.variant = [detail.variant];
+                                          }
+                                        });
+
+                                        dispatch({
+                                          type: ACTIONS.CHANGE_VARIANT_DETAIL,
+                                          next: state.variant_detail,
+                                        });
+                                        return;
+                                      }
+                                      if (item == "" && value != "" && valueIndex == 0) {
+                                        if (checkIfNewVariantType(variant)) {
+                                          onAddNewTypeVariant(value);
+                                          transformToVariantDetail();
+                                        }
+                                      }
+                                      if (item == "" && value != "" && valueIndex != 0) {
+                                        transformToVariantDetail();
+                                      }
                                     }}
                                   />
                                   {variant.value.length > 2 && item != "" ? (
                                     <AiOutlineClose
-                                      onClick={() => onClickRemoveValue(variant, valueIndex)}
+                                      onClick={() => {
+                                        onClickRemoveValue(variant, valueIndex);
+                                        state.variant_detail = state.variant_detail.filter(
+                                          (variantDetail, index) => {
+                                            return variantDetail.variant[variantIndex] != item;
+                                          }
+                                        );
+                                        dispatch({
+                                          type: ACTIONS.CHANGE_VARIANT_DETAIL,
+                                          next: state.variant_detail,
+                                        });
+                                      }}
                                     />
                                   ) : (
                                     <span></span>
@@ -587,10 +793,49 @@ export default function AdminProductNew() {
                                 </div>
                               );
                             })}
-                            <button>Done</button>
+                            <button
+                              onClick={() => {
+                                variant.done = true;
+
+                                dispatch({
+                                  type: ACTIONS.CHANGE_VARIANTS,
+                                  next: state.variants,
+                                });
+                              }}
+                            >
+                              Done
+                            </button>
                           </VariantValue>
                         </VariantItemContainer>
                       );
+                    if (variant.done == true) {
+                      return (
+                        <DoneContainer>
+                          <p>{variant.option.label}</p>
+                          <div>
+                            {variant.value.map((item, index) => {
+                              if (item != "") {
+                                return <button key={index}>{item}</button>;
+                              }
+                            })}
+                          </div>
+                          <div>
+                            <button
+                              onClick={() => {
+                                variant.done = false;
+
+                                dispatch({
+                                  type: ACTIONS.CHANGE_VARIANTS,
+                                  next: state.variants,
+                                });
+                              }}
+                            >
+                              Edit
+                            </button>
+                          </div>
+                        </DoneContainer>
+                      );
+                    }
                   })}
                   {state.variants.length < 3 && (
                     <button onClick={onAddMoreVariant}>
@@ -600,10 +845,48 @@ export default function AdminProductNew() {
                   )}
                   {checkVariantExist() && (
                     <VariantDetailContainer>
-                      <hr />
-                      {onShowVariantDetail().map((item) => {
-                        console.log(item);
-                        return <p>{item}</p>;
+                      {state.variant_detail.map((item, key) => {
+                        return (
+                          <VariantDetail
+                            key={key}
+                            onClick={() => {
+                              item.sellPrice = 10;
+                              dispatch({
+                                type: ACTIONS.CHANGE_VARIANT_DETAIL,
+                                next: state.variant_detail,
+                              });
+                            }}
+                          >
+                            <div>
+                              {item.image ? (
+                                <img src={URL.createObjectURL(item.image)} />
+                              ) : (
+                                <>
+                                  <CiImageOn onClick={() => setVariantImagePopUp(true)} />
+                                  {variantImagePopUp && (
+                                    <ImagePopUp
+                                      action={() => setVariantImagePopUp(false)}
+                                      images={state.images}
+                                      state={item.image}
+                                      setState={(image) => {
+                                        item.image = image;
+                                        dispatch({
+                                          type: ACTIONS.CHANGE_VARIANT_DETAIL,
+                                          next: state.variant_detail,
+                                        });
+                                      }}
+                                    />
+                                  )}
+                                </>
+                              )}
+                              {item.variant.join("/")}
+                            </div>
+                            <div>
+                              <p>{item.sellPrice} $ </p>
+                              <p>{item.inventory} sellable in inventory</p>
+                            </div>
+                          </VariantDetail>
+                        );
                       })}
                     </VariantDetailContainer>
                   )}
@@ -617,7 +900,7 @@ export default function AdminProductNew() {
             <ContentItem>
               <h5>Show</h5>
               <hr />
-              <button onClick={console.log(state)}>sss</button>
+              <button onClick={() => console.log(state.variant_detail)}>sss</button>
             </ContentItem>
           </ShowInfo>
         </Right>
