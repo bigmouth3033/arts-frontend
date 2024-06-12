@@ -42,7 +42,7 @@ export default function ImagePopUp({ action, images, state, setState }) {
       <Content>
         {images.map((item, index) => {
           return (
-            <ImageContainer $active={item == state} onClick={() => setState(item)} key={index}>
+            <ImageContainer $active={item == state} onClick={() => setState(index)} key={index}>
               <img src={URL.createObjectURL(item)} />
             </ImageContainer>
           );

@@ -12,6 +12,7 @@ export default function useCreateProductReducer() {
     CHANGE_UNIT: "CHANGE_UNIT",
     CHANGE_ACTIVE_DAY: "CHANGE_ACTIVE_DAY",
     CHANGE_VARIANT_DETAIL: "CHANGE_VARIANT_DETAIL",
+    CHANGE_CATEGORY: "CHANGE_CATEGORY",
   };
 
   function reducer(state, action) {
@@ -34,11 +35,14 @@ export default function useCreateProductReducer() {
         return { ...state, salePrice: action.next };
       case ACTIONS.CHANGE_VARIANT_DETAIL:
         return { ...state, variant_detail: action.next };
+      case ACTIONS.CHANGE_CATEGORY:
+        return { ...state, category: action.next };
     }
   }
 
   const [state, dispatch] = useReducer(reducer, {
     productName: "",
+    category: null,
     description: "",
     price: 0,
     salePrice: 0,

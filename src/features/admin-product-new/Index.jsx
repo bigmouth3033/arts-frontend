@@ -21,6 +21,7 @@ import PopUp from "@/shared/components/PopUp/PopUp";
 import TextInput from "@/shared/components/Input/TextInput";
 import ErrorPopUp from "@/shared/components/PopUp/ErrorPopUp";
 import ImagePopUp from "./components/CustomPopUp/ImagePopUp";
+import { CreateProductRequest } from "./api/newProductApi";
 
 const Container = styled.div`
   max-width: 75rem;
@@ -370,6 +371,8 @@ export default function AdminProductNew() {
   const [state, dispatch, ACTIONS] = useCreateProductReducer();
   const inputRef = useRef();
 
+  const createProductRequest = CreateProductRequest();
+
   const updateVariant = (value, index) => {
     state.variants[index].option = value;
 
@@ -527,6 +530,31 @@ export default function AdminProductNew() {
     return false;
   };
 
+  const onCreateProduct = () => {
+    const formData = new FormData();
+    formData.append("ProductName", state.productName);
+    formData.append("Category", state.category.value);
+    formData.append("Description", state.description);
+    formData.append("Price", state.price);
+    formData.append("SalePrice", state.salePrice);
+    formData.append("Unit", state.unit);
+    formData.append("ActiveDay", state.activeDay);
+    console.log(state.variants);
+    console.log(state.variant_detail);
+
+    state.images.forEach((item) => formData.append("Images", item));
+    state.variants.forEach((item) => {
+      var copy = item;
+      copy.id = item.option.value;
+      formData.append("variantsJSON[]", JSON.stringify(copy));
+    });
+    state.variant_detail.forEach((item) => {
+      formData.append("VariantDetailsJSON[]", JSON.stringify(item));
+    });
+
+    createProductRequest.mutate(formData);
+  };
+
   return (
     <Container>
       {imageError && (
@@ -554,7 +582,13 @@ export default function AdminProductNew() {
             <ContentItem $split={true}>
               <div>
                 <h5>Category</h5>
-                <SelectInput options={transformCategoriesData()} />
+                <SelectInput
+                  options={transformCategoriesData()}
+                  state={state.category}
+                  setState={(value) => {
+                    dispatch({ type: ACTIONS.CHANGE_CATEGORY, next: value });
+                  }}
+                />
               </div>
             </ContentItem>
             <ContentItem>
@@ -602,11 +636,23 @@ export default function AdminProductNew() {
                 <ContentItem $split={true}>
                   <div>
                     <h5>Sale price</h5>
-                    <TextInput placeholder={"0 $"} />
+                    <TextInput
+                      state={state.price}
+                      setState={(value) => {
+                        dispatch({ type: ACTIONS.CHANGE_PRICE, next: value });
+                      }}
+                      placeholder={"0 $"}
+                    />
                   </div>
                   <div>
                     <h5>Compare price</h5>
-                    <TextInput placeholder={"0 $"} />
+                    <TextInput
+                      state={state.salePrice}
+                      setState={(value) => {
+                        dispatch({ type: ACTIONS.CHANGE_SALE_PRICE, next: value });
+                      }}
+                      placeholder={"0 $"}
+                    />
                   </div>
                 </ContentItem>
               </ContentItem>
@@ -859,7 +905,7 @@ export default function AdminProductNew() {
                           >
                             <div>
                               {item.image ? (
-                                <img src={URL.createObjectURL(item.image)} />
+                                <img src={URL.createObjectURL(state.images[item.image])} />
                               ) : (
                                 <>
                                   <CiImageOn onClick={() => setVariantImagePopUp(true)} />
@@ -900,7 +946,7 @@ export default function AdminProductNew() {
             <ContentItem>
               <h5>Show</h5>
               <hr />
-              <button onClick={() => console.log(state.variant_detail)}>sss</button>
+              <button onClick={onCreateProduct}>Save</button>
             </ContentItem>
           </ShowInfo>
         </Right>
