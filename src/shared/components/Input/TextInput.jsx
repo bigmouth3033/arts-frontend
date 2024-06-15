@@ -19,9 +19,10 @@ const Input = styled.input`
   }
 `;
 
-export default function TextInput({ state, setState, placeholder }) {
+export default function TextInput({ state, setState, placeholder, type }) {
   return (
     <Input
+      type={type}
       placeholder={placeholder}
       value={state}
       onChange={(ev) => {

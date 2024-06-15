@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import Select from "react-select";
+import { useEffect } from "react";
 
 const Input = styled(Select)`
   border-radius: 3px;
@@ -16,5 +17,10 @@ const Input = styled(Select)`
 `;
 
 export default function SelectInput({ state, setState, options }) {
-  return <Input defaultValue={state} onChange={setState} options={options} />;
+  useEffect(() => {
+    if (state == null) {
+      setState(options[0]);
+    }
+  });
+  return <Input value={state} onChange={setState} options={options} />;
 }

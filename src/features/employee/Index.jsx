@@ -1,10 +1,13 @@
-import { GetAdminProductRequest } from "./api/productAdminApi";
 import styled from "styled-components";
-import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
-import ProductPagination from "./components/pagination/ProductPagination";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import CreateEmployeePopUp from "./components/PopUp/CreateEmployeePopUp";
+import { GetEmployeeRequest } from "./api/employeeApi";
+import WaitingPopUp from "@/shared/components/PopUp/WaitingPopUp";
+import EmployeePagination from "./components/pagination/EmployeePagination";
 import WaitingIcon from "@/shared/components/AnimationIcon/WaitingIcon";
+import { useSearchParams } from "react-router-dom";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 const Container = styled.div`
   margin: auto;
@@ -78,41 +81,19 @@ const TableContent = styled.table`
   }
 `;
 
-const DisplayName = styled.td`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-
-  > div:nth-of-type(2) {
-    display: flex;
-    flex-direction: column;
-  }
-
-  > div:nth-of-type(1) {
-    width: 3rem;
-    height: 3rem;
-  }
-
-  & img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-`;
-
-export default function AdminProductList() {
-  const navigate = useNavigate();
+export default function Employee() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [createPopUp, setCreatePopUp] = useState();
   const [totalPage, setTotalPage] = useState(1);
   const [currentPage, setCurrentPage] = useState(searchParams.get("currentpage") || 1);
   const [pageSize, setPageSize] = useState(searchParams.get("pagesize") || 20);
-  const getAdminProductRequest = GetAdminProductRequest(currentPage, pageSize);
+  const getEmployeeRequest = GetEmployeeRequest(currentPage, pageSize);
 
   useEffect(() => {
-    if (getAdminProductRequest.isSuccess) {
-      setTotalPage(getAdminProductRequest.data.totalPages);
+    if (getEmployeeRequest.isSuccess) {
+      setTotalPage(getEmployeeRequest.data.totalPages);
     }
-  }, [getAdminProductRequest.status]);
+  }, [getEmployeeRequest.status]);
 
   const onChangePage = (page) => {
     setSearchParams({ currentpage: currentPage, pagesize: pageSize });
@@ -122,43 +103,37 @@ export default function AdminProductList() {
   return (
     <Container>
       <Header>
-        <h4>Product</h4>
-        <button onClick={() => navigate("/admin/product-new")}>Create New Product</button>
+        <h4>Employee</h4>
+        <button onClick={() => setCreatePopUp(true)}>Create New Employee</button>
       </Header>
       <Content>
         <TableContent>
           <thead>
             <tr>
-              <th>NAME</th>
-              <th>AVAILABLE</th>
-              <th>ACTIVE</th>
-              <th>TYPE</th>
+              <th>S.No</th>
+              <th>EMAIL</th>
+              <th>ID</th>
+              <th>PHONE NUMBER</th>
+              <th>WORKING STATUS</th>
+              <th>ADDRESS</th>
+              <th>ACTION</th>
             </tr>
           </thead>
           <tbody>
-            {getAdminProductRequest.isSuccess ? (
-              getAdminProductRequest.data.data.map((item, index) => {
+            {getEmployeeRequest.isSuccess ? (
+              getEmployeeRequest.data.data.map((item, index) => {
                 return (
                   <tr key={index}>
-                    <DisplayName>
-                      <div>
-                        <img
-                          src={
-                            import.meta.env.VITE_API_IMAGE_PATH + item.productImages[0].imageName
-                          }
-                        />
-                      </div>
-                      <div>
-                        <span>{item.name}</span> <span>{item.variants.length} variants</span>
-                      </div>
-                    </DisplayName>
+                    <td>{index}</td>
+                    <td>{item.email}</td>
+                    <td>{item.id}</td>
+                    <td>{item.phoneNumber || "_"}</td>
+                    <td>{item.active ? "True" : "False"}</td>
+                    <td>{item.address || "_"}</td>
                     <td>
-                      {item.variants.reduce((accumulator, currentValue) => {
-                        return accumulator + currentValue.quanity;
-                      }, 0)}
+                      <button>Active</button>
+                      <button>Update</button>
                     </td>
-                    <td>{item.isActive == true ? "ACTIVE" : "UNACTIVE"}</td>
-                    <td>{item.category.name}</td>
                   </tr>
                 );
               })
@@ -172,13 +147,14 @@ export default function AdminProductList() {
           </tbody>
         </TableContent>
         <Footer>
-          <ProductPagination
+          <EmployeePagination
             currentPage={currentPage}
             setCurrentPage={onChangePage}
             totalPage={totalPage}
           />
         </Footer>
       </Content>
+      {createPopUp && <CreateEmployeePopUp action={() => setCreatePopUp(false)} />}
     </Container>
   );
 }

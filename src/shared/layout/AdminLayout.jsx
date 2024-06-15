@@ -7,6 +7,9 @@ import AdminHeader from "@/features/admin/admin-header/Index";
 import AdminSideBar from "@/features/admin/admin-sidebar/Index";
 import { ReadCategoryRequest } from "../api/categoryApi";
 import { ReadTypeRequest } from "../api/typeApi";
+import { AdminRequest } from "../api/adminApi";
+import WaitingPopUp from "../components/PopUp/WaitingPopUp";
+import { useNavigate } from "react-router-dom";
 
 const Container = styled.div`
   display: flex;
@@ -38,8 +41,11 @@ const AdminBody = styled.div`
 `;
 
 export default function AdminLayout() {
+  const adminRequest = AdminRequest();
   const readCategoryRequest = ReadCategoryRequest();
   const readTypeRequest = ReadTypeRequest();
+
+  const navigate = useNavigate();
 
   if (readCategoryRequest.isSuccess && localStorage.getItem("categories") == null) {
     localStorage.setItem("categories", JSON.stringify(readCategoryRequest.data.data));
@@ -57,15 +63,30 @@ export default function AdminLayout() {
     });
   }, []);
 
-  return (
-    <Container>
-      <AdminHeader />
-      <AdminBody>
-        <AdminSideBar />
-        <OutletContainer>
-          <Outlet />
-        </OutletContainer>
-      </AdminBody>
-    </Container>
-  );
+  if (adminRequest.isLoading) {
+    return <WaitingPopUp />;
+  }
+
+  if (adminRequest.isError) {
+    navigate("/admin-login");
+    return;
+  }
+
+  if (adminRequest.isSuccess) {
+    if (adminRequest.data.status == 400) {
+      navigate("/admin-login");
+    } else {
+      return (
+        <Container>
+          <AdminHeader />
+          <AdminBody>
+            <AdminSideBar />
+            <OutletContainer>
+              <Outlet />
+            </OutletContainer>
+          </AdminBody>
+        </Container>
+      );
+    }
+  }
 }

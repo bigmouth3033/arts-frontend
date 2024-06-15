@@ -22,6 +22,14 @@ import TextInput from "@/shared/components/Input/TextInput";
 import ErrorPopUp from "@/shared/components/PopUp/ErrorPopUp";
 import ImagePopUp from "./components/CustomPopUp/ImagePopUp";
 import { CreateProductRequest } from "./api/newProductApi";
+import VariantDetailPopUp from "./components/CustomPopUp/VariantDetailPopUp";
+import { MdOutlineModeEdit } from "react-icons/md";
+import SalePricePopUp from "./components/CustomPopUp/SalePricePopUp";
+import ComparePricePopUp from "./components/CustomPopUp/ComparePricePopUp";
+import AmountPopUp from "./components/CustomPopUp/AmountPopUp";
+import WaitingPopUp from "@/shared/components/PopUp/WaitingPopUp";
+import SuccessPopUp from "@/shared/components/PopUp/SuccessPopUp";
+import Switch from "@/shared/components/Input/Switch";
 
 const Container = styled.div`
   max-width: 75rem;
@@ -317,6 +325,11 @@ const VariantDetail = styled.div`
     width: 3rem;
     height: 3rem;
   }
+
+  cursor: pointer;
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
 `;
 
 const DoneContainer = styled.div`
@@ -358,15 +371,128 @@ const DoneContainer = styled.div`
   }
 `;
 
+const ImageLayout = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0);
+  cursor: pointer;
+  display: flex;
+  justify-content: flex-end;
+  padding: 5px;
+
+  > svg {
+    display: none;
+    font-size: 1.2rem;
+    background-color: white;
+    padding: none;
+    border-radius: 5px;
+  }
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  &:hover svg {
+    display: block;
+  }
+`;
+
+const ImageItem = styled.div`
+  position: relative;
+`;
+
+const VariantImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+`;
+
+const VariantDetailHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  align-items: center;
+
+  > div {
+    position: relative;
+  }
+`;
+
+const EditButton = styled.div`
+  box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+  padding: 8px 1rem;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  > svg {
+    font-size: 15px;
+  }
+
+  &:hover {
+  }
+`;
+
+const DropDown = styled.div`
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  transform: translate(-3.3rem, 10px);
+  background-color: white;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  width: 12rem;
+  z-index: 1;
+
+  > button {
+    padding: 10px 1rem;
+    text-align: left;
+    width: 100%;
+    cursor: pointer;
+    background-color: white;
+    border: none;
+  }
+
+  > button:hover {
+    background-color: rgba(0, 0, 255, 0.6);
+  }
+`;
+
+const ActionContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  > input {
+  }
+`;
+
+const ConfirmButton = styled.button`
+  cursor: pointer;
+`;
+
+const regex = /^-?\d+(\.\d+)?$/;
+
 export default function AdminProductNew() {
   const readCategoryRequest = ReadCategoryRequest();
   const readTypeRequest = ReadTypeRequest();
 
   const [showVariant, setShowVariant] = useState(false);
   const [showUnit, setShowUnit] = useState(false);
-  const [addNewStatus, setAddNewStatus] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const [variantImagePopUp, setVariantImagePopUp] = useState(false);
+  const [imagePopUp, setImagePopUp] = useState(false);
+  const [chonsenImageState, setChosenImageState] = useState(null);
+  const [variantDetailPopUp, setVariantDetailPopUp] = useState(false);
+  const [chosenVariantDetail, setChosenVariantDetail] = useState(null);
+  const [dropDown, setDropDown] = useState(false);
+  const [editPrice, setEditPrice] = useState(false);
+  const [editComparePrice, setEditComparePrice] = useState(false);
+  const [editAmount, setEditAmount] = useState(false);
+  const [showWarranty, setShowWarranty] = useState(false);
 
   const [state, dispatch, ACTIONS] = useCreateProductReducer();
   const inputRef = useRef();
@@ -427,11 +553,12 @@ export default function AdminProductNew() {
       if (!isValidFileType) {
         setImageError(true);
         // Clear the file input if the file type is invalid
-        ev.target.value = null;
+
         return;
       }
 
       dispatch({ type: ACTIONS.CHANGE_IMAGES, next: [...state.images, ...ev.target.files] });
+      ev.target.value = null;
     }
   };
 
@@ -449,7 +576,7 @@ export default function AdminProductNew() {
 
   const transformTypeData = () => {
     let data = readTypesData(readTypeRequest);
-    data = data.filter((item) => item.nameType != "variant_type");
+    data = data.filter((item) => item.nameType != "VariantAttribute");
     const option = [];
     for (let item of data) {
       option.push({ value: item.id, label: item.name });
@@ -538,9 +665,8 @@ export default function AdminProductNew() {
     formData.append("Price", state.price);
     formData.append("SalePrice", state.salePrice);
     formData.append("Unit", state.unit);
-    formData.append("ActiveDay", state.activeDay);
-    console.log(state.variants);
-    console.log(state.variant_detail);
+    formData.append("Active", state.active);
+    formData.append("Warranty", state.warrantyTime);
 
     state.images.forEach((item) => formData.append("Images", item));
     state.variants.forEach((item) => {
@@ -608,9 +734,28 @@ export default function AdminProductNew() {
                 <Images>
                   {state.images.map((item, index) => {
                     return (
-                      <div key={index}>
+                      <ImageItem key={index}>
+                        <ImageLayout>
+                          <AiOutlineClose
+                            onClick={() => {
+                              dispatch({
+                                type: ACTIONS.CHANGE_IMAGES,
+                                next: state.images.filter((image, position) => position != index),
+                              });
+                              state.variant_detail.forEach((item) => {
+                                if (item.image == index) {
+                                  item.image = null;
+                                }
+                              });
+                              dispatch({
+                                type: ACTIONS.CHANGE_VARIANT_DETAIL,
+                                next: state.variant_detail,
+                              });
+                            }}
+                          />
+                        </ImageLayout>
                         <img src={URL.createObjectURL(item)} />
-                      </div>
+                      </ImageItem>
                     );
                   })}
                   <AddImageButton onClick={onClickAddImage}>
@@ -639,7 +784,9 @@ export default function AdminProductNew() {
                     <TextInput
                       state={state.price}
                       setState={(value) => {
-                        dispatch({ type: ACTIONS.CHANGE_PRICE, next: value });
+                        if (regex.test(value) || value == "") {
+                          dispatch({ type: ACTIONS.CHANGE_PRICE, next: value });
+                        }
                       }}
                       placeholder={"0 $"}
                     />
@@ -649,7 +796,9 @@ export default function AdminProductNew() {
                     <TextInput
                       state={state.salePrice}
                       setState={(value) => {
-                        dispatch({ type: ACTIONS.CHANGE_SALE_PRICE, next: value });
+                        if (regex.test(value) || value == "") {
+                          dispatch({ type: ACTIONS.CHANGE_SALE_PRICE, next: value });
+                        }
                       }}
                       placeholder={"0 $"}
                     />
@@ -673,7 +822,6 @@ export default function AdminProductNew() {
                   Variants with multiple units of measurement (e.g., cans, packs, cases...).
                 </span>
               </InputCheckContainer>
-
               {showUnit && (
                 <UnitContainer>
                   <hr />
@@ -683,6 +831,39 @@ export default function AdminProductNew() {
                       state={state.unit}
                       setState={(value) => dispatch({ type: ACTIONS.CHANGE_UNIT, next: value })}
                       placeholder={"Input basic unit"}
+                    />
+                  </div>
+                </UnitContainer>
+              )}
+            </ContentItem>
+          </ContentContainer>
+          <ContentContainer>
+            <h5>Warrant</h5>
+            <hr />
+            <ContentItem>
+              <InputCheckContainer>
+                <input
+                  onChange={() => {
+                    setShowWarranty((prev) => !prev);
+                  }}
+                  type="checkbox"
+                />
+                <span>Include a warranty with this product</span>
+              </InputCheckContainer>
+
+              {showWarranty && (
+                <UnitContainer>
+                  <hr />
+                  <div>
+                    <h5>Warranty duration </h5>
+                    <TextInput
+                      state={state.warrantyTime}
+                      setState={(value) => {
+                        if (regex.test(value) || value == "") {
+                          dispatch({ type: ACTIONS.CHANGE_WARRANTY, next: value });
+                        }
+                      }}
+                      placeholder={"Duration in month"}
                     />
                   </div>
                 </UnitContainer>
@@ -891,39 +1072,73 @@ export default function AdminProductNew() {
                   )}
                   {checkVariantExist() && (
                     <VariantDetailContainer>
+                      <hr />
+                      <VariantDetailHeader>
+                        <div>{state.variant_detail.length} Variants</div>
+                        <div>
+                          <EditButton onClick={() => setDropDown((prev) => !prev)}>
+                            <MdOutlineModeEdit />
+                            Edit Variant
+                          </EditButton>
+                          {dropDown && (
+                            <DropDown>
+                              <button
+                                onClick={() => {
+                                  setDropDown(false);
+                                  setEditPrice(true);
+                                }}
+                              >
+                                Edit price
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditComparePrice(true);
+                                  setDropDown(false);
+                                }}
+                              >
+                                Edit compare at price
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditAmount(true);
+                                  setDropDown(false);
+                                }}
+                              >
+                                Edit amount
+                              </button>
+                            </DropDown>
+                          )}
+                        </div>
+                      </VariantDetailHeader>
+                      <hr />
                       {state.variant_detail.map((item, key) => {
                         return (
                           <VariantDetail
                             key={key}
-                            onClick={() => {
-                              item.sellPrice = 10;
-                              dispatch({
-                                type: ACTIONS.CHANGE_VARIANT_DETAIL,
-                                next: state.variant_detail,
-                              });
+                            onClick={(ev) => {
+                              ev.stopPropagation();
+                              setChosenVariantDetail(item);
+                              setVariantDetailPopUp(true);
                             }}
                           >
                             <div>
-                              {item.image ? (
-                                <img src={URL.createObjectURL(state.images[item.image])} />
+                              {item.image !== null ? (
+                                <VariantImage
+                                  onClick={(ev) => {
+                                    ev.stopPropagation();
+                                    setChosenImageState(item);
+                                    setImagePopUp(true);
+                                  }}
+                                  src={URL.createObjectURL(state.images[item.image])}
+                                />
                               ) : (
-                                <>
-                                  <CiImageOn onClick={() => setVariantImagePopUp(true)} />
-                                  {variantImagePopUp && (
-                                    <ImagePopUp
-                                      action={() => setVariantImagePopUp(false)}
-                                      images={state.images}
-                                      state={item.image}
-                                      setState={(image) => {
-                                        item.image = image;
-                                        dispatch({
-                                          type: ACTIONS.CHANGE_VARIANT_DETAIL,
-                                          next: state.variant_detail,
-                                        });
-                                      }}
-                                    />
-                                  )}
-                                </>
+                                <CiImageOn
+                                  onClick={(ev) => {
+                                    ev.stopPropagation();
+                                    setChosenImageState(item);
+                                    setImagePopUp(true);
+                                  }}
+                                />
                               )}
                               {item.variant.join("/")}
                             </div>
@@ -946,11 +1161,70 @@ export default function AdminProductNew() {
             <ContentItem>
               <h5>Show</h5>
               <hr />
-              <button onClick={onCreateProduct}>Save</button>
+              <ActionContainer>
+                <Switch
+                  state={state.active}
+                  setState={() => {
+                    dispatch({ type: ACTIONS.CHANGE_ACTIVE, next: !state.active });
+                  }}
+                />
+                Product Active
+              </ActionContainer>
+              <ConfirmButton onClick={() => onCreateProduct()}>Save</ConfirmButton>
             </ContentItem>
           </ShowInfo>
         </Right>
       </Content>
+      {imagePopUp && (
+        <ImagePopUp
+          action={() => setImagePopUp(false)}
+          images={state.images}
+          state={chonsenImageState.image}
+          setState={(image) => {
+            chonsenImageState.image = image;
+            dispatch({
+              type: ACTIONS.CHANGE_VARIANT_DETAIL,
+              next: state.variant_detail,
+            });
+          }}
+        />
+      )}
+      {variantDetailPopUp && (
+        <VariantDetailPopUp
+          state={chosenVariantDetail}
+          action={() => setVariantDetailPopUp(false)}
+          setState={() => {
+            dispatch({ type: ACTIONS.CHANGE_VARIANT_DETAIL, next: state.variant_detail });
+          }}
+        />
+      )}
+      {editPrice && (
+        <SalePricePopUp
+          action={() => setEditPrice(false)}
+          state={state.variant_detail}
+          setState={() => {
+            dispatch({ type: ACTIONS.CHANGE_VARIANT_DETAIL, next: state.variant_detail });
+          }}
+        />
+      )}
+      {editComparePrice && (
+        <ComparePricePopUp
+          action={() => setEditComparePrice(false)}
+          state={state.variant_detail}
+          setState={() => {
+            dispatch({ type: ACTIONS.CHANGE_VARIANT_DETAIL, next: state.variant_detail });
+          }}
+        />
+      )}
+      {editAmount && (
+        <AmountPopUp
+          setState={() => {
+            dispatch({ type: ACTIONS.CHANGE_VARIANT_DETAIL, next: state.variant_detail });
+          }}
+          state={state.variant_detail}
+          action={() => setEditAmount(false)}
+        />
+      )}
     </Container>
   );
 }

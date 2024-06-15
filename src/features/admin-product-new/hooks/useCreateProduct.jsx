@@ -10,9 +10,10 @@ export default function useCreateProductReducer() {
     CHANGE_IMAGES: "CHANGE_IMAGES",
     CHANGE_VARIANTS: "CHANGE_VARIANTS",
     CHANGE_UNIT: "CHANGE_UNIT",
-    CHANGE_ACTIVE_DAY: "CHANGE_ACTIVE_DAY",
+    CHANGE_ACTIVE: "CHANGE_ACTIVE",
     CHANGE_VARIANT_DETAIL: "CHANGE_VARIANT_DETAIL",
     CHANGE_CATEGORY: "CHANGE_CATEGORY",
+    CHANGE_WARRANTY: "CHANGE_WARRANTY",
   };
 
   function reducer(state, action) {
@@ -29,14 +30,16 @@ export default function useCreateProductReducer() {
         return { ...state, variants: action.next };
       case ACTIONS.CHANGE_UNIT:
         return { ...state, unit: action.next };
-      case ACTIONS.CHANGE_ACTIVE_DAY:
-        return { ...state, activeDay: action.next };
+      case ACTIONS.CHANGE_ACTIVE:
+        return { ...state, active: action.next };
       case ACTIONS.CHANGE_SALE_PRICE:
         return { ...state, salePrice: action.next };
       case ACTIONS.CHANGE_VARIANT_DETAIL:
         return { ...state, variant_detail: action.next };
       case ACTIONS.CHANGE_CATEGORY:
         return { ...state, category: action.next };
+      case ACTIONS.CHANGE_WARRANTY:
+        return { ...state, warrantyTime: action.next };
     }
   }
 
@@ -50,7 +53,8 @@ export default function useCreateProductReducer() {
     variants: [],
     variant_detail: [],
     unit: "",
-    activeDay: new Date(),
+    active: true,
+    warrantyTime: 0,
   });
 
   return [state, dispatch, ACTIONS];

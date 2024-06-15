@@ -5,11 +5,7 @@ const axiosClient = axios.create({
 });
 
 axiosClient.interceptors.request.use((config) => {
-  let token = sessionStorage.getItem("ACCESS_TOKEN");
-
-  if (!token) {
-    token = localStorage.getItem("ACCESS_TOKEN");
-  }
+  let token = localStorage.getItem("ACCESS_TOKEN");
 
   config.headers.Authorization = `Bearer ${token}`;
   return config;
@@ -22,9 +18,8 @@ axiosClient.interceptors.response.use(
   (error) => {
     const { response } = error;
 
-    if (response.status == 401) {
+    if (response.status == 401 || response.status == 403) {
       localStorage.removeItem("ACCESS_TOKEN");
-      sessionStorage.removeItem("ACCESS_TOKEN");
     }
   }
 );

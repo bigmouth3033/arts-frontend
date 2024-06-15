@@ -5,6 +5,8 @@ import AdminLayout from "./layout/AdminLayout";
 import AdminDashBoard from "@/features/admin-dashboard/Index";
 import AdminProductList from "@/features/admin-product-list/Index";
 import AdminProductNew from "@/features/admin-product-new/Index";
+import AdminLogin from "@/features/admin-login/Index";
+import Employee from "@/features/employee/Index";
 
 const router = createBrowserRouter([
   {
@@ -33,7 +35,15 @@ const router = createBrowserRouter([
         path: "product-new",
         element: <AdminProductNew />,
       },
+      {
+        path: "employee",
+        element: <Employee />,
+      },
     ],
+  },
+  {
+    path: "admin-login",
+    element: <AdminLogin />,
   },
 ]);
 

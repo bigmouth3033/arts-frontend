@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import logo from "@/shared/assets/images/Art_Logo.png";
 import Avatar from "react-avatar";
+import { AdminRequest } from "@/shared/api/adminApi";
 
 const Container = styled.div`
   height: 3.8rem;
@@ -22,13 +23,15 @@ const LeftContent = styled.div``;
 const RightContent = styled.div``;
 
 export default function AdminHeader() {
+  const adminRequest = AdminRequest();
+
   return (
     <Container>
       <LeftContent>
         <ImageContainer src={logo} />
       </LeftContent>
       <RightContent>
-        <Avatar name="Foo Bar" size="30" round={true} />
+        <Avatar name={adminRequest.data.data.email} size="30" round={true} />
       </RightContent>
     </Container>
   );

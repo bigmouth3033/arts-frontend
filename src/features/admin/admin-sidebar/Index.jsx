@@ -6,6 +6,8 @@ import { CiShoppingTag } from "react-icons/ci";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
+import { VscAccount } from "react-icons/vsc";
+import { AdminRequest } from "@/shared/api/adminApi";
 
 const Container = styled.div`
   height: calc(100vh - 3.8rem);
@@ -39,7 +41,7 @@ const StyledLink = styled(Link)`
   padding: 5px 35px;
   text-decoration: none;
   color: black;
-  font-size: 13px;
+  font-size: 14px;
   &:hover {
     background-color: ${(props) => (props.$active ? "None" : "#eaebed")};
   }
@@ -53,6 +55,8 @@ const StyledLink = styled(Link)`
 export default function AdminSideBar() {
   const containerRef = useRef();
   const contentRef = useRef();
+
+  const adminRequest = AdminRequest();
 
   const location = useLocation();
 
@@ -79,6 +83,14 @@ export default function AdminSideBar() {
             All Products
           </StyledLink>
           <StyledLink>Category</StyledLink>
+          <StyledLink>Inventory</StyledLink>
+        </ButtonGroup>
+        <ButtonGroup groupName={"Account"} icon={<VscAccount />} active={true}>
+          {adminRequest.data.data.roleType.name == "Admin" && (
+            <StyledLink $active={location.pathname.includes("employee")} to={"employee"}>
+              Employee
+            </StyledLink>
+          )}
           <StyledLink>Inventory</StyledLink>
         </ButtonGroup>
       </Content>
