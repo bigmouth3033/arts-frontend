@@ -160,6 +160,7 @@ const StyledButtonSub = styled.button`
 const StyledItemFeature = styled.p`
   padding: 0.5rem 0;
 `;
+
 const ButtonGroup = ({ next, previous, ...rest }) => {
   const {
     carouselState: { currentSlide, totalItems },
@@ -177,7 +178,7 @@ const ButtonGroup = ({ next, previous, ...rest }) => {
 };
 
 // Main component
-export default function ProductSingleMain({ data }) {
+export default function ProductSingleMain({ data, variant }) {
   const [quantity, SetQuantity] = useState(1);
   const handleClickSub = (event) => {
     if (quantity <= 1) {
@@ -186,6 +187,7 @@ export default function ProductSingleMain({ data }) {
       SetQuantity(quantity - 1);
     }
   };
+
   const handleClickAdd = (event) => {
     if (quantity >= 50) {
       event.preventDefault();
@@ -193,6 +195,7 @@ export default function ProductSingleMain({ data }) {
       SetQuantity(quantity + 1);
     }
   };
+
   return (
     <ProductSingleContentStyled>
       <ImageContainerStyled>
@@ -249,7 +252,18 @@ export default function ProductSingleMain({ data }) {
         </StyledProductSingleHeading>
         <StyledSingleInfor>245.000 USD</StyledSingleInfor>
 
-        <ProductSingleMaptags>New</ProductSingleMaptags>
+        {variant.map((item) => {
+          return (
+            <div>
+              <h4>{item.variant}</h4>
+              <div>
+                {item.values.reverse().map((item) => {
+                  return <button>{item}</button>;
+                })}
+              </div>
+            </div>
+          );
+        })}
 
         <StyledProductSingleAction>
           <StyledProductAddCarts>

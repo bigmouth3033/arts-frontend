@@ -21,3 +21,22 @@ export const GetProductDetailRequest = (id) => {
 
   return query;
 };
+
+const onGetProductVariantDetail = async (id) => {
+  const response = await axiosClient.get("product/product-variant", {
+    params: {
+      id: id,
+    },
+  });
+  return response.data;
+};
+
+export const GetProductVariantDetailRequest = (id) => {
+  const query = useQuery({
+    queryKey: ["product-variant", id],
+    queryFn: () => {
+      return onGetProductVariantDetail(id);
+    },
+  });
+  return query;
+};
