@@ -7,6 +7,12 @@ import AdminProductList from "@/features/admin-product-list/Index";
 import AdminProductNew from "@/features/admin-product-new/Index";
 import AdminLogin from "@/features/admin-login/Index";
 import Employee from "@/features/employee/Index";
+import ListingPage from "@/features/listing-page/ListingPage";
+
+// giu
+import ProductDetail from "@/features/ProductDetail/Index";
+import Account from "@/features/account/Index";
+import AccountInformation from "@/features/account/account-information/Index";
 
 const router = createBrowserRouter([
   {
@@ -16,6 +22,24 @@ const router = createBrowserRouter([
       {
         path: "test",
         element: <Test />,
+      },
+      {
+        path: "productdetail",
+        element: <ProductDetail />,
+      },
+      {
+        path: "account",
+        element: <Account />,
+        children: [
+          {
+            path: "account-information",
+            element: <AccountInformation />,
+          },
+        ],
+      },
+      {
+        path: "listing-page",
+        element: <ListingPage />,
       },
     ],
   },

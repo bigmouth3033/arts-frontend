@@ -22,5 +22,5 @@ export default function SelectInput({ state, setState, options }) {
       setState(options[0]);
     }
   });
-  return <Input value={state} onChange={setState} options={options} />;
+  return <Input value={state} onChange={setState} options={options} isSearchable />;
 }

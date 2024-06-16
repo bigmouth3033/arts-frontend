@@ -1,5 +1,9 @@
 import styled from "styled-components";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import SelectInput from "@/shared/components/Input/SelectInput";
+import dchc from "@/shared/data/dchc";
+import TextInput from "@/shared/components/Input/TextInput";
+import NumberInput from "@/shared/components/Input/NumberInput";
 
 // animation icon
 import AlertIcon from "@/shared/components/AnimationIcon/AlertIcon";
@@ -45,11 +49,29 @@ const StyledFaRegArrowAltCircleRight = styled(FaRegArrowAltCircleRight)`
   color: red;
 `;
 
+const SelectContainer = styled.div`
+  margin: 5rem;
+`;
+
+const InputContainer = styled.div`
+  margin: 5rem;
+`;
+
+const regex = /^-?\d+(\.\d+)?$/;
+
 export default function Test() {
   const [showAlert, setShowAlert] = useState(false);
   const [showError, setShowError] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showWaiting, setShowWaiting] = useState(false);
+  const [city, setCity] = useState("01");
+  const [district, setDistrict] = useState("");
+
+  const [textInputState, setTextInputState] = useState("");
+
+  useEffect(() => {
+    setDistrict("1");
+  }, [city]);
 
   return (
     <Container>
@@ -111,6 +133,34 @@ export default function Test() {
           <StyledFaRegArrowAltCircleRight />
         </div>
       </ReactIcon>
+
+      <SelectContainer>
+        <SelectInput
+          options={dchc.data.map((item) => {
+            return { value: item.level1_id, label: item.name };
+          })}
+          state={city}
+          setState={setCity}
+        />
+        <SelectInput
+          options={dchc.data
+            .find((item) => item.level1_id == city.value)
+            ?.level2s.map((item) => {
+              return { value: item.level2_id, label: item.name };
+            })}
+          state={district}
+          setState={setDistrict}
+        />
+      </SelectContainer>
+
+      <InputContainer>
+        <TextInput />
+        <NumberInput
+          state={textInputState}
+          setState={setTextInputState}
+          placeholder={"input something"}
+        />
+      </InputContainer>
     </Container>
   );
 }

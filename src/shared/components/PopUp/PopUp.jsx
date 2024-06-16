@@ -1,6 +1,7 @@
 import React from "react";
 import styled, { keyframes } from "styled-components";
 import { useRef } from "react";
+import { useEffect } from "react";
 
 const initBox = keyframes`
   from {
@@ -39,6 +40,14 @@ const Layout = styled.div`
 export default function PopUp({ className, children, action }) {
   const popUpRef = useRef();
 
+  useEffect(() => {
+    document.body.classList.add("no-scroll");
+
+    return () => {
+      document.body.classList.remove("no-scroll");
+    };
+  });
+
   const onClick = (ev) => {
     if (!popUpRef.current.contains(ev.target)) {
       action();
@@ -56,7 +65,6 @@ const Container = styled.div`
   background-color: white;
   display: flex;
   flex-direction: column;
-  gap: 1.3rem;
   border-radius: 3px;
   padding: 2rem 2rem;
   animation: ${initBox} 0.15s linear;

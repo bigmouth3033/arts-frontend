@@ -1,5 +1,5 @@
 export default [
-  { value: "1", label: "Color" },
-  { value: "2", label: "Material" },
-  { value: "3", label: "Size" },
+  { value: "12", label: "Color" },
+  { value: "3", label: "Material" },
+  { value: "11", label: "Size" },
 ];
