@@ -3,6 +3,7 @@ import CartItem from "./components/cartItem"
 import PaymentComponent from "./components/paymentComponent"
 import { GetCartByUserIdQuery } from "./api/customerCartApi"
 import { useEffect, useState } from "react"
+import { FaRegTrashAlt } from "react-icons/fa";
 
 
 
@@ -101,7 +102,7 @@ export default function Cart() {
             <span className="headingDetail-item item headingDetail-item2">Đơn giá</span>
             <span className="headingDetail-item item headingDetail-item3">Số lượng</span>
             <span className="headingDetail-item item headingDetail-item4">Thành tiền</span>
-            <span className="headingDetail-item item headingDetail-item5">D</span>
+            <span className="headingDetail-item item headingDetail-item5"><FaRegTrashAlt /></span>
           </div>
           {
             carts?.map((cart) => {              

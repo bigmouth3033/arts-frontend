@@ -27,9 +27,20 @@ export const UpdateCartById = async (cartId,quanity) =>{
 
 export const UpdateCartByIdRequest = () =>{
     const mutation = useMutation({
-        mutationFn: () =>{
-            return UpdateCartById();
-        }
+        mutationFn:UpdateCartById
     })
     return mutation;
+}
+
+export const DeleteCartById = async (payload) =>{
+    console.log(payload)
+    const response = await axiosClient.delete(`Cart`,{params:{cartId: payload.cartId}})
+    return response.data;
+}
+
+export const DeleteCartByIdMutation = () =>{
+    const mutation = useMutation({
+        mutationFn: DeleteCartById
+    })
+    return mutation
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import styled from "styled-components"
-import { UpdateCartById, UpdateCartByIdRequest } from "../api/customerCartApi";
+import { DeleteCartByIdMutation, UpdateCartById, UpdateCartByIdRequest } from "../api/customerCartApi";
+import { FaRegTrashAlt } from "react-icons/fa";
 
 const CartItemStyle = styled.div`
     .cart-item-container{
@@ -39,6 +40,7 @@ const CartItemStyle = styled.div`
             }
             .cart-item5{
               width: 18px;
+              cursor: pointer;
             }
           }
 `
@@ -51,6 +53,7 @@ export default function CartItem(props) {
   const [totalPrice, setTotalPrice] = useState(0);
   const [availableQuanity, setAvailableQuanity] = useState(props?.detailCart?.variant?.availableQuanity);
   // const updateCartByIdRequest = UpdateCartByIdRequest();
+  const deleteCartByIdMutation = DeleteCartByIdMutation();
 
   useEffect(() => {
     // console.log('props', props)     
@@ -113,6 +116,12 @@ export default function CartItem(props) {
         }
       )
   }
+  const deleteCartBtn = () =>{
+    deleteCartByIdMutation.mutate({cartId: idCart},{onSuccess: (res)=>{
+      alert("asdasd");  
+    }});
+
+  }
 
   return (
     <CartItemStyle>
@@ -143,7 +152,7 @@ export default function CartItem(props) {
           <button onClick={() => handleQuanity("+")}>+</button>
         </span>
         <span className="cart-item4">{totalPrice ? totalPrice : 0}</span>
-        <span className="cart-item5">D</span>
+        <span className="cart-item5" onClick={deleteCartBtn}><FaRegTrashAlt /></span>
       </div>
     </CartItemStyle>
   )
