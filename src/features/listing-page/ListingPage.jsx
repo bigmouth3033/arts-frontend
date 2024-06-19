@@ -3,9 +3,13 @@ import ProductFilter from "./components/sidebar/ProductFilter";
 import ProductListing from "./components/ProductListing";
 import styled from "styled-components";
 import Search from "./components/Search";
-import products from "./data/product.json";
+// import products from "./data/product.json";
 import ProductCard from "./components/ProductCard";
 import Sort from "./components/Sort";
+import { ReadCategoryRequest } from "@/shared/api/categoryApi";
+import WaitingPopUp from "@/shared/components/PopUp/WaitingPopUp";
+import { ReadCustomerProductsRequest } from "./api/productApi";
+import productList from "@/features/listing-page/data/product.json";
 
 const StyleListingPage = styled.div`
   display: grid;
@@ -43,19 +47,20 @@ const StyleRight = styled.div`
 `;
 
 const ListingPage = () => {
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(0);
   const [selectedPrice, setSelectedPrice] = useState(null);
+  const [searchValue, setSearchValue] = useState("");
+  const [sort, setSort] = useState();
+  const pageSize = 2;
 
-  //------------Search Filter---------------
-  const [search, setSearch] = useState("");
-
-  const handleSearchChange = (value) => {
-    setSearch(value);
-  };
-
-  const searchItems = products.filter((product) =>
-    product.Name.toLocaleLowerCase().includes(search.toLocaleLowerCase())
-  );
+  //call APIs
+  const readCategories = ReadCategoryRequest();
+  const products = ReadCustomerProductsRequest(
+    selectedCategory,
+    pageSize,
+    sort?.value,
+    searchValue
+  ); //category ID, pageSize
 
   //------------Radio Cate Filter---------------
   const handleChange = (categoryId) => {
@@ -67,113 +72,32 @@ const ListingPage = () => {
     setSelectedPrice(PriceValue);
   };
 
-  //------------Main Function handle listing page---------------
-  function filteredData(products, selectedCate, selectedPrice, search) {
-    let filteredProducts = products; //all products
-
-    //Filtering Search Items
-    if (search) {
-      filteredProducts = searchItems;
-    }
-
-    console.log(search);
-
-    //Selected Filter
-    //Destructuring => using exactly the name of each field of the table/json file instead of product.Price, product.etc...
-    if (selectedCate !== null || selectedPrice !== null) {
-      filteredProducts = filteredProducts.filter(
-        ({ CategoryID, Price, SalePrice }) => {
-          if (selectedCate === 0) {
-            // All categories
-            if (selectedPrice === 0) {
-              // All price range
-              return true;
-            } else if (selectedPrice <= 50) {
-              // 0 - $50 price range
-              return (
-                (Price >= 0 && Price <= 50) ||
-                (SalePrice >= 0 && SalePrice <= 50)
-              );
-            } else if (selectedPrice <= 100) {
-              // $50 - $100 price range
-              return (
-                (Price > 50 && Price <= 100) ||
-                (SalePrice > 50 && SalePrice <= 100)
-              );
-            } else if (selectedPrice <= 200) {
-              // $100 - $200 price range
-              return (
-                (Price > 100 && Price <= 200) ||
-                (SalePrice > 100 && SalePrice <= 200)
-              );
-            } else {
-              // Over $200 price range
-              return Price > 200 || SalePrice > 200;
-            }
-          } else {
-            // Specific category
-            if (selectedPrice === 0) {
-              // All price range
-              return CategoryID === selectedCate;
-            } else if (selectedPrice <= 50) {
-              // 0 - $50 price range
-              return (
-                CategoryID === selectedCate &&
-                ((Price >= 0 && Price <= 50) ||
-                  (SalePrice >= 0 && SalePrice <= 50))
-              );
-            } else if (selectedPrice <= 100) {
-              // $50 - $100 price range
-              return (
-                CategoryID === selectedCate &&
-                ((Price > 50 && Price <= 100) ||
-                  (SalePrice > 50 && SalePrice <= 100))
-              );
-            } else if (selectedPrice <= 200) {
-              // $100 - $200 price range
-              return (
-                CategoryID === selectedCate &&
-                ((Price > 100 && Price <= 200) ||
-                  (SalePrice > 100 && SalePrice <= 200))
-              );
-            } else {
-              // Over $200 price range
-              return (
-                CategoryID === selectedCate && (Price > 200 || SalePrice > 200)
-              );
-            }
-          }
-        }
-      );
-    }
-
-    console.log(selectedCate, selectedPrice);
-    return filteredProducts.map((product, index) => (
-      <ProductCard product={product} index={index} />
-    ));
+  //------------SEARCH---------------------------
+  const handleSearchChange = (searchValue) => {
+    setSearchValue(searchValue);
+    console.log(searchValue);
+  };
+  if (readCategories.isLoading || products.isLoading) {
+    return <WaitingPopUp />;
   }
 
-  //Call the main function
-  const result = filteredData(
-    products,
-    selectedCategory,
-    selectedPrice,
-    search
-  );
-
-  //Then pass main function to ProductFilter as a props
   return (
     <>
-      <Search handleSearchChange={handleSearchChange} />
-
+      <Search
+        searchValueSaved={searchValue}
+        handleSearchChange={handleSearchChange}
+      />
       <StyleListingPage>
         <ProductFilter
+          selectedCategory={selectedCategory}
+          selectedPrice={selectedPrice}
           handleChange={handleChange}
           handlePriceRadioChange={handlePriceRadioChange}
+          categoryData={readCategories.data.data}
         />
         <StyleRight>
-          <Sort />
-          <ProductListing result={result} />
+          <Sort switched={sort} setSwitched={setSort} />
+          <ProductListing productList={products} pageSize={pageSize} />
         </StyleRight>
       </StyleListingPage>
     </>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import categories from "../../data/category.json";
-import styled from "styled-components";
+// import categories from "../../data/category.json";
+import styled, { css } from "styled-components";
 
 //CSS
 const StyleCategoryBlock = styled.div`
@@ -59,13 +59,11 @@ const StyleInputRadio = styled.input`
 `;
 
 // Category Filter Block in Sidebar of Product Listing Page
-const CategoryFilter = ({ handleChange }) => {
-  const [selectedCategory, setSelectedCategory] = useState(null);
-
+const CategoryFilter = ({ handleChange, categoryData, selectedCategory }) => {
   //handle which category range is selected
-  const handleCategoryChange = (categoryId) => {
-    setSelectedCategory(categoryId);
-    handleChange(categoryId); // Call the handleChange prop with the selected category ID
+  const handleCategoryChange = (ev) => {
+    selectedCategory = ev.target.value;
+    handleChange(ev.target.value); // Call the handleChange prop with the selected category ID
   };
 
   return (
@@ -77,25 +75,21 @@ const CategoryFilter = ({ handleChange }) => {
             type="radio"
             name="category"
             value={0}
-            checked={selectedCategory === 0}
-            onChange={() => {
-              handleCategoryChange(0);
-            }}
+            checked={selectedCategory == 0}
+            onChange={handleCategoryChange}
           />
           <StyleCategoryTitle>All</StyleCategoryTitle>
         </StyleCategoryContent>
-        {categories.map((cate) => (
-          <StyleCategoryContent key={cate.Id}>
+        {categoryData?.map((cate, index) => (
+          <StyleCategoryContent key={cate.id}>
             <StyleInputRadio
               type="radio"
               name="category"
-              value={cate.Id}
-              checked={selectedCategory === cate.Id}
-              onChange={() => {
-                handleCategoryChange(cate.Id);
-              }}
+              value={cate.id}
+              checked={selectedCategory == cate.id}
+              onChange={handleCategoryChange}
             />
-            <StyleCategoryTitle>{cate.Name}</StyleCategoryTitle>
+            <StyleCategoryTitle>{cate.name}</StyleCategoryTitle>
           </StyleCategoryContent>
         ))}
       </>

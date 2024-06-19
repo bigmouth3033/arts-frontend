@@ -6,12 +6,12 @@ const StyleSearchInput = styled.input`
 `;
 //value paramater: which kind of value is going to be specifying inside this search component
 //name: not product name !!!
-const Search = ({ handleSearchChange }) => {
-  const [searchValue, setSearchValue] = useState(""); //For CSS + 'checked' attribute purpose
+const Search = ({ handleSearchChange, searchValueSaved }) => {
+  const [searchValue, setSearchValue] = useState(searchValueSaved); //For CSS + 'checked' attribute purpose
 
+  //for saving data in search bar
   const handleInputChange = (e) => {
-    const { value } = e.target;
-    setSearchValue(value);
+    setSearchValue(e.target.value);
   };
 
   const handleKeyDown = (e) => {

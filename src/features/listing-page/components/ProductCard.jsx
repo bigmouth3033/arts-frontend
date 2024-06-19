@@ -5,8 +5,9 @@ import styled from "styled-components";
 const StyleProductCard = styled.div`
   display: block;
   width: 100%;
-  height: max-content;
-  /* border: 0.01rem solid lightgray; */
+  height: 100%;
+  min-height: 100%;
+  border: 0.01rem solid #cee1fcb3;
   border-radius: 0.7rem;
 
   & p {
@@ -20,14 +21,14 @@ const StyleProductCard = styled.div`
       font-size: 0.75rem;
     }
 
-    &.sale-price {
+    &.original-price {
       font-weight: 600;
       font-size: 0.9rem;
       margin-bottom: 0.5rem;
       color: #ba1818;
     }
 
-    &.original-price {
+    &.sale-price {
       color: grey;
       font-weight: 600;
       font-size: 0.8rem;
@@ -59,13 +60,25 @@ const StyleProductCard = styled.div`
 
 //Product Card items in Product Listing Page
 const ProductCard = ({ product, index }) => {
+  const minVariant = product.variants.reduce((min, variant) => {
+    return variant.price < min.price ? variant : min;
+  }, product.variants[0]);
   return (
     <StyleProductCard key={index}>
-      <img src={image} />
+      <img
+        src={
+          import.meta.env.VITE_API_IMAGE_PATH +
+          product.productImages[0].imageName
+        }
+      />
 
-      <p>{product.Name}</p>
-      <p className="original-price">{product.Price}</p>
-      <p className="sale-price">{product.SalePrice}</p>
+      <p>{product.name}</p>
+      {minVariant.salePrice != 0 ? (
+        <p className="sale-price">{minVariant.salePrice}</p>
+      ) : (
+        <></>
+      )}
+      <p className="original-price">{minVariant.price}</p>
     </StyleProductCard>
   );
 };
