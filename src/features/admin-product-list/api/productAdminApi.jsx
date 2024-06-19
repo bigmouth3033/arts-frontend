@@ -4,7 +4,7 @@ import { AxiosError } from "axios";
 
 const onGetAminProducts = async (pageNumber, pageSize, categoryId, searchValue) => {
   let categoryStr = "";
-  categoryId.forEach((item) => categoryStr + `&categoryId=${item}`);
+  categoryId.forEach((item) => (categoryStr += `&categoryId=${item}`));
 
   const response = await axiosClient.get(
     `product/admin-products?pageNumber=${pageNumber}&pageSize=${pageSize}${categoryStr}&searchValue=${searchValue}`

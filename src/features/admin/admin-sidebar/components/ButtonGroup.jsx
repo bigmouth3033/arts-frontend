@@ -10,6 +10,7 @@ const Container = styled.div`
 
 const MainButton = styled.button`
   background-color: ${(props) => (props.$active ? "white" : "#edeff2")};
+  font-weight: bold;
   width: 100%;
   display: flex;
   align-items: center;
@@ -18,6 +19,7 @@ const MainButton = styled.button`
   padding: 5px;
   border-radius: 5px;
   cursor: pointer;
+  color: rgba(0, 0, 0, 0.7);
   &:hover {
     background-color: ${(props) => (props.$active ? "None" : "#eaebed")};
   }

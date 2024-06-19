@@ -1,6 +1,6 @@
 import { GetAdminProductRequest } from "./api/productAdminApi";
 import styled from "styled-components";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import ProductPagination from "./components/pagination/ProductPagination";
 import { useNavigate } from "react-router-dom";
@@ -198,6 +198,7 @@ const FilterDropDown = styled.div`
   box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
   padding: 1rem;
   width: 20rem;
+  z-index: 1;
 `;
 
 const pageOptions = [
@@ -208,14 +209,9 @@ const pageOptions = [
   { value: 100, label: "100 items" },
 ];
 
-// const sortOptions = [
-//   {
-//     value: 0, label: "None",
-//     value: 1, label:
-//   }
-// ]
-
 export default function AdminProductList() {
+  const dropDownRef = useRef();
+  const buttonRef = useRef();
   const readCategoryRequest = ReadCategoryRequest();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -228,7 +224,8 @@ export default function AdminProductList() {
   );
   const [showMore, setShowMore] = useState([]);
   const [inputs, setInputs] = useState({});
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [displaySearch, setDisplaySearch] = useState(searchParams.get("search") || "");
   const [onShowDropDown, setOnShowDropDown] = useState(false);
   const [categorySelect, setCategorySelect] = useState([]);
 
@@ -246,7 +243,7 @@ export default function AdminProductList() {
   }, [getAdminProductRequest.status]);
 
   const onChangePage = (page) => {
-    setSearchParams({ currentpage: currentPage, pagesize: pageSize });
+    setSearchParams({ currentpage: page, pagesize: pageSize.value, search: search });
     setCurrentPage(page);
   };
 
@@ -266,6 +263,37 @@ export default function AdminProductList() {
     console.log(product);
   };
 
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      setSearch(displaySearch);
+      setSearchParams({
+        currentpage: currentPage,
+        pagesize: pageSize.value,
+        search: displaySearch,
+      });
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [displaySearch]);
+
+  useEffect(() => {
+    const event = (ev) => {
+      if (
+        dropDownRef &&
+        !dropDownRef.current.contains(ev.target) &&
+        !buttonRef.current.contains(ev.target)
+      ) {
+        setOnShowDropDown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", event);
+
+    return () => {
+      document.removeEventListener("mousedown", event);
+    };
+  }, []);
+
   return (
     <Container>
       <Header>
@@ -278,29 +306,33 @@ export default function AdminProductList() {
       <Content>
         <FilterBar>
           <FilterCotainer>
-            <button onClick={() => setOnShowDropDown((prev) => !prev)}>
+            <button ref={buttonRef} onClick={() => setOnShowDropDown((prev) => !prev)}>
               <IoFilterOutline />
               Filter
             </button>
             {onShowDropDown && (
-              <FilterDropDown>
+              <FilterDropDown ref={dropDownRef}>
                 <h4>Filter by categories:</h4>
                 <SelectMultiple
                   state={categorySelect}
                   setState={setCategorySelect}
                   options={transformCategoriesData()}
                 />
-                <h4>Or by:</h4>
-                <button onClick={() => console.log(categorySelect)}>f </button>
               </FilterDropDown>
             )}
           </FilterCotainer>
-          <TextInput state={search} setState={setSearch} placeholder={"Search"} />
+          <TextInput
+            state={displaySearch}
+            setState={(value) => {
+              setDisplaySearch(value);
+            }}
+            placeholder={"Search"}
+          />
           <SelectInput
             state={pageSize}
             options={pageOptions}
             setState={(value) => {
-              setSearchParams({ pagesize: value.value });
+              setSearchParams({ currentpage: currentPage, pagesize: value.value, search: search });
               setPageSize(value);
             }}
           />

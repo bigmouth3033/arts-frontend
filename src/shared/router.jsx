@@ -9,6 +9,7 @@ import AdminLogin from "@/features/admin-login/Index";
 import Employee from "@/features/employee/Index";
 import ListingPage from "@/features/listing-page/ListingPage";
 import AdminProductDetail from "@/features/admin-product-detail/Index";
+import Cart from "@/features/customer-cart/Index";
 
 // giu
 import ProductDetail from "@/features/ProductDetail/Index";
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
       {
         path: "listing-page",
         element: <ListingPage />,
+      },
+      {
+        path: "cart",
+        element: <Cart />,
       },
     ],
   },
