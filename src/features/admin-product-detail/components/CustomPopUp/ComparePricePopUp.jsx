@@ -20,6 +20,7 @@ const Content = styled.div`
     font-size: 14px;
     color: rgba(0, 0, 0, 0.7);
   }
+
   max-height: 30rem;
   overflow-y: scroll;
   padding: 0 2rem;
@@ -94,10 +95,9 @@ const ContentBody = styled.div`
     width: 10rem;
   }
 `;
-
 const regex = /^-?\d+(\.\d+)?$/;
 
-export default function SalePricePopUp({ action, state, setState }) {
+export default function ComparePricePopUp({ action, state, setState }) {
   const [allPrice, setAllPrice] = useState("");
   const [prices, setPrices] = useState(new Array(state.length).fill(""));
 
@@ -111,7 +111,7 @@ export default function SalePricePopUp({ action, state, setState }) {
 
   const onConfirm = () => {
     for (let i = 0; i < prices.length; i++) {
-      state[i].sellPrice = prices[i];
+      state[i].salePrice = prices[i];
     }
 
     setState();
@@ -119,17 +119,17 @@ export default function SalePricePopUp({ action, state, setState }) {
   };
 
   useEffect(() => {
-    state.forEach((item, index) => (prices[index] = item.sellPrice));
+    state.forEach((item, index) => (prices[index] = item.salePrice));
     setPrices([...prices]);
   }, []);
 
   return (
     <StyledPopUp action={() => {}}>
-      <Header>Edit price</Header>
+      <Header>Edit compare price</Header>
       <hr />
       <Content>
         <ContentHeader>
-          <h4>Apply price for all variants</h4>
+          <h4>Apply compare price for all variants</h4>
           <div>
             <TextInput
               placeholder={"0"}

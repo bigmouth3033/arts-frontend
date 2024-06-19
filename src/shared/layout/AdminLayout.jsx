@@ -47,11 +47,11 @@ export default function AdminLayout() {
 
   const navigate = useNavigate();
 
-  if (readCategoryRequest.isSuccess && localStorage.getItem("categories") == null) {
+  if (readCategoryRequest.isSuccess) {
     localStorage.setItem("categories", JSON.stringify(readCategoryRequest.data.data));
   }
 
-  if (readTypeRequest.isSuccess && localStorage.getItem("types") == null) {
+  if (readTypeRequest.isSuccess) {
     localStorage.setItem("types", JSON.stringify(readTypeRequest.data.data));
   }
 

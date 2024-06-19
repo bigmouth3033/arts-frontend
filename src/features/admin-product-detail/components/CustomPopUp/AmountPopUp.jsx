@@ -97,21 +97,21 @@ const ContentBody = styled.div`
 
 const regex = /^-?\d+(\.\d+)?$/;
 
-export default function SalePricePopUp({ action, state, setState }) {
-  const [allPrice, setAllPrice] = useState("");
-  const [prices, setPrices] = useState(new Array(state.length).fill(""));
+export default function AmountPopUp({ action, state, setState }) {
+  const [allStock, setAllStock] = useState("");
+  const [stock, setStock] = useState(new Array(state.length).fill(""));
 
-  const applyAllPrices = () => {
-    for (let i = 0; i < prices.length; i++) {
-      prices[i] = allPrice;
+  const applyAllStock = () => {
+    for (let i = 0; i < stock.length; i++) {
+      stock[i] = allStock;
     }
 
-    setPrices([...prices]);
+    setStock([...stock]);
   };
 
   const onConfirm = () => {
-    for (let i = 0; i < prices.length; i++) {
-      state[i].sellPrice = prices[i];
+    for (let i = 0; i < stock.length; i++) {
+      state[i].availableQuanity = stock[i];
     }
 
     setState();
@@ -119,8 +119,8 @@ export default function SalePricePopUp({ action, state, setState }) {
   };
 
   useEffect(() => {
-    state.forEach((item, index) => (prices[index] = item.sellPrice));
-    setPrices([...prices]);
+    state.forEach((item, index) => (stock[index] = item.availableQuanity));
+    setStock([...stock]);
   }, []);
 
   return (
@@ -133,14 +133,14 @@ export default function SalePricePopUp({ action, state, setState }) {
           <div>
             <TextInput
               placeholder={"0"}
-              state={allPrice}
+              state={allStock}
               setState={(value) => {
                 if (regex.test(value) || value == "") {
-                  setAllPrice(value);
+                  setAllStock(value);
                 }
               }}
             />
-            <button onClick={() => applyAllPrices()}>Apply</button>
+            <button onClick={() => applyAllStock()}>Apply</button>
           </div>
         </ContentHeader>
         <hr />
@@ -151,12 +151,12 @@ export default function SalePricePopUp({ action, state, setState }) {
                 <span>{item.variant.join("/")}</span>
                 <TextInput
                   placeholder={0}
-                  state={prices[key]}
+                  state={stock[key]}
                   setState={(value) => {
                     if (regex.test(value) || value == "") {
-                      const newList = [...prices];
+                      const newList = [...stock];
                       newList[key] = value;
-                      setPrices(newList);
+                      setStock(newList);
                     }
                   }}
                 />

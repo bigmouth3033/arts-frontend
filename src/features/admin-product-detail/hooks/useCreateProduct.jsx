@@ -48,7 +48,7 @@ export default function useCreateProductReducer() {
 
   const [state, dispatch] = useReducer(reducer, {
     productName: "",
-    category: null,
+    category: {},
     description: "",
     price: 0,
     salePrice: 0,

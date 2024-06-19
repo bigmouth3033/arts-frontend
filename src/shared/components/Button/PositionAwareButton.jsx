@@ -43,7 +43,7 @@ export default function PositionAwareButton({ content, action, className }) {
   }, [number]);
 
   return (
-    <a
+    <button
       className={"btn-posnawr " + className}
       onClick={(ev) => {
         ev.preventDefault();
@@ -53,6 +53,6 @@ export default function PositionAwareButton({ content, action, className }) {
     >
       {content}
       <span></span>
-    </a>
+    </button>
   );
 }

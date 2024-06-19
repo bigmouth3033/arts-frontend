@@ -5,7 +5,7 @@ import parse from "html-react-parser";
 const StyledContainerInfor = styled.div``;
 const StyledProductTitle = styled.div`
   color: #4c503d;
-  font-size: 20px;
+  font-size: 15px;
   font-weight: 700;
   line-height: 28px;
   margin-bottom: 20px;
@@ -17,7 +17,7 @@ const StyledProductInforWrap = styled.div`
   font-weight: 400;
   line-height: 24px;
   transition: all 0.3s;
-  padding: 0 19%;
+
   margin-top: 20px;
 `;
 const StyledProductItem = styled.div`
@@ -33,7 +33,7 @@ const StyledImage = styled.img`
 export default function ProductSingleInformation({ data }) {
   return (
     <StyledContainerInfor>
-      <StyledProductTitle>PRODUCT INFORMATION</StyledProductTitle>
+      <StyledProductTitle>Description</StyledProductTitle>
       <StyledProductInforWrap>{parse(data.description)}</StyledProductInforWrap>
     </StyledContainerInfor>
   );

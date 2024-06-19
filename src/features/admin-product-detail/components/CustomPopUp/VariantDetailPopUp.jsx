@@ -59,10 +59,9 @@ const Button = styled.div`
 const regex = /^-?\d+(\.\d+)?$/;
 
 export default function VariantDetailPopUp({ action, state, setState }) {
-  const [salePrice, setSalePrice] = useState(state.sellPrice);
-  const [comparePrice, setComparePrice] = useState(state.comparePrice);
-  const [costPerItem, setCostPerItem] = useState(state.beginFund);
-  const [stock, setStock] = useState(state.inventory);
+  const [salePrice, setSalePrice] = useState(state.price);
+  const [comparePrice, setComparePrice] = useState(state.salePrice);
+  const [stock, setStock] = useState(state.availableQuanity);
 
   return (
     <StyledPopUp action={() => {}}>
@@ -112,10 +111,9 @@ export default function VariantDetailPopUp({ action, state, setState }) {
       <Button>
         <button
           onClick={() => {
-            state.sellPrice = salePrice;
-            state.comparePrice = comparePrice;
-            state.inventory = stock;
-            state.beginFund = costPerItem;
+            state.price = salePrice;
+            state.salePrice = comparePrice;
+            state.availableQuanity = stock;
             setState();
             action();
           }}

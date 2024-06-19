@@ -16,11 +16,6 @@ const Input = styled(Select)`
   }
 `;
 
-export default function SelectInput({ state, setState, options, selectRef }) {
-  useEffect(() => {
-    if (state == null) {
-      setState(options[0]);
-    }
-  });
-  return <Input ref={selectRef} value={state} onChange={setState} options={options} isSearchable />;
+export default function SelectMultiple({ state, setState, options, selectRef }) {
+  return <Input ref={selectRef} value={state} onChange={setState} options={options} isMulti />;
 }

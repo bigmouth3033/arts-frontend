@@ -6,6 +6,7 @@ import { useState } from "react";
 import ErrorPopUp from "@/shared/components/PopUp/ErrorPopUp";
 import { AdminLoginRequest } from "./api/adminLoginApi";
 import { useNavigate } from "react-router-dom";
+import PositionAwareButton from "@/shared/components/Button/PositionAwareButton";
 
 const Container = styled.div`
   background-color: #6291e1;
@@ -14,22 +15,27 @@ const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+
+  & input {
+    font-size: 14px;
+  }
 `;
 
-const LoginForm = styled.div`
+const LoginForm = styled.form`
   background-color: white;
   border-radius: 5px;
   padding: 2rem;
+  width: 22rem;
 
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.8rem;
 `;
 
 const Header = styled.div`
   text-align: center;
   & h4 {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
   }
 `;
 
@@ -38,7 +44,6 @@ const ButtonContainer = styled.div`
   & button {
     width: 100%;
     background-color: white;
-    border-radius: 10px;
     cursor: pointer;
   }
 `;
@@ -47,6 +52,12 @@ const Content = styled.div`
   & label {
     font-size: 15px;
   }
+`;
+
+const PositionAwareButtonCustom = styled(PositionAwareButton)`
+  padding: 3px 0;
+  border-radius: 5px;
+  font-weight: 500;
 `;
 
 export default function AdminLogin() {
@@ -67,6 +78,11 @@ export default function AdminLogin() {
   }, []);
 
   const onLogin = () => {
+    if (email == "" || password == "") {
+      setErrorPopUp(true);
+      return;
+    }
+
     const formData = new FormData();
 
     formData.append("Email", email);
@@ -109,7 +125,7 @@ export default function AdminLogin() {
           <TextInput type={"password"} state={password} setState={setPassword} />
         </Content>
         <ButtonContainer>
-          <button onClick={onLogin}>Login</button>
+          <PositionAwareButtonCustom content={"Login"} action={onLogin} />
         </ButtonContainer>
       </LoginForm>
     </Container>

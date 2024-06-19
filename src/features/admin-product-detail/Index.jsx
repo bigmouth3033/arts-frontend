@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import TextEditor from "./components/TextEditor/TextEditor";
 import CustomInput from "./components/Input/CustomInput";
 import SelectInput from "@/shared/components/Input/SelectInput";
@@ -17,22 +17,23 @@ import { readTypesData } from "@/shared/utils/readTypesData";
 import variant_detail_sample from "./data/variant_detail_sample";
 import cartesian from "./utils/cartesian";
 import { CiImageOn } from "react-icons/ci";
-import PopUp from "@/shared/components/PopUp/PopUp";
 import TextInput from "@/shared/components/Input/TextInput";
 import ErrorPopUp from "@/shared/components/PopUp/ErrorPopUp";
 import ImagePopUp from "./components/CustomPopUp/ImagePopUp";
-import { CreateProductRequest } from "./api/newProductApi";
 import VariantDetailPopUp from "./components/CustomPopUp/VariantDetailPopUp";
 import { MdOutlineModeEdit } from "react-icons/md";
 import SalePricePopUp from "./components/CustomPopUp/SalePricePopUp";
 import ComparePricePopUp from "./components/CustomPopUp/ComparePricePopUp";
 import AmountPopUp from "./components/CustomPopUp/AmountPopUp";
-import WaitingPopUp from "@/shared/components/PopUp/WaitingPopUp";
-import SuccessPopUp from "@/shared/components/PopUp/SuccessPopUp";
 import Switch from "@/shared/components/Input/Switch";
 import { Tooltip } from "react-tooltip";
 import { FaRegQuestionCircle } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { GetProductVariantDetailRequest } from "../ProductDetail/api/productDetailApi";
+import { GetProductAdminDetailRequest } from "./api/editProductApi";
+import { useSearchParams } from "react-router-dom";
+import WaitingPopUp from "@/shared/components/PopUp/WaitingPopUp";
+import { DeleteImageRequest, UploadImageRequest } from "./api/editProductApi";
+import { Link } from "react-router-dom";
 
 const StyledFaRegQuestionCircle = styled(FaRegQuestionCircle)`
   cursor: pointer;
@@ -90,7 +91,7 @@ const Right = styled.div`
     box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
     background-color: white;
     position: sticky;
-    top: 10px;
+    top: 0;
   }
 `;
 
@@ -164,7 +165,7 @@ const VariantItemContainer = styled.div`
 `;
 
 const VariantContainer = styled.div`
-  padding: 20px;
+  padding: 0px 20px;
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -530,12 +531,24 @@ const DiscardButton = styled.button`
   font-weight: 600;
 `;
 
+const StyledLink = styled(Link)`
+  width: fit-content;
+  padding: 10px;
+  border: 1px solid black;
+`;
+
 const regex = /^-?\d+(\.\d+)?$/;
 
-export default function AdminProductNew() {
-  const navigate = useNavigate();
+export default function AdminProductDetail() {
   const readCategoryRequest = ReadCategoryRequest();
   const readTypeRequest = ReadTypeRequest();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const getProductVariantDetailRequest = GetProductVariantDetailRequest(searchParams.get("id"));
+  const getProductAdminDetailRequest = GetProductAdminDetailRequest(searchParams.get("id"));
+  const uploadImageRequest = UploadImageRequest();
+  const deleteImageRequest = DeleteImageRequest();
+
+  const categoryRef = useRef(null);
 
   const [showVariant, setShowVariant] = useState(false);
   const [showUnit, setShowUnit] = useState(false);
@@ -549,52 +562,9 @@ export default function AdminProductNew() {
   const [editComparePrice, setEditComparePrice] = useState(false);
   const [editAmount, setEditAmount] = useState(false);
   const [showWarranty, setShowWarranty] = useState(false);
-  const [error, setError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
 
   const [state, dispatch, ACTIONS] = useCreateProductReducer();
   const inputRef = useRef();
-
-  const createProductRequest = CreateProductRequest();
-
-  const updateVariant = (value, index) => {
-    state.variants[index].option = value;
-
-    dispatch({
-      type: ACTIONS.CHANGE_VARIANTS,
-      next: [...state.variants],
-    });
-  };
-
-  const onAddMoreVariant = () => {
-    state.variants.push({ done: false, value: [""] });
-    dispatch({
-      type: ACTIONS.CHANGE_VARIANTS,
-      next: [...state.variants],
-    });
-  };
-
-  const onDeleteVariant = (key) => {
-    dispatch({
-      type: ACTIONS.CHANGE_VARIANTS,
-      next: state.variants.filter((item, index) => index != key),
-    });
-  };
-
-  const onClickRemoveValue = (variant, key) => {
-    variant.value = variant.value.filter((value, index) => index != key);
-    dispatch({
-      type: ACTIONS.CHANGE_VARIANTS,
-      next: [...state.variants],
-    });
-  };
-
-  const getRemainVariant = () => {
-    const options = [];
-    state.variants.forEach((item) => options.push(item.option));
-
-    return variant_options.filter((item) => !options.includes(item));
-  };
 
   const onClickAddImage = () => {
     inputRef.current.click();
@@ -610,13 +580,24 @@ export default function AdminProductNew() {
 
       if (!isValidFileType) {
         setImageError(true);
-        // Clear the file input if the file type is invalid
 
         return;
       }
 
-      dispatch({ type: ACTIONS.CHANGE_IMAGES, next: [...state.images, ...ev.target.files] });
-      ev.target.value = null;
+      const formData = new FormData();
+
+      [...ev.target.files].forEach((newFile) => formData.append("Images", newFile));
+
+      formData.append("ProductId", getProductDetailRequest.data.data.id);
+
+      uploadImageRequest.mutate(formData, {
+        onSuccess: (response) => {
+          if (response.status == 200) {
+            dispatch({ type: ACTIONS.CHANGE_IMAGES, next: [...state.images, ...response.data] });
+            ev.target.value = null;
+          }
+        },
+      });
     }
   };
 
@@ -632,33 +613,14 @@ export default function AdminProductNew() {
     return option;
   };
 
-  const transformTypeData = () => {
-    let data = readTypesData(readTypeRequest);
-    data = data.filter((item) => item.nameType != "VariantAttribute");
-    const option = [];
-    for (let item of data) {
-      option.push({ value: item.id, label: item.name });
-    }
-
-    return option;
-  };
-
   const checkVariantExist = () => {
     return state.variants.find((item) => item.value.find((itemValue) => itemValue != ""));
   };
 
-  const transformToVariantDetail = () => {
+  const initialTransformToVariantDetail = (variants, productData) => {
     const allVariants = [];
 
-    const generateVariantKey = (item) => {
-      if (Array.isArray(item)) {
-        return item.join("_");
-      } else {
-        return item;
-      }
-    };
-
-    for (let variant of state.variants) {
+    for (let variant of variants) {
       if (!variant.value.find((item) => item != "")) {
         continue;
       }
@@ -669,124 +631,112 @@ export default function AdminProductNew() {
 
     dispatch({
       type: ACTIONS.CHANGE_VARIANT_DETAIL,
-      next: variantDetail.map((variant) => {
-        const key = generateVariantKey(variant);
-        let oldVariant;
-        if (
-          (oldVariant = state.variant_detail.find(
-            (item) => generateVariantKey(item.variant) == key
-          ))
-        ) {
-          return { ...oldVariant, variant: Array.isArray(variant) ? variant : [variant] };
-        } else {
-          return {
-            variant: Array.isArray(variant) ? variant : [variant],
-            ...variant_detail_sample,
-          };
-        }
+      next: variantDetail.map((item) => {
+        const variant = Array.isArray(item) ? item : [item];
+
+        const detail = productData.variants.find((item) => {
+          if (variant.length == 1) {
+            return item.variantAttributes[0].attributeValue == variant[0];
+          }
+
+          if (variant.length == 2) {
+            return (
+              item.variantAttributes[0].attributeValue == variant[0] &&
+              item.variantAttributes[1].attributeValue == variant[1]
+            );
+          }
+
+          if (variant.length == 3) {
+            return (
+              item.variantAttributes[0].attributeValue == variant[0] &&
+              item.variantAttributes[1].attributeValue == variant[1] &&
+              item.variantAttributes[2].attributeValue == variant[2]
+            );
+          }
+        });
+
+        return {
+          variant: variant,
+          ...detail,
+        };
       }),
     });
   };
 
-  const onAddNewTypeVariant = (value) => {
-    for (let item of state.variant_detail) {
-      item.variant.push(value);
-    }
-
-    dispatch({ type: ACTIONS.CHANGE_VARIANT_DETAIL, next: state.variant_detail });
-  };
-
-  const checkIfNewVariantType = (variant) => {
-    const slice = variant.value.filter((item, index) => index != 0);
-
-    if (!slice.find((item) => item != "")) {
-      return true;
-    }
-
-    return false;
-  };
-
-  const checkRemoveable = (value) => {
-    if (value.length == 1 || (value.length == 2 && value[1] == "")) {
-      return true;
-    }
-
-    return false;
-  };
-
   const onCreateProduct = () => {
-    if (state.productName.length == 0) {
-      setErrorMessage("Product need to have a name");
-      setError(true);
-      return;
-    }
-
-    if (state.images.length == 0) {
-      setErrorMessage("Product need atlest one image");
-      setError(true);
-      return;
-    }
-
-    if (state.variants.length != 0 && state.variant_detail.length == 0) {
-      setErrorMessage("You need to add variant or turn off variants");
-      setError(true);
-
-      return;
-    }
-
-    if (state.variants.length == 0 && state.variant_detail.length == 0 && state.price == 0) {
-      setErrorMessage("Product need to be priced");
-      setError(true);
-      return;
-    }
-
-    const variantWithOutPrice = state.variant_detail.find((item) => {
-      return item.sellPrice == 0;
-    });
-
-    if (variantWithOutPrice) {
-      setErrorMessage(`Every variant need to have a price`);
-      setError(true);
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("ProductName", state.productName);
-    formData.append("Category", state.category.value);
-    formData.append("Description", state.description);
-    formData.append("Price", state.price);
-    formData.append("SalePrice", state.salePrice);
-    formData.append("Amount", state.amount);
-    formData.append("Unit", state.unit);
-    formData.append("Active", state.active);
-    formData.append("Warranty", state.warrantyTime);
-
-    state.images.forEach((item) => formData.append("Images", item));
-    state.variants.forEach((item) => {
-      var copy = item;
-      copy.id = item.option.value;
-      formData.append("variantsJSON[]", JSON.stringify(copy));
-    });
-    state.variant_detail.forEach((item) => {
-      formData.append("VariantDetailsJSON[]", JSON.stringify(item));
-    });
-
-    createProductRequest.mutate(formData, {
-      onSuccess: (response) => {
-        if (response.status == 200) {
-          navigate(`/admin/product?id=${response.data.id}`);
-        }
-      },
-      onError: (response) => {
-        console.log(response);
-      },
-    });
+    console.log(state);
   };
+
+  useEffect(() => {
+    if (getProductAdminDetailRequest.isSuccess && getProductVariantDetailRequest.isSuccess) {
+      const data = getProductAdminDetailRequest.data.data;
+      const variantData = getProductVariantDetailRequest.data.data;
+
+      dispatch({ type: ACTIONS.CHANGE_NAME, next: data.name });
+      dispatch({ type: ACTIONS.CHANGE_DESCRIPTION, next: data.description });
+      dispatch({
+        type: ACTIONS.CHANGE_CATEGORY,
+        next: categoryRef.current.props.options.find((item) => item.value == data.categoryId),
+      });
+
+      dispatch({
+        type: ACTIONS.CHANGE_IMAGES,
+        next: data.productImages.map((item) => item.imageName),
+      });
+
+      dispatch({
+        type: ACTIONS.CHANGE_WARRANTY,
+        next: data.warrantyDuration,
+      });
+
+      dispatch({
+        type: ACTIONS.CHANGE_UNIT,
+        next: data.unit,
+      });
+
+      if (data.unit) {
+        setShowUnit(true);
+      }
+
+      if (data.warrantyDuration) {
+        setShowWarranty(true);
+      }
+
+      if (variantData.length != 0) {
+        setShowVariant(true);
+        const variants = [];
+
+        for (let item of variantData) {
+          variants.push({
+            done: true,
+            value: item.values,
+            option: variant_options.find((option) => item.variant == option.label),
+          });
+        }
+
+        dispatch({ type: ACTIONS.CHANGE_VARIANTS, next: variants });
+
+        initialTransformToVariantDetail(variants, data);
+      }
+
+      if (variantData.length == 0) {
+        dispatch({ type: ACTIONS.CHANGE_PRICE, next: data.variants[0].price });
+        dispatch({ type: ACTIONS.CHANGE_SALE_PRICE, next: data.variants[0].salePrice });
+        dispatch({ type: ACTIONS.CHANGE_AMOUNT, next: data.variants[0].availableQuanity });
+      }
+
+      dispatch({ type: ACTIONS.CHANGE_ACTIVE, next: data.isActive });
+    }
+  }, [getProductAdminDetailRequest.status, getProductVariantDetailRequest.status]);
+
+  if (getProductAdminDetailRequest.isLoading || getProductVariantDetailRequest.isLoading) {
+    return <WaitingPopUp />;
+  }
 
   return (
     <>
       <Container>
-        <h4>Create new product</h4>
+        <h4>{state.productName}</h4>
         <Content>
           <Left>
             <ContentContainer>
@@ -804,6 +754,7 @@ export default function AdminProductNew() {
                 <div>
                   <h5>Category</h5>
                   <SelectInput
+                    selectRef={categoryRef}
                     options={transformCategoriesData()}
                     state={state.category}
                     setState={(value) => {
@@ -853,7 +804,7 @@ export default function AdminProductNew() {
                               }}
                             />
                           </ImageLayout>
-                          <img src={URL.createObjectURL(item)} />
+                          <img src={import.meta.env.VITE_API_IMAGE_PATH + item} />
                         </ImageItem>
                       );
                     })}
@@ -903,7 +854,7 @@ export default function AdminProductNew() {
                       />
                     </div>
                     <div>
-                      <h5>Amount</h5>
+                      <h5>Compare price</h5>
                       <TextInput
                         state={state.amount}
                         setState={(value) => {
@@ -911,7 +862,7 @@ export default function AdminProductNew() {
                             dispatch({ type: ACTIONS.CHANGE_AMOUNT, next: value });
                           }
                         }}
-                        placeholder={"0"}
+                        placeholder={"0 $"}
                       />
                     </div>
                   </ContentItem>
@@ -926,13 +877,7 @@ export default function AdminProductNew() {
                   <input
                     checked={showUnit}
                     onChange={() => {
-                      setShowUnit((prev) => {
-                        if (prev) {
-                          dispatch({ type: ACTIONS.CHANGE_UNIT, next: "" });
-                        }
-
-                        return !prev;
-                      });
+                      setShowUnit((prev) => !prev);
                     }}
                     type="checkbox"
                   />
@@ -970,6 +915,7 @@ export default function AdminProductNew() {
                         return !prev;
                       });
                     }}
+                    checked={showWarranty}
                     type="checkbox"
                   />
                   <span>Include a warranty with this product</span>
@@ -994,291 +940,115 @@ export default function AdminProductNew() {
                 )}
               </ContentItem>
             </ContentContainer>
-            <ContentContainer>
-              <h5>Variants</h5>
-              <hr />
-              <ContentItem>
-                <InputCheckContainer>
-                  <input
-                    onChange={() => {
-                      if (showVariant == false) {
-                        dispatch({
-                          type: ACTIONS.CHANGE_VARIANTS,
-                          next: [{ done: false, value: [""] }],
-                        });
-                      }
-
-                      if (showVariant == true) {
-                        dispatch({ type: ACTIONS.CHANGE_VARIANTS, next: [] });
-                        dispatch({ type: ACTIONS.CHANGE_VARIANT_DETAIL, next: [] });
-                      }
-
-                      setShowVariant((prev) => !prev);
-                    }}
-                    type="checkbox"
-                  />
-                  <span>This product has many variants, such as different in size and color</span>
-                </InputCheckContainer>
+            {state.variants.length != 0 && (
+              <ContentContainer>
+                <h5>Variants</h5>
                 <hr />
-                {showVariant && (
-                  <VariantContainer>
-                    {state.variants.map((variant, variantIndex) => {
-                      if (variant.done == false)
-                        return (
-                          <VariantItemContainer key={variantIndex}>
-                            <SelectVariant>
-                              <h5>Variant</h5>
+                <ContentItem>
+                  {showVariant && (
+                    <VariantContainer>
+                      {state.variants.map((variant, variantIndex) => {
+                        if (variant.done == true) {
+                          return (
+                            <DoneContainer>
+                              <p>{variant.option.label}</p>
                               <div>
-                                <SelectInput
-                                  setState={(value) => updateVariant(value, variantIndex)}
-                                  options={getRemainVariant(transformTypeData())}
-                                  state={variant.option}
-                                />
-                                {checkRemoveable(variant.value) && (
-                                  <FaTrash
-                                    onClick={() => {
-                                      if (variant.value != "") {
-                                        state.variant_detail.forEach((variantDetail) => {
-                                          variantDetail.variant = variantDetail.variant.filter(
-                                            (item, index) => {
-                                              if (
-                                                item != variant.value.slice(0, -1) ||
-                                                index != variantIndex
-                                              ) {
-                                                return true;
-                                              }
-                                            }
-                                          );
-                                        });
-                                        state.variant_detail = state.variant_detail.filter(
-                                          (item) => item.variant.length != 0
-                                        );
-
-                                        dispatch({
-                                          type: ACTIONS.CHANGE_VARIANT_DETAIL,
-                                          next: state.variant_detail,
-                                        });
-                                      }
-                                      onDeleteVariant(variantIndex);
-                                    }}
-                                  />
-                                )}
+                                {variant.value.map((item, index) => {
+                                  if (item != "") {
+                                    return <button key={index}>{item}</button>;
+                                  }
+                                })}
                               </div>
-                            </SelectVariant>
-                            <VariantValue>
-                              <h5>Value</h5>
-                              {variant.value.map((item, valueIndex) => {
-                                return (
-                                  <div key={valueIndex}>
-                                    <CustomInput
-                                      state={item}
-                                      setState={(value) => {
-                                        if (variant.value[valueIndex + 1] == null) {
-                                          variant.value[valueIndex + 1] = "";
-                                          dispatch({
-                                            type: ACTIONS.CHANGE_VARIANTS,
-                                            next: [...state.variants],
-                                          });
-                                        }
-                                        variant.value[valueIndex] = value;
-                                        dispatch({
-                                          type: ACTIONS.CHANGE_VARIANTS,
-                                          next: [...state.variants],
-                                        });
-                                        if (item != "") {
-                                          const allVariants = [];
-                                          for (let variant of state.variants) {
-                                            if (!variant.value.find((item) => item != "")) {
-                                              continue;
-                                            }
-                                            allVariants.push(
-                                              variant.value.filter((item) => item != "")
-                                            );
-                                          }
-
-                                          const variantDetail = cartesian(...allVariants);
-
-                                          let n = 0;
-                                          state.variant_detail.map((detail) => {
-                                            detail.variant = variantDetail[n++];
-                                            if (!Array.isArray(detail.variant)) {
-                                              detail.variant = [detail.variant];
-                                            }
-                                          });
-
-                                          dispatch({
-                                            type: ACTIONS.CHANGE_VARIANT_DETAIL,
-                                            next: state.variant_detail,
-                                          });
-                                          return;
-                                        }
-                                        if (item == "" && value != "" && valueIndex == 0) {
-                                          if (checkIfNewVariantType(variant)) {
-                                            onAddNewTypeVariant(value);
-                                            transformToVariantDetail();
-                                          }
-                                        }
-                                        if (item == "" && value != "" && valueIndex != 0) {
-                                          transformToVariantDetail();
-                                        }
+                              <div></div>
+                            </DoneContainer>
+                          );
+                        }
+                      })}
+                      {checkVariantExist() && (
+                        <VariantDetailContainer>
+                          <VariantDetailHeader>
+                            <div>{state.variant_detail.length} Variants</div>
+                            <div>
+                              <EditButton onClick={() => setDropDown((prev) => !prev)}>
+                                <MdOutlineModeEdit />
+                                Edit Variant
+                              </EditButton>
+                              {dropDown && (
+                                <DropDown>
+                                  <button
+                                    onClick={() => {
+                                      setDropDown(false);
+                                      setEditPrice(true);
+                                    }}
+                                  >
+                                    Edit price
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setEditComparePrice(true);
+                                      setDropDown(false);
+                                    }}
+                                  >
+                                    Edit compare at price
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setEditAmount(true);
+                                      setDropDown(false);
+                                    }}
+                                  >
+                                    Edit amount
+                                  </button>
+                                </DropDown>
+                              )}
+                            </div>
+                          </VariantDetailHeader>
+                          <hr />
+                          {state.variant_detail.map((item, key) => {
+                            return (
+                              <VariantDetail
+                                key={key}
+                                onClick={(ev) => {
+                                  ev.stopPropagation();
+                                  setChosenVariantDetail(item);
+                                  setVariantDetailPopUp(true);
+                                }}
+                              >
+                                <div>
+                                  {item.variantImage !== null ? (
+                                    <VariantImage
+                                      onClick={(ev) => {
+                                        ev.stopPropagation();
+                                        setChosenImageState(item);
+                                        setImagePopUp(true);
+                                      }}
+                                      src={import.meta.env.VITE_API_IMAGE_PATH + item.variantImage}
+                                    />
+                                  ) : (
+                                    <CiImageOn
+                                      onClick={(ev) => {
+                                        ev.stopPropagation();
+                                        setChosenImageState(item);
+                                        setImagePopUp(true);
                                       }}
                                     />
-                                    {variant.value.length > 2 && item != "" ? (
-                                      <AiOutlineClose
-                                        onClick={() => {
-                                          onClickRemoveValue(variant, valueIndex);
-                                          state.variant_detail = state.variant_detail.filter(
-                                            (variantDetail, index) => {
-                                              return variantDetail.variant[variantIndex] != item;
-                                            }
-                                          );
-                                          dispatch({
-                                            type: ACTIONS.CHANGE_VARIANT_DETAIL,
-                                            next: state.variant_detail,
-                                          });
-                                        }}
-                                      />
-                                    ) : (
-                                      <span></span>
-                                    )}
-                                  </div>
-                                );
-                              })}
-                              <button
-                                onClick={() => {
-                                  variant.done = true;
-
-                                  dispatch({
-                                    type: ACTIONS.CHANGE_VARIANTS,
-                                    next: state.variants,
-                                  });
-                                }}
-                              >
-                                Done
-                              </button>
-                            </VariantValue>
-                          </VariantItemContainer>
-                        );
-                      if (variant.done == true) {
-                        return (
-                          <DoneContainer>
-                            <p>{variant.option.label}</p>
-                            <div>
-                              {variant.value.map((item, index) => {
-                                if (item != "") {
-                                  return <button key={index}>{item}</button>;
-                                }
-                              })}
-                            </div>
-                            <div>
-                              <button
-                                onClick={() => {
-                                  variant.done = false;
-
-                                  dispatch({
-                                    type: ACTIONS.CHANGE_VARIANTS,
-                                    next: state.variants,
-                                  });
-                                }}
-                              >
-                                Edit
-                              </button>
-                            </div>
-                          </DoneContainer>
-                        );
-                      }
-                    })}
-                    {state.variants.length < 3 && (
-                      <button onClick={onAddMoreVariant}>
-                        <FaPlus />
-                        Add more variant
-                      </button>
-                    )}
-                    {checkVariantExist() && (
-                      <VariantDetailContainer>
-                        <hr />
-                        <VariantDetailHeader>
-                          <div>{state.variant_detail.length} Variants</div>
-                          <div>
-                            <EditButton onClick={() => setDropDown((prev) => !prev)}>
-                              <MdOutlineModeEdit />
-                              Edit Variant
-                            </EditButton>
-                            {dropDown && (
-                              <DropDown>
-                                <button
-                                  onClick={() => {
-                                    setDropDown(false);
-                                    setEditPrice(true);
-                                  }}
-                                >
-                                  Edit price
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setEditComparePrice(true);
-                                    setDropDown(false);
-                                  }}
-                                >
-                                  Edit compare at price
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setEditAmount(true);
-                                    setDropDown(false);
-                                  }}
-                                >
-                                  Edit amount
-                                </button>
-                              </DropDown>
-                            )}
-                          </div>
-                        </VariantDetailHeader>
-                        <hr />
-                        {state.variant_detail.map((item, key) => {
-                          return (
-                            <VariantDetail
-                              key={key}
-                              onClick={(ev) => {
-                                ev.stopPropagation();
-                                setChosenVariantDetail(item);
-                                setVariantDetailPopUp(true);
-                              }}
-                            >
-                              <div>
-                                {item.image !== null ? (
-                                  <VariantImage
-                                    onClick={(ev) => {
-                                      ev.stopPropagation();
-                                      setChosenImageState(item);
-                                      setImagePopUp(true);
-                                    }}
-                                    src={URL.createObjectURL(state.images[item.image])}
-                                  />
-                                ) : (
-                                  <CiImageOn
-                                    onClick={(ev) => {
-                                      ev.stopPropagation();
-                                      setChosenImageState(item);
-                                      setImagePopUp(true);
-                                    }}
-                                  />
-                                )}
-                                {item.variant.join("/")}
-                              </div>
-                              <div>
-                                <p>{item.sellPrice} $ </p>
-                                <p>{item.inventory} sellable in inventory</p>
-                              </div>
-                            </VariantDetail>
-                          );
-                        })}
-                      </VariantDetailContainer>
-                    )}
-                  </VariantContainer>
-                )}
-              </ContentItem>
-            </ContentContainer>
+                                  )}
+                                  {item.variant.join("/")}
+                                </div>
+                                <div>
+                                  <p>{item.price} $ </p>
+                                  <p>{item.availableQuanity} sellable in inventory</p>
+                                </div>
+                              </VariantDetail>
+                            );
+                          })}
+                        </VariantDetailContainer>
+                      )}
+                    </VariantContainer>
+                  )}
+                </ContentItem>
+              </ContentContainer>
+            )}
           </Left>
           <Right>
             <ShowInfo>
@@ -1308,9 +1078,9 @@ export default function AdminProductNew() {
         <ImagePopUp
           action={() => setImagePopUp(false)}
           images={state.images}
-          state={chonsenImageState.image}
+          state={chonsenImageState.variantImage}
           setState={(image) => {
-            chonsenImageState.image = image;
+            chonsenImageState.variantImage = image;
             dispatch({
               type: ACTIONS.CHANGE_VARIANT_DETAIL,
               next: state.variant_detail,
@@ -1371,9 +1141,6 @@ export default function AdminProductNew() {
           message={"Invalid file type! Please select a valid image file"}
           action={() => setImageError(false)}
         />
-      )}
-      {error && (
-        <ErrorPopUp header={"Error"} message={errorMessage} action={() => setError(false)} />
       )}
     </>
   );

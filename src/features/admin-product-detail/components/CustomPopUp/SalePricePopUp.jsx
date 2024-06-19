@@ -111,7 +111,7 @@ export default function SalePricePopUp({ action, state, setState }) {
 
   const onConfirm = () => {
     for (let i = 0; i < prices.length; i++) {
-      state[i].sellPrice = prices[i];
+      state[i].price = prices[i];
     }
 
     setState();
@@ -119,7 +119,7 @@ export default function SalePricePopUp({ action, state, setState }) {
   };
 
   useEffect(() => {
-    state.forEach((item, index) => (prices[index] = item.sellPrice));
+    state.forEach((item, index) => (prices[index] = item.price));
     setPrices([...prices]);
   }, []);
 
