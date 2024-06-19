@@ -13,6 +13,7 @@ import ListingPage from "@/features/listing-page/ListingPage";
 import ProductDetail from "@/features/ProductDetail/Index";
 import Account from "@/features/account/Index";
 import AccountInformation from "@/features/account/account-information/Index";
+import Cart from "@/features/customer-cart/Index";
 
 const router = createBrowserRouter([
   {
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
       {
         path: "test",
         element: <Test />,
+      },
+      {
+        path:"cart",
+        element:<Cart/>
       },
       {
         path: "productdetail",
@@ -34,7 +39,7 @@ const router = createBrowserRouter([
           {
             path: "account-information",
             element: <AccountInformation />,
-          },
+          },          
         ],
       },
       {
