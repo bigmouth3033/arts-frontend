@@ -20,7 +20,22 @@ const Content = styled.div`
     font-size: 14px;
     color: rgba(0, 0, 0, 0.7);
   }
+  max-height: 30rem;
+  overflow-y: scroll;
   padding: 0 2rem;
+
+  &::-webkit-scrollbar-track {
+    background-color: none;
+  }
+
+  &::-webkit-scrollbar {
+    width: 4px;
+    background-color: none;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgb(205, 205, 207);
+  }
 `;
 
 const Button = styled.div`
@@ -30,9 +45,16 @@ const Button = styled.div`
   padding: 1rem;
 
   > button {
-    background-color: white;
     cursor: pointer;
-    padding: 5px 15px;
+    color: white;
+    background-color: #2962ff;
+    border: none;
+    padding: 0.3rem 1rem;
+    border-radius: 5px;
+
+    &:hover {
+      background-color: #0052cc;
+    }
   }
 `;
 

@@ -41,7 +41,7 @@ const StyledLink = styled(Link)`
   padding: 5px 35px;
   text-decoration: none;
   color: black;
-  font-size: 14px;
+  font-size: 14 px;
   &:hover {
     background-color: ${(props) => (props.$active ? "None" : "#eaebed")};
   }
@@ -78,13 +78,11 @@ export default function AdminSideBar() {
           groupName={"Dashboard"}
           icon={<MdOutlineDashboard />}
         ></ButtonGroup>
-        <ButtonGroup groupName={"Products"} icon={<CiShoppingTag />} active={true}>
-          <StyledLink $active={location.pathname.includes("product-list")} to={"product-list"}>
-            All Products
-          </StyledLink>
-          <StyledLink>Category</StyledLink>
-          <StyledLink>Inventory</StyledLink>
-        </ButtonGroup>
+        <ButtonGroup
+          groupName={"Products"}
+          icon={<CiShoppingTag />}
+          link={"product-list"}
+        ></ButtonGroup>
         <ButtonGroup groupName={"Account"} icon={<VscAccount />} active={true}>
           {adminRequest.data.data.roleType.name == "Admin" && (
             <StyledLink $active={location.pathname.includes("employee")} to={"employee"}>

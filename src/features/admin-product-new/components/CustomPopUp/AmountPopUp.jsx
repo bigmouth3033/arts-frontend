@@ -20,7 +20,22 @@ const Content = styled.div`
     font-size: 14px;
     color: rgba(0, 0, 0, 0.7);
   }
+  max-height: 30rem;
+  overflow-y: scroll;
   padding: 0 2rem;
+
+  &::-webkit-scrollbar-track {
+    background-color: none;
+  }
+
+  &::-webkit-scrollbar {
+    width: 4px;
+    background-color: none;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgb(205, 205, 207);
+  }
 `;
 
 const Button = styled.div`
@@ -30,9 +45,16 @@ const Button = styled.div`
   padding: 1rem;
 
   > button {
-    background-color: white;
     cursor: pointer;
-    padding: 5px 15px;
+    color: white;
+    background-color: #2962ff;
+    border: none;
+    padding: 0.3rem 1rem;
+    border-radius: 5px;
+
+    &:hover {
+      background-color: #0052cc;
+    }
   }
 `;
 
@@ -59,14 +81,13 @@ const ContentHeader = styled.div`
 const ContentBody = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1rem;
   margin: 2rem 0;
 
   > div {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 2rem;
   }
 
   & input {
@@ -74,74 +95,71 @@ const ContentBody = styled.div`
   }
 `;
 
-const InputContainer = styled.div`
-  display: flex;
-  gap: 2rem;
-`;
-
 const regex = /^-?\d+(\.\d+)?$/;
 
 export default function AmountPopUp({ action, state, setState }) {
+  const [allStock, setAllStock] = useState("");
   const [stock, setStock] = useState(new Array(state.length).fill(""));
-  const [costPerItem, setCostPerItem] = useState(new Array(state.length).fill(""));
 
-  useEffect(() => {
-    for (let i = 0; i < state.length; i++) {
-      stock[i] = state[i].inventory;
-      costPerItem[i] = state[i].beginFund;
+  const applyAllStock = () => {
+    for (let i = 0; i < stock.length; i++) {
+      stock[i] = allStock;
     }
 
     setStock([...stock]);
-    setCostPerItem([...costPerItem]);
-  }, []);
+  };
 
   const onConfirm = () => {
-    for (let i = 0; i < state.length; i++) {
+    for (let i = 0; i < stock.length; i++) {
       state[i].inventory = stock[i];
-      state[i].beginFund = costPerItem[i];
     }
+
     setState();
     action();
   };
 
+  useEffect(() => {
+    state.forEach((item, index) => (stock[index] = item.inventory));
+    setStock([...stock]);
+  }, []);
+
   return (
     <StyledPopUp action={() => {}}>
-      <Header>Edit Amount</Header>
+      <Header>Edit price</Header>
       <hr />
       <Content>
+        <ContentHeader>
+          <h4>Apply price for all variants</h4>
+          <div>
+            <TextInput
+              placeholder={"0"}
+              state={allStock}
+              setState={(value) => {
+                if (regex.test(value) || value == "") {
+                  setAllStock(value);
+                }
+              }}
+            />
+            <button onClick={() => applyAllStock()}>Apply</button>
+          </div>
+        </ContentHeader>
+        <hr />
         <ContentBody>
           {state.map((item, key) => {
             return (
               <div key={key}>
                 <span>{item.variant.join("/")}</span>
-                <InputContainer>
-                  <div>
-                    <h4>Stock</h4>
-                    <TextInput
-                      state={stock[key]}
-                      setState={(value) => {
-                        if (regex.test(value) || value == "") {
-                          const newList = [...stock];
-                          newList[key] = value;
-                          setStock(newList);
-                        }
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <h4>Cost per item</h4>
-                    <TextInput
-                      setState={(value) => {
-                        if (regex.test(value) || value == "") {
-                          const newList = [...costPerItem];
-                          newList[key] = value;
-                          setCostPerItem(newList);
-                        }
-                      }}
-                      state={costPerItem[key]}
-                    />
-                  </div>
-                </InputContainer>
+                <TextInput
+                  placeholder={0}
+                  state={stock[key]}
+                  setState={(value) => {
+                    if (regex.test(value) || value == "") {
+                      const newList = [...stock];
+                      newList[key] = value;
+                      setStock(newList);
+                    }
+                  }}
+                />
               </div>
             );
           })}

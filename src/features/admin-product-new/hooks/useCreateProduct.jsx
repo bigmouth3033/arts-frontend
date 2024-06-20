@@ -14,6 +14,7 @@ export default function useCreateProductReducer() {
     CHANGE_VARIANT_DETAIL: "CHANGE_VARIANT_DETAIL",
     CHANGE_CATEGORY: "CHANGE_CATEGORY",
     CHANGE_WARRANTY: "CHANGE_WARRANTY",
+    CHANGE_AMOUNT: "CHANGE_AMOUNT",
   };
 
   function reducer(state, action) {
@@ -40,6 +41,8 @@ export default function useCreateProductReducer() {
         return { ...state, category: action.next };
       case ACTIONS.CHANGE_WARRANTY:
         return { ...state, warrantyTime: action.next };
+      case ACTIONS.CHANGE_AMOUNT:
+        return { ...state, amount: action.next };
     }
   }
 
@@ -55,6 +58,7 @@ export default function useCreateProductReducer() {
     unit: "",
     active: true,
     warrantyTime: 0,
+    amount: 0,
   });
 
   return [state, dispatch, ACTIONS];

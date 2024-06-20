@@ -30,6 +30,15 @@ import AmountPopUp from "./components/CustomPopUp/AmountPopUp";
 import WaitingPopUp from "@/shared/components/PopUp/WaitingPopUp";
 import SuccessPopUp from "@/shared/components/PopUp/SuccessPopUp";
 import Switch from "@/shared/components/Input/Switch";
+import { Tooltip } from "react-tooltip";
+import { FaRegQuestionCircle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+
+const StyledFaRegQuestionCircle = styled(FaRegQuestionCircle)`
+  cursor: pointer;
+  color: #0057a0;
+  font-size: 13px;
+`;
 
 const Container = styled.div`
   max-width: 75rem;
@@ -48,6 +57,13 @@ const Container = styled.div`
   * hr {
     border: none;
     border-top: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  & h5,
+  h4 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 `;
 
@@ -74,7 +90,7 @@ const Right = styled.div`
     box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
     background-color: white;
     position: sticky;
-    top: 0;
+    top: 10px;
   }
 `;
 
@@ -380,7 +396,7 @@ const ImageLayout = styled.div`
   background: rgba(0, 0, 0, 0);
   cursor: pointer;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   padding: 5px;
 
   > svg {
@@ -389,6 +405,16 @@ const ImageLayout = styled.div`
     background-color: white;
     padding: none;
     border-radius: 5px;
+  }
+
+  > svg:nth-of-type(1) {
+    align-self: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-left: 30px;
+    background-color: rgba(0, 0, 0, 0);
+    color: white;
+    border: 2px dotted rgba(255, 255, 255, 1);
   }
 
   &:hover {
@@ -466,6 +492,7 @@ const ActionContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
+  margin: 0.4rem 0;
 
   > input {
   }
@@ -473,11 +500,40 @@ const ActionContainer = styled.div`
 
 const ConfirmButton = styled.button`
   cursor: pointer;
+  color: white;
+  background-color: #2962ff;
+  border: none;
+  padding: 0.3rem 0;
+  border-radius: 5px;
+
+  &:hover {
+    background-color: #0052cc;
+  }
+`;
+
+const ButtonContainer = styled.div`
+  margin-top: 10px;
+  display: flex;
+  gap: 1rem;
+
+  > button {
+    flex: 1;
+  }
+`;
+
+const DiscardButton = styled.button`
+  cursor: pointer;
+  border: 1px solid black;
+  background-color: white;
+  border-radius: 5px;
+  padding: 0.3rem 0;
+  font-weight: 600;
 `;
 
 const regex = /^-?\d+(\.\d+)?$/;
 
 export default function AdminProductNew() {
+  const navigate = useNavigate();
   const readCategoryRequest = ReadCategoryRequest();
   const readTypeRequest = ReadTypeRequest();
 
@@ -493,6 +549,8 @@ export default function AdminProductNew() {
   const [editComparePrice, setEditComparePrice] = useState(false);
   const [editAmount, setEditAmount] = useState(false);
   const [showWarranty, setShowWarranty] = useState(false);
+  const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const [state, dispatch, ACTIONS] = useCreateProductReducer();
   const inputRef = useRef();
@@ -608,7 +666,6 @@ export default function AdminProductNew() {
     }
 
     const variantDetail = cartesian(...allVariants);
-    console.log(variantDetail);
 
     dispatch({
       type: ACTIONS.CHANGE_VARIANT_DETAIL,
@@ -658,12 +715,48 @@ export default function AdminProductNew() {
   };
 
   const onCreateProduct = () => {
+    if (state.productName.length == 0) {
+      setErrorMessage("Product need to have a name");
+      setError(true);
+      return;
+    }
+
+    if (state.images.length == 0) {
+      setErrorMessage("Product need atlest one image");
+      setError(true);
+      return;
+    }
+
+    if (state.variants.length != 0 && state.variant_detail.length == 0) {
+      setErrorMessage("You need to add variant or turn off variants");
+      setError(true);
+
+      return;
+    }
+
+    if (state.variants.length == 0 && state.variant_detail.length == 0 && state.price == 0) {
+      setErrorMessage("Product need to be priced");
+      setError(true);
+      return;
+    }
+
+    const variantWithOutPrice = state.variant_detail.find((item) => {
+      return item.sellPrice == 0;
+    });
+
+    if (variantWithOutPrice) {
+      setErrorMessage(`Every variant need to have a price`);
+      setError(true);
+      return;
+    }
+
     const formData = new FormData();
     formData.append("ProductName", state.productName);
     formData.append("Category", state.category.value);
     formData.append("Description", state.description);
     formData.append("Price", state.price);
     formData.append("SalePrice", state.salePrice);
+    formData.append("Amount", state.amount);
     formData.append("Unit", state.unit);
     formData.append("Active", state.active);
     formData.append("Warranty", state.warrantyTime);
@@ -678,503 +771,539 @@ export default function AdminProductNew() {
       formData.append("VariantDetailsJSON[]", JSON.stringify(item));
     });
 
-    createProductRequest.mutate(formData);
+    createProductRequest.mutate(formData, {
+      onSuccess: (response) => {
+        if (response.status == 200) {
+          navigate(`/admin/product?id=${response.data.id}`);
+        }
+      },
+      onError: (response) => {
+        console.log(response);
+      },
+    });
   };
 
   return (
-    <Container>
-      {imageError && (
-        <ErrorPopUp
-          header={"Invalid Type"}
-          message={"Invalid file type! Please select a valid image file"}
-          action={() => setImageError(false)}
-        />
-      )}
-
-      <h4>Create new product</h4>
-      <Content>
-        <Left>
-          <ContentContainer>
-            <h5>General info</h5>
-            <hr />
-            <ContentItem>
-              <h5>Product name</h5>
-              <CustomInput
-                placeholder={"Input product name"}
-                state={state.productName}
-                setState={(value) => dispatch({ type: ACTIONS.CHANGE_NAME, next: value })}
-              />
-            </ContentItem>
-            <ContentItem $split={true}>
-              <div>
-                <h5>Category</h5>
-                <SelectInput
-                  options={transformCategoriesData()}
-                  state={state.category}
-                  setState={(value) => {
-                    dispatch({ type: ACTIONS.CHANGE_CATEGORY, next: value });
-                  }}
-                />
-              </div>
-            </ContentItem>
-            <ContentItem>
-              <h5>Description</h5>
-              <hr />
-              <TextEditor
-                state={state.description}
-                setState={(value) => dispatch({ type: ACTIONS.CHANGE_DESCRIPTION, next: value })}
-              />
-            </ContentItem>
-          </ContentContainer>
-          <ContentContainer>
-            <h5>Product images</h5>
-            <hr />
-            <ImageContainer>
-              {state.images.length > 0 && (
-                <Images>
-                  {state.images.map((item, index) => {
-                    return (
-                      <ImageItem key={index}>
-                        <ImageLayout>
-                          <AiOutlineClose
-                            onClick={() => {
-                              dispatch({
-                                type: ACTIONS.CHANGE_IMAGES,
-                                next: state.images.filter((image, position) => position != index),
-                              });
-                              state.variant_detail.forEach((item) => {
-                                if (item.image == index) {
-                                  item.image = null;
-                                }
-                              });
-                              dispatch({
-                                type: ACTIONS.CHANGE_VARIANT_DETAIL,
-                                next: state.variant_detail,
-                              });
-                            }}
-                          />
-                        </ImageLayout>
-                        <img src={URL.createObjectURL(item)} />
-                      </ImageItem>
-                    );
-                  })}
-                  <AddImageButton onClick={onClickAddImage}>
-                    <BiImageAdd />
-                  </AddImageButton>
-                </Images>
-              )}
-
-              {state.images.length == 0 && (
-                <AddImageButton onClick={onClickAddImage}>
-                  <BiImageAdd />
-                  <span>Add Image</span>
-                </AddImageButton>
-              )}
-              <input ref={inputRef} onChange={handleImageChange} type="file" multiple />
-            </ImageContainer>
-          </ContentContainer>
-          {showVariant || (
+    <>
+      <Container>
+        <h4>Create new product</h4>
+        <Content>
+          <Left>
             <ContentContainer>
-              <h5>Product Price</h5>
+              <h5>General info</h5>
               <hr />
               <ContentItem>
-                <ContentItem $split={true}>
-                  <div>
-                    <h5>Sale price</h5>
-                    <TextInput
-                      state={state.price}
-                      setState={(value) => {
-                        if (regex.test(value) || value == "") {
-                          dispatch({ type: ACTIONS.CHANGE_PRICE, next: value });
-                        }
-                      }}
-                      placeholder={"0 $"}
-                    />
-                  </div>
-                  <div>
-                    <h5>Compare price</h5>
-                    <TextInput
-                      state={state.salePrice}
-                      setState={(value) => {
-                        if (regex.test(value) || value == "") {
-                          dispatch({ type: ACTIONS.CHANGE_SALE_PRICE, next: value });
-                        }
-                      }}
-                      placeholder={"0 $"}
-                    />
-                  </div>
-                </ContentItem>
+                <h5 data-tooltip-id="my-tooltip-1">Product name</h5>
+                <CustomInput
+                  placeholder={"Input product name"}
+                  state={state.productName}
+                  setState={(value) => dispatch({ type: ACTIONS.CHANGE_NAME, next: value })}
+                />
+              </ContentItem>
+              <ContentItem $split={true}>
+                <div>
+                  <h5>Category</h5>
+                  <SelectInput
+                    options={transformCategoriesData()}
+                    state={state.category}
+                    setState={(value) => {
+                      dispatch({ type: ACTIONS.CHANGE_CATEGORY, next: value });
+                    }}
+                  />
+                </div>
+              </ContentItem>
+              <ContentItem>
+                <h5>Description</h5>
+                <hr />
+                <TextEditor
+                  state={state.description}
+                  setState={(value) => dispatch({ type: ACTIONS.CHANGE_DESCRIPTION, next: value })}
+                />
               </ContentItem>
             </ContentContainer>
-          )}
-          <ContentContainer>
-            <h5>Product Unit</h5>
-            <hr />
-            <ContentItem>
-              <InputCheckContainer>
-                <input
-                  onChange={() => {
-                    setShowUnit((prev) => !prev);
-                  }}
-                  type="checkbox"
-                />
-                <span>
-                  Variants with multiple units of measurement (e.g., cans, packs, cases...).
-                </span>
-              </InputCheckContainer>
-              {showUnit && (
-                <UnitContainer>
-                  <hr />
-                  <div>
-                    <h5>Basic unit</h5>
-                    <TextInput
-                      state={state.unit}
-                      setState={(value) => dispatch({ type: ACTIONS.CHANGE_UNIT, next: value })}
-                      placeholder={"Input basic unit"}
-                    />
-                  </div>
-                </UnitContainer>
-              )}
-            </ContentItem>
-          </ContentContainer>
-          <ContentContainer>
-            <h5>Warrant</h5>
-            <hr />
-            <ContentItem>
-              <InputCheckContainer>
-                <input
-                  onChange={() => {
-                    setShowWarranty((prev) => !prev);
-                  }}
-                  type="checkbox"
-                />
-                <span>Include a warranty with this product</span>
-              </InputCheckContainer>
-
-              {showWarranty && (
-                <UnitContainer>
-                  <hr />
-                  <div>
-                    <h5>Warranty duration </h5>
-                    <TextInput
-                      state={state.warrantyTime}
-                      setState={(value) => {
-                        if (regex.test(value) || value == "") {
-                          dispatch({ type: ACTIONS.CHANGE_WARRANTY, next: value });
-                        }
-                      }}
-                      placeholder={"Duration in month"}
-                    />
-                  </div>
-                </UnitContainer>
-              )}
-            </ContentItem>
-          </ContentContainer>
-          <ContentContainer>
-            <h5>Variants</h5>
-            <hr />
-            <ContentItem>
-              <InputCheckContainer>
-                <input
-                  onChange={() => {
-                    if (showVariant == false) {
-                      dispatch({
-                        type: ACTIONS.CHANGE_VARIANTS,
-                        next: [{ done: false, value: [""] }],
-                      });
-                    }
-
-                    if (showVariant == true) {
-                      dispatch({ type: ACTIONS.CHANGE_VARIANTS, next: [] });
-                      dispatch({ type: ACTIONS.CHANGE_VARIANT_DETAIL, next: [] });
-                    }
-
-                    setShowVariant((prev) => !prev);
-                  }}
-                  type="checkbox"
-                />
-                <span>This product has many variants, such as different in size and color</span>
-              </InputCheckContainer>
+            <ContentContainer>
+              <h5>
+                Product images <StyledFaRegQuestionCircle data-tooltip-id="product_images" />
+              </h5>
               <hr />
-              {showVariant && (
-                <VariantContainer>
-                  {state.variants.map((variant, variantIndex) => {
-                    if (variant.done == false)
+              <ImageContainer>
+                {state.images.length > 0 && (
+                  <Images>
+                    {state.images.map((item, index) => {
                       return (
-                        <VariantItemContainer key={variantIndex}>
-                          <SelectVariant>
-                            <h5>Variant</h5>
-                            <div>
-                              <SelectInput
-                                setState={(value) => updateVariant(value, variantIndex)}
-                                options={getRemainVariant(transformTypeData())}
-                                state={variant.option}
-                              />
-                              {checkRemoveable(variant.value) && (
-                                <FaTrash
-                                  onClick={() => {
-                                    if (variant.value != "") {
-                                      state.variant_detail.forEach((variantDetail) => {
-                                        variantDetail.variant = variantDetail.variant.filter(
-                                          (item, index) => {
-                                            if (
-                                              item != variant.value.slice(0, -1) ||
-                                              index != variantIndex
-                                            ) {
-                                              return true;
-                                            }
-                                          }
-                                        );
-                                      });
-                                      state.variant_detail = state.variant_detail.filter(
-                                        (item) => item.variant.length != 0
-                                      );
+                        <ImageItem key={index}>
+                          <ImageLayout>
+                            <span></span>
+                            <CiImageOn data-tooltip-id="change_image" />
+                            <AiOutlineClose
+                              onClick={() => {
+                                dispatch({
+                                  type: ACTIONS.CHANGE_IMAGES,
+                                  next: state.images.filter((image, position) => position != index),
+                                });
+                                state.variant_detail.forEach((item) => {
+                                  if (item.image == index) {
+                                    item.image = null;
+                                  }
+                                });
+                                dispatch({
+                                  type: ACTIONS.CHANGE_VARIANT_DETAIL,
+                                  next: state.variant_detail,
+                                });
+                              }}
+                            />
+                          </ImageLayout>
+                          <img src={URL.createObjectURL(item)} />
+                        </ImageItem>
+                      );
+                    })}
+                    <AddImageButton onClick={onClickAddImage}>
+                      <BiImageAdd />
+                    </AddImageButton>
+                  </Images>
+                )}
 
-                                      dispatch({
-                                        type: ACTIONS.CHANGE_VARIANT_DETAIL,
-                                        next: state.variant_detail,
-                                      });
-                                    }
-                                    onDeleteVariant(variantIndex);
-                                  }}
+                {state.images.length == 0 && (
+                  <AddImageButton onClick={onClickAddImage}>
+                    <BiImageAdd />
+                    <span>Add Image</span>
+                  </AddImageButton>
+                )}
+                <input ref={inputRef} onChange={handleImageChange} type="file" multiple />
+              </ImageContainer>
+            </ContentContainer>
+            {showVariant || (
+              <ContentContainer>
+                <h5>Product Price</h5>
+                <hr />
+                <ContentItem>
+                  <ContentItem $split={true}>
+                    <div>
+                      <h5>Sale price</h5>
+                      <TextInput
+                        state={state.price}
+                        setState={(value) => {
+                          if (regex.test(value) || value == "") {
+                            dispatch({ type: ACTIONS.CHANGE_PRICE, next: value });
+                          }
+                        }}
+                        placeholder={"0 $"}
+                      />
+                    </div>
+                    <div>
+                      <h5>Compare price</h5>
+                      <TextInput
+                        state={state.salePrice}
+                        setState={(value) => {
+                          if (regex.test(value) || value == "") {
+                            dispatch({ type: ACTIONS.CHANGE_SALE_PRICE, next: value });
+                          }
+                        }}
+                        placeholder={"0 $"}
+                      />
+                    </div>
+                    <div>
+                      <h5>Amount</h5>
+                      <TextInput
+                        state={state.amount}
+                        setState={(value) => {
+                          if (regex.test(value) || value == "") {
+                            dispatch({ type: ACTIONS.CHANGE_AMOUNT, next: value });
+                          }
+                        }}
+                        placeholder={"0"}
+                      />
+                    </div>
+                  </ContentItem>
+                </ContentItem>
+              </ContentContainer>
+            )}
+            <ContentContainer>
+              <h5>Product Unit</h5>
+              <hr />
+              <ContentItem>
+                <InputCheckContainer>
+                  <input
+                    checked={showUnit}
+                    onChange={() => {
+                      setShowUnit((prev) => {
+                        if (prev) {
+                          dispatch({ type: ACTIONS.CHANGE_UNIT, next: "" });
+                        }
+
+                        return !prev;
+                      });
+                    }}
+                    type="checkbox"
+                  />
+                  <span>
+                    Variants with multiple units of measurement (e.g., cans, packs, cases...).
+                  </span>
+                </InputCheckContainer>
+                {showUnit && (
+                  <UnitContainer>
+                    <hr />
+                    <div>
+                      <h5>Basic unit</h5>
+                      <TextInput
+                        state={state.unit}
+                        setState={(value) => dispatch({ type: ACTIONS.CHANGE_UNIT, next: value })}
+                        placeholder={"Input basic unit"}
+                      />
+                    </div>
+                  </UnitContainer>
+                )}
+              </ContentItem>
+            </ContentContainer>
+            <ContentContainer>
+              <h5>Warrant</h5>
+              <hr />
+              <ContentItem>
+                <InputCheckContainer>
+                  <input
+                    onChange={() => {
+                      setShowWarranty((prev) => {
+                        if (prev) {
+                          dispatch({ type: ACTIONS.CHANGE_WARRANTY, next: 0 });
+                        }
+
+                        return !prev;
+                      });
+                    }}
+                    type="checkbox"
+                  />
+                  <span>Include a warranty with this product</span>
+                </InputCheckContainer>
+
+                {showWarranty && (
+                  <UnitContainer>
+                    <hr />
+                    <div>
+                      <h5>Warranty duration </h5>
+                      <TextInput
+                        state={state.warrantyTime}
+                        setState={(value) => {
+                          if (regex.test(value) || value == "") {
+                            dispatch({ type: ACTIONS.CHANGE_WARRANTY, next: value });
+                          }
+                        }}
+                        placeholder={"Duration in month"}
+                      />
+                    </div>
+                  </UnitContainer>
+                )}
+              </ContentItem>
+            </ContentContainer>
+            <ContentContainer>
+              <h5>Variants</h5>
+              <hr />
+              <ContentItem>
+                <InputCheckContainer>
+                  <input
+                    onChange={() => {
+                      if (showVariant == false) {
+                        dispatch({
+                          type: ACTIONS.CHANGE_VARIANTS,
+                          next: [{ done: false, value: [""] }],
+                        });
+                      }
+
+                      if (showVariant == true) {
+                        dispatch({ type: ACTIONS.CHANGE_VARIANTS, next: [] });
+                        dispatch({ type: ACTIONS.CHANGE_VARIANT_DETAIL, next: [] });
+                      }
+
+                      setShowVariant((prev) => !prev);
+                    }}
+                    type="checkbox"
+                  />
+                  <span>This product has many variants, such as different in size and color</span>
+                </InputCheckContainer>
+                <hr />
+                {showVariant && (
+                  <VariantContainer>
+                    {state.variants.map((variant, variantIndex) => {
+                      if (variant.done == false)
+                        return (
+                          <VariantItemContainer key={variantIndex}>
+                            <SelectVariant>
+                              <h5>Variant</h5>
+                              <div>
+                                <SelectInput
+                                  setState={(value) => updateVariant(value, variantIndex)}
+                                  options={getRemainVariant(transformTypeData())}
+                                  state={variant.option}
                                 />
-                              )}
-                            </div>
-                          </SelectVariant>
-                          <VariantValue>
-                            <h5>Value</h5>
-                            {variant.value.map((item, valueIndex) => {
-                              return (
-                                <div key={valueIndex}>
-                                  <CustomInput
-                                    state={item}
-                                    setState={(value) => {
-                                      if (variant.value[valueIndex + 1] == null) {
-                                        variant.value[valueIndex + 1] = "";
+                                {checkRemoveable(variant.value) && (
+                                  <FaTrash
+                                    onClick={() => {
+                                      if (variant.value != "") {
+                                        state.variant_detail.forEach((variantDetail) => {
+                                          variantDetail.variant = variantDetail.variant.filter(
+                                            (item, index) => {
+                                              if (
+                                                item != variant.value.slice(0, -1) ||
+                                                index != variantIndex
+                                              ) {
+                                                return true;
+                                              }
+                                            }
+                                          );
+                                        });
+                                        state.variant_detail = state.variant_detail.filter(
+                                          (item) => item.variant.length != 0
+                                        );
+
+                                        dispatch({
+                                          type: ACTIONS.CHANGE_VARIANT_DETAIL,
+                                          next: state.variant_detail,
+                                        });
+                                      }
+                                      onDeleteVariant(variantIndex);
+                                    }}
+                                  />
+                                )}
+                              </div>
+                            </SelectVariant>
+                            <VariantValue>
+                              <h5>Value</h5>
+                              {variant.value.map((item, valueIndex) => {
+                                return (
+                                  <div key={valueIndex}>
+                                    <CustomInput
+                                      state={item}
+                                      setState={(value) => {
+                                        if (variant.value[valueIndex + 1] == null) {
+                                          variant.value[valueIndex + 1] = "";
+                                          dispatch({
+                                            type: ACTIONS.CHANGE_VARIANTS,
+                                            next: [...state.variants],
+                                          });
+                                        }
+                                        variant.value[valueIndex] = value;
                                         dispatch({
                                           type: ACTIONS.CHANGE_VARIANTS,
                                           next: [...state.variants],
                                         });
-                                      }
-                                      variant.value[valueIndex] = value;
-                                      dispatch({
-                                        type: ACTIONS.CHANGE_VARIANTS,
-                                        next: [...state.variants],
-                                      });
-                                      if (item != "") {
-                                        const allVariants = [];
-                                        for (let variant of state.variants) {
-                                          if (!variant.value.find((item) => item != "")) {
-                                            continue;
+                                        if (item != "") {
+                                          const allVariants = [];
+                                          for (let variant of state.variants) {
+                                            if (!variant.value.find((item) => item != "")) {
+                                              continue;
+                                            }
+                                            allVariants.push(
+                                              variant.value.filter((item) => item != "")
+                                            );
                                           }
-                                          allVariants.push(
-                                            variant.value.filter((item) => item != "")
-                                          );
+
+                                          const variantDetail = cartesian(...allVariants);
+
+                                          let n = 0;
+                                          state.variant_detail.map((detail) => {
+                                            detail.variant = variantDetail[n++];
+                                            if (!Array.isArray(detail.variant)) {
+                                              detail.variant = [detail.variant];
+                                            }
+                                          });
+
+                                          dispatch({
+                                            type: ACTIONS.CHANGE_VARIANT_DETAIL,
+                                            next: state.variant_detail,
+                                          });
+                                          return;
                                         }
-
-                                        const variantDetail = cartesian(...allVariants);
-
-                                        let n = 0;
-                                        state.variant_detail.map((detail) => {
-                                          detail.variant = variantDetail[n++];
-                                          if (!Array.isArray(detail.variant)) {
-                                            detail.variant = [detail.variant];
+                                        if (item == "" && value != "" && valueIndex == 0) {
+                                          if (checkIfNewVariantType(variant)) {
+                                            onAddNewTypeVariant(value);
+                                            transformToVariantDetail();
                                           }
-                                        });
-
-                                        dispatch({
-                                          type: ACTIONS.CHANGE_VARIANT_DETAIL,
-                                          next: state.variant_detail,
-                                        });
-                                        return;
-                                      }
-                                      if (item == "" && value != "" && valueIndex == 0) {
-                                        if (checkIfNewVariantType(variant)) {
-                                          onAddNewTypeVariant(value);
+                                        }
+                                        if (item == "" && value != "" && valueIndex != 0) {
                                           transformToVariantDetail();
                                         }
-                                      }
-                                      if (item == "" && value != "" && valueIndex != 0) {
-                                        transformToVariantDetail();
-                                      }
-                                    }}
-                                  />
-                                  {variant.value.length > 2 && item != "" ? (
-                                    <AiOutlineClose
-                                      onClick={() => {
-                                        onClickRemoveValue(variant, valueIndex);
-                                        state.variant_detail = state.variant_detail.filter(
-                                          (variantDetail, index) => {
-                                            return variantDetail.variant[variantIndex] != item;
-                                          }
-                                        );
-                                        dispatch({
-                                          type: ACTIONS.CHANGE_VARIANT_DETAIL,
-                                          next: state.variant_detail,
-                                        });
                                       }}
                                     />
-                                  ) : (
-                                    <span></span>
-                                  )}
-                                </div>
-                              );
-                            })}
-                            <button
-                              onClick={() => {
-                                variant.done = true;
+                                    {variant.value.length > 2 && item != "" ? (
+                                      <AiOutlineClose
+                                        onClick={() => {
+                                          onClickRemoveValue(variant, valueIndex);
+                                          state.variant_detail = state.variant_detail.filter(
+                                            (variantDetail, index) => {
+                                              return variantDetail.variant[variantIndex] != item;
+                                            }
+                                          );
+                                          dispatch({
+                                            type: ACTIONS.CHANGE_VARIANT_DETAIL,
+                                            next: state.variant_detail,
+                                          });
+                                        }}
+                                      />
+                                    ) : (
+                                      <span></span>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                              <button
+                                onClick={() => {
+                                  variant.done = true;
 
-                                dispatch({
-                                  type: ACTIONS.CHANGE_VARIANTS,
-                                  next: state.variants,
-                                });
-                              }}
-                            >
-                              Done
-                            </button>
-                          </VariantValue>
-                        </VariantItemContainer>
-                      );
-                    if (variant.done == true) {
-                      return (
-                        <DoneContainer>
-                          <p>{variant.option.label}</p>
-                          <div>
-                            {variant.value.map((item, index) => {
-                              if (item != "") {
-                                return <button key={index}>{item}</button>;
-                              }
-                            })}
-                          </div>
-                          <div>
-                            <button
-                              onClick={() => {
-                                variant.done = false;
-
-                                dispatch({
-                                  type: ACTIONS.CHANGE_VARIANTS,
-                                  next: state.variants,
-                                });
-                              }}
-                            >
-                              Edit
-                            </button>
-                          </div>
-                        </DoneContainer>
-                      );
-                    }
-                  })}
-                  {state.variants.length < 3 && (
-                    <button onClick={onAddMoreVariant}>
-                      <FaPlus />
-                      Add more variant
-                    </button>
-                  )}
-                  {checkVariantExist() && (
-                    <VariantDetailContainer>
-                      <hr />
-                      <VariantDetailHeader>
-                        <div>{state.variant_detail.length} Variants</div>
-                        <div>
-                          <EditButton onClick={() => setDropDown((prev) => !prev)}>
-                            <MdOutlineModeEdit />
-                            Edit Variant
-                          </EditButton>
-                          {dropDown && (
-                            <DropDown>
-                              <button
-                                onClick={() => {
-                                  setDropDown(false);
-                                  setEditPrice(true);
+                                  dispatch({
+                                    type: ACTIONS.CHANGE_VARIANTS,
+                                    next: state.variants,
+                                  });
                                 }}
                               >
-                                Edit price
+                                Done
                               </button>
-                              <button
-                                onClick={() => {
-                                  setEditComparePrice(true);
-                                  setDropDown(false);
-                                }}
-                              >
-                                Edit compare at price
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setEditAmount(true);
-                                  setDropDown(false);
-                                }}
-                              >
-                                Edit amount
-                              </button>
-                            </DropDown>
-                          )}
-                        </div>
-                      </VariantDetailHeader>
-                      <hr />
-                      {state.variant_detail.map((item, key) => {
-                        return (
-                          <VariantDetail
-                            key={key}
-                            onClick={(ev) => {
-                              ev.stopPropagation();
-                              setChosenVariantDetail(item);
-                              setVariantDetailPopUp(true);
-                            }}
-                          >
-                            <div>
-                              {item.image !== null ? (
-                                <VariantImage
-                                  onClick={(ev) => {
-                                    ev.stopPropagation();
-                                    setChosenImageState(item);
-                                    setImagePopUp(true);
-                                  }}
-                                  src={URL.createObjectURL(state.images[item.image])}
-                                />
-                              ) : (
-                                <CiImageOn
-                                  onClick={(ev) => {
-                                    ev.stopPropagation();
-                                    setChosenImageState(item);
-                                    setImagePopUp(true);
-                                  }}
-                                />
-                              )}
-                              {item.variant.join("/")}
-                            </div>
-                            <div>
-                              <p>{item.sellPrice} $ </p>
-                              <p>{item.inventory} sellable in inventory</p>
-                            </div>
-                          </VariantDetail>
+                            </VariantValue>
+                          </VariantItemContainer>
                         );
-                      })}
-                    </VariantDetailContainer>
-                  )}
-                </VariantContainer>
-              )}
-            </ContentItem>
-          </ContentContainer>
-        </Left>
-        <Right>
-          <ShowInfo>
-            <ContentItem>
-              <h5>Show</h5>
-              <hr />
-              <ActionContainer>
-                <Switch
-                  state={state.active}
-                  setState={() => {
-                    dispatch({ type: ACTIONS.CHANGE_ACTIVE, next: !state.active });
-                  }}
-                />
-                Product Active
-              </ActionContainer>
-              <ConfirmButton onClick={() => onCreateProduct()}>Save</ConfirmButton>
-            </ContentItem>
-          </ShowInfo>
-        </Right>
-      </Content>
+                      if (variant.done == true) {
+                        return (
+                          <DoneContainer>
+                            <p>{variant.option.label}</p>
+                            <div>
+                              {variant.value.map((item, index) => {
+                                if (item != "") {
+                                  return <button key={index}>{item}</button>;
+                                }
+                              })}
+                            </div>
+                            <div>
+                              <button
+                                onClick={() => {
+                                  variant.done = false;
+
+                                  dispatch({
+                                    type: ACTIONS.CHANGE_VARIANTS,
+                                    next: state.variants,
+                                  });
+                                }}
+                              >
+                                Edit
+                              </button>
+                            </div>
+                          </DoneContainer>
+                        );
+                      }
+                    })}
+                    {state.variants.length < 3 && (
+                      <button onClick={onAddMoreVariant}>
+                        <FaPlus />
+                        Add more variant
+                      </button>
+                    )}
+                    {checkVariantExist() && (
+                      <VariantDetailContainer>
+                        <hr />
+                        <VariantDetailHeader>
+                          <div>{state.variant_detail.length} Variants</div>
+                          <div>
+                            <EditButton onClick={() => setDropDown((prev) => !prev)}>
+                              <MdOutlineModeEdit />
+                              Edit Variant
+                            </EditButton>
+                            {dropDown && (
+                              <DropDown>
+                                <button
+                                  onClick={() => {
+                                    setDropDown(false);
+                                    setEditPrice(true);
+                                  }}
+                                >
+                                  Edit price
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setEditComparePrice(true);
+                                    setDropDown(false);
+                                  }}
+                                >
+                                  Edit compare at price
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setEditAmount(true);
+                                    setDropDown(false);
+                                  }}
+                                >
+                                  Edit amount
+                                </button>
+                              </DropDown>
+                            )}
+                          </div>
+                        </VariantDetailHeader>
+                        <hr />
+                        {state.variant_detail.map((item, key) => {
+                          return (
+                            <VariantDetail
+                              key={key}
+                              onClick={(ev) => {
+                                ev.stopPropagation();
+                                setChosenVariantDetail(item);
+                                setVariantDetailPopUp(true);
+                              }}
+                            >
+                              <div>
+                                {item.image !== null ? (
+                                  <VariantImage
+                                    onClick={(ev) => {
+                                      ev.stopPropagation();
+                                      setChosenImageState(item);
+                                      setImagePopUp(true);
+                                    }}
+                                    src={URL.createObjectURL(state.images[item.image])}
+                                  />
+                                ) : (
+                                  <CiImageOn
+                                    onClick={(ev) => {
+                                      ev.stopPropagation();
+                                      setChosenImageState(item);
+                                      setImagePopUp(true);
+                                    }}
+                                  />
+                                )}
+                                {item.variant.join("/")}
+                              </div>
+                              <div>
+                                <p>{item.sellPrice} $ </p>
+                                <p>{item.inventory} sellable in inventory</p>
+                              </div>
+                            </VariantDetail>
+                          );
+                        })}
+                      </VariantDetailContainer>
+                    )}
+                  </VariantContainer>
+                )}
+              </ContentItem>
+            </ContentContainer>
+          </Left>
+          <Right>
+            <ShowInfo>
+              <ContentItem>
+                <h5>Status</h5>
+                <hr />
+                <ActionContainer>
+                  <Switch
+                    state={state.active}
+                    setState={() => {
+                      dispatch({ type: ACTIONS.CHANGE_ACTIVE, next: !state.active });
+                    }}
+                  />
+                  Product Active
+                </ActionContainer>
+                <hr />
+                <ButtonContainer>
+                  <ConfirmButton onClick={() => onCreateProduct()}>Save</ConfirmButton>
+                  <DiscardButton onClick={() => window.location.reload()}>Discard</DiscardButton>
+                </ButtonContainer>
+              </ContentItem>
+            </ShowInfo>
+          </Right>
+        </Content>
+      </Container>
       {imagePopUp && (
         <ImagePopUp
           action={() => setImagePopUp(false)}
@@ -1225,6 +1354,27 @@ export default function AdminProductNew() {
           action={() => setEditAmount(false)}
         />
       )}
-    </Container>
+      <Tooltip
+        id="product_images"
+        place="bottom"
+        content="jpeg, png, webp 1:1 ratio for better quality, First image always use as cover"
+      />
+      <Tooltip
+        id="change_image"
+        place="top"
+        style={{ fontSize: "11px" }}
+        content="Change this image"
+      />
+      {imageError && (
+        <ErrorPopUp
+          header={"Invalid Type"}
+          message={"Invalid file type! Please select a valid image file"}
+          action={() => setImageError(false)}
+        />
+      )}
+      {error && (
+        <ErrorPopUp header={"Error"} message={errorMessage} action={() => setError(false)} />
+      )}
+    </>
   );
 }

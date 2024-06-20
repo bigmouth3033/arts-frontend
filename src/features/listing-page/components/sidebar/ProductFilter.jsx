@@ -23,11 +23,24 @@ const StyleProductFilter = styled.div`
 `;
 
 //Filter Sidebar (parents component) in Product Listing Page
-const ProductFilter = ({ handleChange, handlePriceRadioChange }) => {
+const ProductFilter = ({
+  handleChange,
+  handlePriceRadioChange,
+  categoryData,
+  selectedCategory,
+  selectedPrice,
+}) => {
   return (
     <StyleProductFilter>
-      <CategoryFilter handleChange={handleChange} />
-      <PriceFilter handlePriceRadioChange={handlePriceRadioChange} />
+      <CategoryFilter
+        selectedCategory={selectedCategory}
+        handleChange={handleChange}
+        categoryData={categoryData}
+      />
+      {/* <PriceFilter
+        selectedPrice={selectedPrice}
+        handlePriceRadioChange={handlePriceRadioChange}
+      /> */}
     </StyleProductFilter>
   );
 };

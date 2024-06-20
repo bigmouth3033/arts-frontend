@@ -14,6 +14,7 @@ const Container = styled.div`
   flex-direction: column;
   min-height: 100vh;
   justify-content: space-between;
+  background-color: rgb(245, 245, 250);
 `;
 
 const OutletContainer = styled.div``;

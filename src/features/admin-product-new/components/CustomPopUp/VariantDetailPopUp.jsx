@@ -14,7 +14,7 @@ const StyledPopUp = styled(PopUp)`
 
 const Header = styled.div`
   font-size: 18px;
-  padding: 1rem;
+  padding: 1rem 1rem 0;
 `;
 
 const Content = styled.div`
@@ -22,7 +22,7 @@ const Content = styled.div`
   grid-template-columns: repeat(2, 1fr);
   row-gap: 2rem;
   column-gap: 2rem;
-  padding: 2rem;
+  padding: 1rem;
 
   > div {
     display: flex;
@@ -40,12 +40,19 @@ const Button = styled.div`
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-  padding: 1rem;
+  padding: 0rem 1rem 1rem;
 
   > button {
-    background-color: white;
     cursor: pointer;
-    padding: 5px 15px;
+    color: white;
+    background-color: #2962ff;
+    border: none;
+    padding: 0.3rem 1rem;
+    border-radius: 5px;
+
+    &:hover {
+      background-color: #0052cc;
+    }
   }
 `;
 
@@ -84,18 +91,6 @@ export default function VariantDetailPopUp({ action, state, setState }) {
             setState={(value) => {
               if (regex.test(value) || value == "") {
                 setComparePrice(value);
-              }
-            }}
-          />
-        </div>
-        <div>
-          <h4>Cost per item</h4>
-          <TextInput
-            placeholder={"0"}
-            state={costPerItem}
-            setState={(value) => {
-              if (regex.test(value) || value == "") {
-                setCostPerItem(value);
               }
             }}
           />

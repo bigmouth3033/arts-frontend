@@ -10,6 +10,7 @@ import { FaHome } from "react-icons/fa";
 import { CustomerRequest } from "@/shared/api/customerApi";
 import { FaSortDown } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { MdCurrencyExchange } from "react-icons/md";
 
 const StyledContainer = styled.div`
   background-color: #0272c0;
@@ -88,7 +89,7 @@ const StyledHeaderBot = styled.div`
   display: grid;
   grid-template-columns: 5fr 1fr;
   column-gap: 2rem;
-  padding: 1rem 6.5rem;
+  padding: 5px 6.5rem;
 `;
 
 const StyledContainerCategory = styled.div`
@@ -172,6 +173,30 @@ const UserContainer = styled.div`
   }
 `;
 
+const Exchange = styled.div`
+  background-color: #0057a0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  > h4 {
+    cursor: pointer;
+    padding: 10px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: white;
+    > span {
+      color: #808080;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 700;
+      font-size: 18px;
+    }
+  }
+`;
+
 export default function UserNavbar() {
   const customerRequest = CustomerRequest();
   const [isPopUpVisible, setIsPopUpVisible] = useState(false);
@@ -247,6 +272,14 @@ export default function UserNavbar() {
             <h4>Blog</h4>
           </StyledContainerAboutArts>
         </StyledHeaderBot>
+        <Exchange>
+          <h4>
+            <span>
+              <MdCurrencyExchange />7 Days
+            </span>
+            Change of Mind Policy
+          </h4>
+        </Exchange>
       </StyledContainer>
       {isPopUpVisible && (
         <StyedPopUp action={() => {}}>

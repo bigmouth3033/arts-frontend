@@ -14,6 +14,7 @@ const Content = styled.div`
   padding: 1rem;
   gap: 0.5rem;
   border: 1px dotted rgba(0, 0, 0, 0.4);
+  margin: 1rem 0;
 
   > p {
     grid-column: 1/4;
@@ -35,8 +36,9 @@ const ImageContainer = styled.div`
   cursor: pointer;
 
   & img {
-    width: 100% !important;
     display: block;
+    width: 100% !important;
+    height: 100%;
     object-fit: cover;
   }
 `;
@@ -47,9 +49,16 @@ const Button = styled.div`
   gap: 1rem;
 
   > button {
-    background-color: white;
     cursor: pointer;
-    padding: 5px 15px;
+    color: white;
+    background-color: #2962ff;
+    border: none;
+    padding: 0.3rem 1rem;
+    border-radius: 5px;
+
+    &:hover {
+      background-color: #0052cc;
+    }
   }
 `;
 
