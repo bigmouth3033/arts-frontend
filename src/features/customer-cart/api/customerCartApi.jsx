@@ -44,3 +44,15 @@ export const DeleteCartByIdMutation = () =>{
     })
     return mutation
 }
+
+export const GetTotalAmountByCartsId = async(cartsId) =>{    
+    const response = await axiosClient.post(`Cart/TotalAmount`,cartsId)
+    return response.data;
+}
+
+export const GetTotalAmountByCartsIdRequest = () =>{
+    const mutation = useMutation({
+        mutationFn: GetTotalAmountByCartsId,
+    })
+    return mutation
+}

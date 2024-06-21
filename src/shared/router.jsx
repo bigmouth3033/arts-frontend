@@ -9,7 +9,7 @@ import AdminLogin from "@/features/admin-login/Index";
 import Employee from "@/features/employee/Index";
 import ListingPage from "@/features/listing-page/ListingPage";
 import AdminProductDetail from "@/features/admin-product-detail/Index";
-import Cart from "@/features/customer-cart/Index";
+import CartNhan from "@/features/customer-cart/Index";
 
 // giu
 import ProductDetail from "@/features/ProductDetail/Index";
@@ -26,10 +26,10 @@ const router = createBrowserRouter([
         path: "test",
         element: <Test />,
       },
-      {
-        path:"cart",
-        element:<Cart/>
-      },
+      // {
+      //   path:"cart",
+      //   element:<Cart/>
+      // },
       {
         path: "productdetail",
         element: <ProductDetail />,
@@ -50,7 +50,7 @@ const router = createBrowserRouter([
       },
       {
         path: "cart",
-        element: <Cart />,
+        element: <CartNhan />,
       },
     ],
   },

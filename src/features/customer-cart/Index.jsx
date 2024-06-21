@@ -1,7 +1,7 @@
 import styled from "styled-components"
 import CartItem from "./components/cartItem"
 import PaymentComponent from "./components/paymentComponent"
-import { GetCartByUserIdQuery } from "./api/customerCartApi"
+import { GetCartByUserIdQuery, GetTotalAmountByCartsIdRequest } from "./api/customerCartApi"
 import { useEffect, useState } from "react"
 import { FaRegTrashAlt } from "react-icons/fa";
 
@@ -82,21 +82,59 @@ const MainStyleComponent = styled.div`
 export default function Cart() {
   const GetCartByUserId = GetCartByUserIdQuery();
   const [carts, setCarts] = useState();
+  const [listCartsOptions, setListCartsOptions] = useState([])
+  const [totalAmount,setTotalAmount] = useState(0);
+  const getTotalAmountByCartsIdRequest = GetTotalAmountByCartsIdRequest();
+
   useEffect(() => {
-    // console.log(GetCartByUserId.data);
-    setCarts(GetCartByUserId?.data?.data)
-  }, [GetCartByUserId.status, carts])
+    const transformedData = GetCartByUserId?.data?.data.map(item => ({ ...item, isChecked: false }))
+    setCarts(transformedData)
+  }, [GetCartByUserId.status])
 
+  useEffect(() => {
+    var cartsId = [];
+    listCartsOptions.map((item) => {
+      cartsId.push(item.idCart)
+    })
+    getTotalAmountByCartsIdRequest.mutate(cartsId, {
+      onSuccess: (res) => {
+        // console.log(res)
+        setTotalAmount(res);
+      }
+    })
+  }, [listCartsOptions])
 
+  const setDataFromParent = (childData) => {
+    setListCartsOptions(pre => {
+      if (pre.some(item => item.idCart == childData.idCart)) {
+        return pre.filter(item => item.idCart !== childData.idCart)
+      } else {
+        return [...pre, childData]
+      }
+    })
+  }
+
+  const configurateDataFromParent = (childData) => {
+    const itemExists = listCartsOptions.some(item => item.idCart == childData.idCart)
+    if (itemExists) {
+      const updateListCartsOption = listCartsOptions.map(item =>{
+        if(item.idCart == childData.idCart){
+          return {...item,quanity: childData.quanity,totalPrice:childData.totalPrice}
+        }
+        return item
+      })     
+      setListCartsOptions(updateListCartsOption)
+    } 
+  }
 
   return (
-    <MainStyleComponent>
+    <MainStyleComponent>            
       <div className="layout">
         <div className="left-cart">
           {/* <h4>Cart</h4> */}
           <div className="headingDetail">
             <span className="headingDetail-item headingDetail-item1">
-              <input type="checkbox" />
+              {/* <input type="checkbox" /> */}
               Tất cả
             </span>
             <span className="headingDetail-item item headingDetail-item2">Đơn giá</span>
@@ -105,17 +143,17 @@ export default function Cart() {
             <span className="headingDetail-item item headingDetail-item5"><FaRegTrashAlt /></span>
           </div>
           {
-            carts?.map((cart) => {              
+            carts?.map((cart) => {
               return (
                 <div key={cart?.id}>
-                  <CartItem  detailCart={cart}/>
+                  <CartItem detailCart={cart} setData={setDataFromParent} configurateData={configurateDataFromParent} />
                 </div>
               )
             })
           }
         </div>
         <div className="right-cart">
-          <PaymentComponent />
+          <PaymentComponent totalAmount={totalAmount}/>
         </div>
       </div>
     </MainStyleComponent>

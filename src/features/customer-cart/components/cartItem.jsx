@@ -52,12 +52,13 @@ export default function CartItem(props) {
   const [quanity, setQuanity] = useState(props?.detailCart?.quanity);
   const [totalPrice, setTotalPrice] = useState(0);
   const [availableQuanity, setAvailableQuanity] = useState(props?.detailCart?.variant?.availableQuanity);
+  const [isChecked,setIsChecked] = useState(props?.detailCart?.isChecked)
   // const updateCartByIdRequest = UpdateCartByIdRequest();
   const deleteCartByIdMutation = DeleteCartByIdMutation();
 
-  useEffect(() => {
-    // console.log('props', props)     
-  }, [props])
+  // useEffect(() => {
+  //   // console.log('props', props)     
+  // }, [props])
 
   useEffect(() => {
     setTotalPrice(price * quanity)
@@ -67,10 +68,27 @@ export default function CartItem(props) {
     if (operator == "+") {
       UpdateCartById(idCart, quanity + 1).then(
         (res) => {          
+          // console.log(res)
           if (res?.data?.isOkay) {                        
             setQuanity(quanity + 1);
             setTotalPrice(res?.data?.total)
-          } 
+            props.configurateData({
+              idCart,
+              price,
+              quanity:res?.data?.quanity,
+              totalPrice:res?.data?.total
+            })    
+            if (!res?.data?.isOkay) {           
+              setQuanity(res?.data?.quanity);
+              setTotalPrice(res?.data?.total) 
+              props.configurateData({
+                idCart,
+                price,
+                quanity:res?.data?.quanity,
+                totalPrice:res?.data?.total
+              })                              
+            } 
+          }           
         }
       )
     }
@@ -81,6 +99,12 @@ export default function CartItem(props) {
             if (res?.data?.isOkay) {              
               setQuanity(quanity - 1);
               setTotalPrice(res?.data?.total)
+              props.configurateData({
+                idCart,
+                price,
+                quanity:res?.data?.quanity,
+                totalPrice:res?.data?.total
+              })    
             }
           }
         )
@@ -100,18 +124,29 @@ export default function CartItem(props) {
     }
   }
 
-  const onBlurInput = () =>{
-      console.log('blur');
+  const onBlurInput = () =>{      
       UpdateCartById(idCart,quanity).then(
         (res) =>{
           console.log(res)
           if (res?.data?.isOkay) {                        
             setQuanity(res?.data?.quanity);
-            setTotalPrice(res?.data?.total)            
+            setTotalPrice(res?.data?.total)     
+            props.configurateData({
+              idCart,
+              price,
+              quanity:res?.data?.quanity,
+              totalPrice:res?.data?.total
+            })       
           } 
           if (!res?.data?.isOkay) {           
             setQuanity(res?.data?.quanity);
-            setTotalPrice(res?.data?.total)     
+            setTotalPrice(res?.data?.total) 
+            props.configurateData({
+              idCart,
+              price,
+              quanity:res?.data?.quanity,
+              totalPrice:res?.data?.total
+            })                              
           } 
         }
       )
@@ -120,14 +155,23 @@ export default function CartItem(props) {
     deleteCartByIdMutation.mutate({cartId: idCart},{onSuccess: (res)=>{
       alert("asdasd");  
     }});
+  }
 
+  const handleIsChecked = (event) =>{
+    props.setData({
+      idCart,
+      price,
+      quanity,
+      totalPrice
+    })
+    setIsChecked(event.target.checked)
   }
 
   return (
     <CartItemStyle>
       <div className="cart-item-container">
         <span className="cart-item1">
-          <input type="checkbox" />
+          <input type="checkbox" checked={isChecked} onChange={(event) => handleIsChecked(event)}/>
           <img src="as/jpg" style={{ width: "50px", height: "50px" }} />
           <div>
             <a>{productName}</a>

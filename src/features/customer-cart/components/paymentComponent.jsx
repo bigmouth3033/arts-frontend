@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react"
 import styled from "styled-components"
 
 const PaymentComponentStyle = styled.div`
@@ -32,17 +33,22 @@ const PaymentComponentStyle = styled.div`
     }
 `
 
-export default function PaymentComponent() {
+export default function PaymentComponent(props) {
+    const [totalAmount,setTotalAmount] = useState(props?.totalAmount)
+
+    useEffect(()=>{
+        setTotalAmount(props?.totalAmount)        
+    },[props])
     return (
         <PaymentComponentStyle>
             <div className="price-summary">
                 <div className="price-item">
                     <span>Tạm tính</span>
-                    <span>555.555.555d</span>
+                    <span>{totalAmount}</span>
                 </div>
                 <div className="price-total">
                     <span>Tổng tiền</span>
-                    <span>555.555.555d</span>
+                    <span>{totalAmount}</span>
                 </div>
             </div>
             <button className="btn-order">Mua Hàng</button>
