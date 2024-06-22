@@ -66,14 +66,18 @@ export default function CartItem(props) {
 
 
   //dung trong checked Alll
-  useEffect(()=>{    
+  useEffect(()=>{         
     setIsChecked(props?.isCheckedAll)
-    props.setData({
-      idCart,
-      price,
-      quanity,
-      totalPrice
-    })
+    
+    if(isChecked != props.isCheckedAll){
+      props.setData({
+        idCart,
+        price,
+        quanity,
+        totalPrice
+      })
+    }
+    
   },[props?.isCheckedAll])
   const handleQuanity = (operator) => {
     if (operator == "+") {

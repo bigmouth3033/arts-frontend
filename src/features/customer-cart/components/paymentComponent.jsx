@@ -39,6 +39,13 @@ export default function PaymentComponent(props) {
     useEffect(()=>{
         setTotalAmount(props?.totalAmount)        
     },[props])
+
+    const transformCurrency = (amount) =>{        
+        if(amount > 1000){
+                return amount.toLocaleString();
+        }
+        return amount
+    }
     return (
         <PaymentComponentStyle>
             <div className="price-summary">
@@ -48,7 +55,7 @@ export default function PaymentComponent(props) {
                 </div>
                 <div className="price-total">
                     <span>Tổng tiền</span>
-                    <span>{totalAmount}</span>
+                    <span>{transformCurrency(totalAmount)}</span>
                 </div>
             </div>
             <button className="btn-order">Mua Hàng</button>
