@@ -64,6 +64,17 @@ export default function CartItem(props) {
     setTotalPrice(price * quanity)
   }, [])
 
+
+  //dung trong checked Alll
+  useEffect(()=>{    
+    setIsChecked(props?.isCheckedAll)
+    props.setData({
+      idCart,
+      price,
+      quanity,
+      totalPrice
+    })
+  },[props?.isCheckedAll])
   const handleQuanity = (operator) => {
     if (operator == "+") {
       UpdateCartById(idCart, quanity + 1).then(

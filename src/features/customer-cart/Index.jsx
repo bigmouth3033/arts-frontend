@@ -84,6 +84,7 @@ export default function Cart() {
   const [carts, setCarts] = useState();
   const [listCartsOptions, setListCartsOptions] = useState([])
   const [totalAmount,setTotalAmount] = useState(0);
+  const [isCheckedAll,setIsCheckedAll] = useState(false)
   const getTotalAmountByCartsIdRequest = GetTotalAmountByCartsIdRequest();
 
   useEffect(() => {
@@ -96,13 +97,24 @@ export default function Cart() {
     listCartsOptions.map((item) => {
       cartsId.push(item.idCart)
     })
+    console.log(cartsId)
     getTotalAmountByCartsIdRequest.mutate(cartsId, {
       onSuccess: (res) => {
         // console.log(res)
         setTotalAmount(res);
       }
     })
+    
   }, [listCartsOptions])
+
+
+  /// dung trong checkAlll
+  useEffect(()=>{
+      if(!isCheckedAll){
+        console.log(listCartsOptions)
+        setListCartsOptions([]);
+      }
+  },[isCheckedAll])
 
   const setDataFromParent = (childData) => {
     setListCartsOptions(pre => {
@@ -127,6 +139,12 @@ export default function Cart() {
     } 
   }
 
+
+  /// dung trong checkAlll
+  const handleIsCheckedAll = (event) =>{
+    setIsCheckedAll(event.target.checked)
+  }
+
   return (
     <MainStyleComponent>            
       <div className="layout">
@@ -134,7 +152,7 @@ export default function Cart() {
           {/* <h4>Cart</h4> */}
           <div className="headingDetail">
             <span className="headingDetail-item headingDetail-item1">
-              {/* <input type="checkbox" /> */}
+              <input type="checkbox" checked={isCheckedAll} onChange={(event) => handleIsCheckedAll(event)}/>
               Tất cả
             </span>
             <span className="headingDetail-item item headingDetail-item2">Đơn giá</span>
@@ -146,7 +164,7 @@ export default function Cart() {
             carts?.map((cart) => {
               return (
                 <div key={cart?.id}>
-                  <CartItem detailCart={cart} setData={setDataFromParent} configurateData={configurateDataFromParent} />
+                  <CartItem detailCart={cart} setData={setDataFromParent} configurateData={configurateDataFromParent} isCheckedAll={isCheckedAll} />
                 </div>
               )
             })
