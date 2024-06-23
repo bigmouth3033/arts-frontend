@@ -1,11 +1,12 @@
 import styled from "styled-components";
 import CartItem from "./components/cartItem";
 import PaymentComponent from "./components/paymentComponent";
-import { GetCartByUserIdQuery, GetTotalAmountByCartsIdRequest } from "./api/customerCartApi";
+import { GetCartByUserIdQuery, GetTotalAmountByUserIdQuery, PutAllCartCheckedMutate } from "./api/customerCartApi";
 import { useEffect, useState } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 import WaitingPopUp from "@/shared/components/PopUp/WaitingPopUp";
 import InputCheckBox from "@/shared/components/Input/InputCheckBox";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const MainStyleComponent = styled.div`
   max-width: 1280px;
@@ -37,72 +38,36 @@ const CartItemContainer = styled.div`
 `;
 
 export default function Cart() {
-  const GetCartByUserId = GetCartByUserIdQuery();
+
   const [carts, setCarts] = useState();
-  const [listCartsOptions, setListCartsOptions] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
   const [isCheckedAll, setIsCheckedAll] = useState(false);
-  const getTotalAmountByCartsIdRequest = GetTotalAmountByCartsIdRequest();
+  const GetCartByUserId = GetCartByUserIdQuery();
+  const putAllCartCheckedMutate = PutAllCartCheckedMutate();
+  const getTotalAmountByUserIdQuery = GetTotalAmountByUserIdQuery()
+  const queryClient = useQueryClient()
+
 
   useEffect(() => {
-    const transformedData = GetCartByUserId?.data?.data.map((item) => ({
-      ...item,
-      isChecked: false,
-    }));
-    setCarts(transformedData);
-  }, [GetCartByUserId.status]);
+    console.log('get api', GetCartByUserId?.data?.data)    
+    console.log(getTotalAmountByUserIdQuery?.data?.data)
+  }, [GetCartByUserId.status,getTotalAmountByUserIdQuery.status]);
 
-  useEffect(() => {
-    var cartsId = [];
-    listCartsOptions.map((item) => {
-      cartsId.push(item.idCart);
-    });
-    console.log(cartsId);
-    getTotalAmountByCartsIdRequest.mutate(cartsId, {
-      onSuccess: (res) => {
-        // console.log(res)
-        setTotalAmount(res);
-      },
-    });
-  }, [listCartsOptions]);
-
-  /// dung trong checkAlll
-  useEffect(() => {
-    if (!isCheckedAll) {
-      console.log(listCartsOptions);
-      setListCartsOptions([]);
-    }
-  }, [isCheckedAll]);
-
-  const setDataFromParent = (childData) => {
-    setListCartsOptions((pre) => {
-      if (pre.some((item) => item.idCart == childData.idCart)) {
-        return pre.filter((item) => item.idCart !== childData.idCart);
-      } else {
-        return [...pre, childData];
-      }
-    });
-  };
-
-  const configurateDataFromParent = (childData) => {
-    const itemExists = listCartsOptions.some((item) => item.idCart == childData.idCart);
-    if (itemExists) {
-      const updateListCartsOption = listCartsOptions.map((item) => {
-        if (item.idCart == childData.idCart) {
-          return { ...item, quanity: childData.quanity, totalPrice: childData.totalPrice };
-        }
-        return item;
-      });
-      setListCartsOptions(updateListCartsOption);
-    }
-  };
-
-  /// dung trong checkAlll
+  
   const handleIsCheckedAll = (event) => {
     setIsCheckedAll(event.target.checked);
+    const formData = new FormData()
+    formData.append('isCheckedState', event.target.checked);
+    putAllCartCheckedMutate.mutate(formData, {
+      onSuccess: (res) => {
+        console.log(res)
+        queryClient.invalidateQueries({ queryKey: ['user-cart'] })
+        queryClient.invalidateQueries({ queryKey: ['cart-totalAmount'] })
+      }
+    })
   };
 
-  if (GetCartByUserId.isLoading || getTotalAmountByCartsIdRequest.isLoading) {
+  if (GetCartByUserId.isLoading) {
     return <WaitingPopUp />;
   }
 
@@ -125,13 +90,11 @@ export default function Cart() {
               <FaRegTrashAlt />
             </span>
           </div>
-          {carts?.map((cart) => {
+          {GetCartByUserId?.data?.data.map((cart) => {
             return (
               <CartItemContainer key={cart?.id}>
                 <CartItem
                   detailCart={cart}
-                  setData={setDataFromParent}
-                  configurateData={configurateDataFromParent}
                   isCheckedAll={isCheckedAll}
                 />
               </CartItemContainer>
@@ -139,7 +102,7 @@ export default function Cart() {
           })}
         </div>
         <div className="right-cart">
-          <PaymentComponent totalAmount={totalAmount} />
+          <PaymentComponent totalAmount={getTotalAmountByUserIdQuery?.data?.data} />
         </div>
       </div>
     </MainStyleComponent>

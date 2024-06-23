@@ -36,12 +36,11 @@ const PaymentComponentStyle = styled.div`
   }
 `;
 
-export default function PaymentComponent(props) {
-  const [totalAmount, setTotalAmount] = useState(props?.totalAmount);
+export default function PaymentComponent(props) {  
 
-  useEffect(() => {
-    setTotalAmount(props?.totalAmount);
-  }, [props]);
+  // useEffect(() => {
+  //   setTotalAmount(props?.totalAmount);
+  // }, [props]);
 
   const transformCurrency = (amount) => {
     if (amount > 1000) {
@@ -54,11 +53,11 @@ export default function PaymentComponent(props) {
       <div className="price-summary">
         <div className="price-item">
           <span>Tạm tính</span>
-          <span>{totalAmount}</span>
+          <span>{props?.totalAmount}</span>
         </div>
         <div className="price-total">
           <span>Tổng tiền</span>
-          <span>{transformCurrency(totalAmount)}</span>
+          <span>{transformCurrency(props?.totalAmount)}</span>
         </div>
       </div>
       <button className="btn-order">Mua Hàng</button>
