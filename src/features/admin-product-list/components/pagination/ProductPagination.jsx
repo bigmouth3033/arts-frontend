@@ -13,17 +13,12 @@ const Container = styled.div`
   transition: all 0.5s;
 
   & button {
-    background-color: white;
-    border: 1px solid rgba(0, 0, 0, 0.25);
-    border-radius: 25%;
-  }
-
-  & .arrow {
-    height: 1rem;
+    cursor: pointer;
   }
 
   & .active {
-    border: 2px solid rgba(0, 0, 255, 0.6);
+    background-color: #4da1fa;
+    color: white;
   }
 
   & span {
@@ -32,38 +27,46 @@ const Container = styled.div`
 `;
 
 const Button = styled.button`
+  width: 2rem;
   cursor: pointer;
+  border-radius: 50%;
+  padding: 0.25rem 0.5rem;
+  background-color: white;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  border-radius: 100%;
+`;
+
+const Icon = styled.button`
+  background-color: white;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  border-radius: 100%;
+  padding: 0.5rem;
 `;
 
 export default function ProductPagination({ currentPage, totalPage, setCurrentPage }) {
-  const [pages, setPages] = useState([]);
   const [renderPage, setRenderPage] = useState();
 
-  // useEffect(() => {
-  //   const array = new Array(totalPage).fill(false);
-  //   array[currentPage - 1] = true;
-  //   setPages(array);
-  // }, [totalPage]);
-
   const paginate = () => {
+    const current = parseInt(currentPage);
+
     const paginate = [];
 
-    if (currentPage - 2 > 0) {
-      paginate.push(currentPage - 2);
+    if (current - 2 > 0) {
+      paginate.push(current - 2);
     }
 
-    if (currentPage - 1 > 0) {
-      paginate.push(currentPage - 1);
+    if (current - 1 > 0) {
+      paginate.push(current - 1);
     }
 
-    paginate.push(currentPage);
+    paginate.push(current);
 
-    if (currentPage + 1 <= totalPage) {
-      paginate.push(currentPage + 1);
+    if (current + 1 <= totalPage) {
+      paginate.push(current + 1);
     }
 
-    if (currentPage + 2 <= totalPage) {
-      paginate.push(currentPage + 2);
+    if (current + 2 <= totalPage) {
+      paginate.push(current + 2);
     }
 
     return paginate;
@@ -73,25 +76,25 @@ export default function ProductPagination({ currentPage, totalPage, setCurrentPa
     setRenderPage(paginate());
   }, [currentPage]);
 
-  useEffect(() => {
-    setRenderPage(paginate());
-  }, [totalPage]);
-
   return (
     <Container>
-      <button onClick={() => setCurrentPage(1)} disabled={currentPage == 1}>
+      <Icon onClick={() => setCurrentPage(1)} disabled={currentPage == 1}>
         <MdKeyboardDoubleArrowLeft />
-      </button>
+      </Icon>
       {renderPage?.map((item, index) => {
         return (
-          <Button onClick={() => setCurrentPage(index + 1)} key={index}>
-            {index + 1}
+          <Button
+            className={item == currentPage && "active"}
+            onClick={() => setCurrentPage(item)}
+            key={index}
+          >
+            {item}
           </Button>
         );
       })}
-      <button onClick={() => setCurrentPage(totalPage)} disabled={currentPage == totalPage}>
+      <Icon onClick={() => setCurrentPage(totalPage)} disabled={currentPage == totalPage}>
         <MdKeyboardDoubleArrowRight />
-      </button>
+      </Icon>
     </Container>
   );
 }

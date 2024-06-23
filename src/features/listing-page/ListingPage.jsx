@@ -15,7 +15,7 @@ const StyleListingPage = styled.div`
   display: grid;
   grid-template-columns: 1fr 4fr;
   margin: 0 auto;
-  max-width: 1230px;
+  max-width: 1280px;
   padding-left: 15px;
   padding-right: 15px;
   width: 100%;
@@ -83,10 +83,7 @@ const ListingPage = () => {
 
   return (
     <>
-      <Search
-        searchValueSaved={searchValue}
-        handleSearchChange={handleSearchChange}
-      />
+      <Search searchValueSaved={searchValue} handleSearchChange={handleSearchChange} />
       <StyleListingPage>
         <ProductFilter
           selectedCategory={selectedCategory}

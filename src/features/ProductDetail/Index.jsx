@@ -10,7 +10,8 @@ import { FaAngleRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const ProductSingleContainer = styled.div`
-  max-width: 1230px;
+  max-width: 1280px;
+  padding: 15px;
   margin: 0 auto;
 `;
 
@@ -49,6 +50,7 @@ export default function ProductDetail() {
       <ProductSingleMain
         data={getProductDetailRequest.data.data}
         variant={getProductVariantDetailRequest.data.data}
+        request={getProductDetailRequest}
       />
 
       <ProductRelated />

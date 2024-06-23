@@ -15,23 +15,38 @@ const StyleProductCard = styled.div`
     font-size: 1.2rem;
     margin-top: 1rem;
     margin-left: 0.7rem;
-    margin-bottom: 1rem;
 
     @media (max-width: 784px) {
       font-size: 0.75rem;
     }
 
+    &.product-name {
+      overflow: hidden;
+      text-overflow: ellipsis; /* Hiển thị dấu chấm (...) nếu văn bản bị cắt bớt */
+      display: -webkit-box;
+      -webkit-line-clamp: 2; /* Số dòng hiển thị tối đa */
+      -webkit-box-orient: vertical;
+    }
+
     &.original-price {
       font-weight: 600;
-      font-size: 0.9rem;
+      font-size: 1.2rem;
       margin-bottom: 0.5rem;
+      margin-right: 1rem;
       color: #ba1818;
+      position: relative;
+    }
+
+    .currency-symbol {
+      font-size: 0.7em;
+      position: absolute;
+      top: -0.3em;
     }
 
     &.sale-price {
       color: grey;
       font-weight: 600;
-      font-size: 0.8rem;
+      font-size: 1rem;
       margin-bottom: 0.5rem;
       text-decoration: line-through;
     }
@@ -58,6 +73,12 @@ const StyleProductCard = styled.div`
   }
 `;
 
+const StylePriceBlock = styled.div`
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: start;
+`;
+
 //Product Card items in Product Listing Page
 const ProductCard = ({ product, index }) => {
   const minVariant = product.variants.reduce((min, variant) => {
@@ -65,20 +86,15 @@ const ProductCard = ({ product, index }) => {
   }, product.variants[0]);
   return (
     <StyleProductCard key={index}>
-      <img
-        src={
-          import.meta.env.VITE_API_IMAGE_PATH +
-          product.productImages[0].imageName
-        }
-      />
-
-      <p>{product.name}</p>
-      {minVariant.salePrice != 0 ? (
-        <p className="sale-price">{minVariant.salePrice}</p>
-      ) : (
-        <></>
-      )}
-      <p className="original-price">{minVariant.price}</p>
+      <img src={import.meta.env.VITE_API_IMAGE_PATH + product.productImages[0].imageName} />
+      <p className="product-name">{product.name}</p>
+      <StylePriceBlock>
+        {minVariant.salePrice != 0 ? <p className="sale-price">{minVariant.salePrice}</p> : <></>}
+        <p className="original-price">
+          {minVariant.price}
+          <sup className="currency-symbol">$</sup>
+        </p>
+      </StylePriceBlock>
     </StyleProductCard>
   );
 };

@@ -215,7 +215,6 @@ export default function AdminProductList() {
   const readCategoryRequest = ReadCategoryRequest();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [totalPage, setTotalPage] = useState(1);
   const [currentPage, setCurrentPage] = useState(searchParams.get("currentpage") || 1);
   const [pageSize, setPageSize] = useState(
     searchParams.get("pagesize")
@@ -235,12 +234,6 @@ export default function AdminProductList() {
     categorySelect?.map((item) => item.value),
     search
   );
-
-  useEffect(() => {
-    if (getAdminProductRequest.isSuccess) {
-      setTotalPage(getAdminProductRequest.data.totalPages);
-    }
-  }, [getAdminProductRequest.status]);
 
   const onChangePage = (page) => {
     setSearchParams({ currentpage: page, pagesize: pageSize.value, search: search });
@@ -495,11 +488,13 @@ export default function AdminProductList() {
           </tbody>
         </TableContent>
         <Footer>
-          <ProductPagination
-            currentPage={currentPage}
-            setCurrentPage={onChangePage}
-            totalPage={totalPage}
-          />
+          {getAdminProductRequest.isSuccess && (
+            <ProductPagination
+              currentPage={currentPage}
+              setCurrentPage={onChangePage}
+              totalPage={getAdminProductRequest.data.totalPages}
+            />
+          )}
         </Footer>
       </Content>
     </Container>

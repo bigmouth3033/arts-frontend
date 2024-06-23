@@ -1,6 +1,6 @@
 import React from "react";
 import Carousel from "react-multi-carousel";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import "react-multi-carousel/lib/styles.css";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { useState, useEffect, useCallback } from "react";
@@ -9,6 +9,22 @@ import "../assets/embla.css";
 import ProductSingleInformation from "./ProductSingleInformation";
 import { FaDollarSign } from "react-icons/fa6";
 import convertToLetterString from "../utils/convertIdToStr";
+import { getSalePrices } from "../utils/getVariantPrices";
+import { getPrices } from "../utils/getVariantPrices";
+import { FaCheck } from "react-icons/fa";
+import NumberInput from "@/shared/components/Input/NumberInput";
+import { CiSquarePlus } from "react-icons/ci";
+import { CiSquareMinus } from "react-icons/ci";
+import { CiShoppingCart } from "react-icons/ci";
+import AlertPopUp from "@/shared/components/PopUp/AlertPopUp";
+import { CustomerRequest } from "@/shared/api/customerApi";
+import { IoIosReturnLeft } from "react-icons/io";
+import { IoShieldCheckmark } from "react-icons/io5";
+import { Link } from "react-router-dom";
+import { CreateCartItemRequest } from "../api/productDetailApi";
+import SuccessPopUp from "@/shared/components/PopUp/SuccessPopUp";
+import ErrorPopUp from "@/shared/components/PopUp/ErrorPopUp";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Container = styled.div`
   margin: 1rem 0;
@@ -30,7 +46,7 @@ const Detail = styled.div`
   gap: 1rem;
 
   > div {
-    padding: 1rem;
+    padding: 1rem 2rem;
     background-color: white;
   }
 `;
@@ -57,11 +73,38 @@ const Variant = styled.button`
   cursor: pointer;
   border-radius: 5px;
   border: none;
-  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+  box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+  position: relative;
 
   color: rgba(0, 0, 0, 0.8);
 
-  border: ${(props) => (props.$active ? "2px solid #0057A0" : "2px solid rgba(0,0,0,0)")};
+  border: ${(props) => (props.$active ? "2px solid #0a68ff" : "2px solid rgba(0,0,0,0)")};
+
+  &:hover {
+    border: 2px solid #0a68ff;
+  }
+
+  > svg {
+    display: none;
+  }
+
+  ${(props) => {
+    if (props.$active == true) {
+      return css`
+        svg {
+          display: block;
+          position: absolute;
+          top: 0;
+          right: 0;
+          background-color: #0a68ff;
+          color: white;
+          font-size: 10px;
+          padding: 0 0 2px 2px;
+          border-bottom-left-radius: 5px;
+        }
+      `;
+    }
+  }}
 `;
 
 const VariantContainer = styled.div`
@@ -79,7 +122,7 @@ const LeftDetail = styled.div`
   gap: 1rem;
 `;
 
-const Payment = styled.div`
+const ShipmentDetail = styled.div`
   background-color: white;
 `;
 
@@ -87,6 +130,24 @@ const StyledShippingBoxWrap = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   column-gap: 1rem;
+`;
+
+const Header = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+`;
+
+const ID = styled.span`
+  display: flex;
+  font-size: 13px;
+  font-weight: 700;
+  gap: 0.4rem;
+  color: rgba(0, 0, 0, 0.6);
+
+  > span:nth-of-type(2) {
+    letter-spacing: 2px;
+  }
 `;
 
 const Prices = styled.div`
@@ -100,15 +161,18 @@ const Prices = styled.div`
   }
 
   > h4:nth-of-type(1) {
-    font-size: 2.2rem;
-
+    font-size: 2rem;
+    color: #ee4d2d;
     > svg {
+      margin-top: 10px;
       font-size: 15px;
     }
+    font-weight: 400;
   }
 
   > h4:nth-of-type(2) {
-    font-size: 1.4rem;
+    font-size: 1.1rem;
+    color: #9292a0;
     font-weight: 100;
     text-decoration: line-through;
 
@@ -118,130 +182,236 @@ const Prices = styled.div`
   }
 `;
 
-const Header = styled.div`
+const InitialPrice = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.4rem;
+  align-items: last baseline;
+
+  & svg {
+    padding: 0;
+    margin: 0;
+  }
+
+  > div:nth-of-type(2) {
+    font-size: 1.1rem;
+    color: #9292a0;
+    position: relative;
+    > span {
+      font-weight: 900;
+    }
+
+    & h4 {
+      font-weight: 100;
+    }
+
+    & svg {
+      margin-top: 5px;
+      font-size: 0.8rem;
+    }
+  }
+
+  > div:nth-of-type(2)::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    border-top: 1px solid #9292a0;
+    pointer-events: none;
+    transform: translateX(2px);
+  }
+
+  > div:nth-of-type(1) {
+    font-size: 2rem;
+    color: #ee4d2d;
+
+    & svg {
+      margin-top: 10px;
+      font-size: 1rem;
+    }
+
+    & h4 {
+      font-weight: 400;
+    }
+  }
+
+  & h4 {
+    display: flex;
+  }
+
+  > div {
+    display: flex;
+    gap: 0.2rem;
+  }
+`;
+
+const Quantity = styled.div`
+  display: flex;
+  align-items: center;
+
+  & button {
+    background-color: white;
+    border: none;
+  }
+
+  & svg {
+    width: 2rem;
+    height: 2rem;
+    cursor: pointer;
+  }
+
+  & input {
+    width: 3rem;
+    height: 2rem;
+  }
+
+  & span {
+    font-size: 13px;
+    color: rgba(0, 0, 0, 0.7);
+  }
+`;
+
+const CartButton = styled.div`
+  > button {
+    display: flex;
+    align-items: center;
+    width: 15rem;
+    justify-content: center;
+    background-color: red;
+    color: white;
+    font-size: 1rem;
+    border: none;
+    padding: 0.5rem;
+    font-weight: 500;
+    border-radius: 5px;
+    cursor: pointer;
+    > svg {
+      font-size: 1.8rem;
+    }
+  }
+`;
+
+const Payment = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 1rem;
 `;
 
-const StyledProductSingleAction = styled.div`
-  background-color: orange;
-  border-radius: 1.3rem;
-  margin-bottom: 1rem;
-  padding: 0.6rem;
-  width: fit-content;
-  transition: background-color 0.5s;
-
-  &:hover {
-    background-color: #e47c21;
-  }
-`;
-
-const StyledProductAddCarts = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: center;
-  cursor: pointer;
-`;
-
-const StyledGroupButtonAddCart = styled.div`
-  padding: 3px 10px;
-  margin: 0 0.5rem;
-  border-radius: 1.5rem;
-  background-color: white;
-  align-items: center;
+const VariantDetail = styled.div`
   display: flex;
-  align-items: center;
-  gap: 10px;
+  gap: 1rem;
 
-  > span {
-    width: 10px;
+  > div:nth-of-type(1) {
+    width: 2rem;
+    height: 2rem;
+
+    & img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  & span {
+    font-size: 14px;
+  }
+
+  & span:nth-of-type(odd) {
+    font-weight: 900;
   }
 `;
 
-const OutOfStock = styled.h4`
-  font-size: 20px;
+const TotalAmount = styled.div`
+  h2 {
+    display: flex;
+    font-size: 2rem;
+    color: #ee4d2d;
+    font-weight: 400;
+    align-items: flex-start baseline;
+  }
+
+  & svg {
+    margin-top: 10px;
+    font-size: 1.2rem;
+  }
 `;
 
-const StyledButtonAdd = styled.button`
-  border: none;
-  background: white;
-  border-radius: 1.5rem;
-  cursor: pointer;
-  font-size: 1rem;
-`;
-const StyledButtonSub = styled.button`
-  background: white;
-  border-radius: 1.5rem;
-  border: none;
-  cursor: pointer;
-  font-size: 1rem;
+const ProductDetail = styled.div`
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  row-gap: 1rem;
+
+  > div {
+    display: grid;
+    grid-template-columns: 2fr 5fr;
+    column-gap: 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding-bottom: 10px;
+  }
+
+  & h4 {
+    display: flex;
+    gap: 5px;
+    color: rgba(0, 0, 0, 0.8);
+
+    > svg {
+      margin-top: 2px;
+      align-self: baseline;
+    }
+  }
+
+  & p {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    gap: 5px;
+    color: rgba(0, 0, 0, 0.5);
+  }
 `;
 
-const AddToCartButton = styled.button`
-  background-color: inherit;
-  border: none;
-  color: white;
-  font-size: 1rem;
-  cursor: pointer;
-`;
-
-export default function ProductSingleMain({ data, variant }) {
+export default function ProductSingleMain({ data, variant, request }) {
+  const createCartItemRequest = CreateCartItemRequest();
   const OPTIONS = {};
   const SLIDES = data.productImages;
-
+  const customerRequest = CustomerRequest();
   const [quantity, setQuantity] = useState(0);
-  const [first, setFirst] = useState(variant[0] && 0);
-  const [second, setSecond] = useState(variant[1] && 0);
-  const [third, setThird] = useState(variant[2] && 0);
+  const queryClient = useQueryClient();
 
-  const onClickVariant = (index, i) => {
-    if (index == 0) {
-      setFirst(i);
-    }
+  const [variantError, setVariantError] = useState(false);
+  const [userError, setUserError] = useState(false);
+  const [outOfStockError, setOutOfStockError] = useState(false);
+  const [cartSuccess, setCartSuccess] = useState(false);
+  const [cartError, setCartError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-    if (index == 1) {
-      setSecond(i);
-    }
-
-    if (index == 2) {
-      setThird(i);
-    }
-  };
+  const [variantAttributes, setVariantAttributes] = useState(new Array(variant.length).fill(null));
 
   const onActive = (index, i) => {
     if (index == 0) {
-      return i == first;
+      return i == variantAttributes[0];
     }
 
     if (index == 1) {
-      return i == second;
+      return i == variantAttributes[1];
     }
 
     if (index == 2) {
-      return i == third;
+      return i == variantAttributes[2];
     }
   };
 
   const onGetVariant = () => {
     return data.variants.find((item) => {
-      if (first != null) {
-        return item.variantAttributes[0].attributeValue == variant[0].values[first];
+      let i = 0;
+      for (i; i < item.variantAttributes.length; i++) {
+        if (item.variantAttributes[i].attributeValue != variant[i].values[variantAttributes[i]]) {
+          break;
+        }
       }
-
-      if (second != null) {
-        return (
-          item.variantAttributes[0].attributeValue == variant[0].values[first] &&
-          item.variantAttributes[1].attributeValue == variant[1].values[second]
-        );
-      }
-
-      if (third != null) {
-        return (
-          item.variantAttributes[0].attributeValue == variant[0].values[first] &&
-          item.variantAttributes[1].attributeValue == variant[1].values[second] &&
-          item.variantAttributes[2].attributeValue == variant[2].values[third]
-        );
+      if (i == item.variantAttributes.length) {
+        return item;
       }
     });
   };
@@ -249,12 +419,22 @@ export default function ProductSingleMain({ data, variant }) {
   const onClickAddQuantity = () => {
     const variant = onGetVariant();
 
-    setQuantity((prev) => {
-      if (prev + 1 > variant.quanity) {
-        return variant.quanity;
-      }
-      return prev + 1;
-    });
+    if (variant) {
+      setQuantity((prev) => {
+        if (prev + 1 > variant.availableQuanity) {
+          return variant.availableQuanity;
+        }
+        return prev + 1;
+      });
+    } else {
+      const max = getTotalQuantity(data);
+      setQuantity((prev) => {
+        if (prev + 1 > max) {
+          return max;
+        }
+        return prev + 1;
+      });
+    }
   };
 
   const onClickSubQuantity = () => {
@@ -267,9 +447,69 @@ export default function ProductSingleMain({ data, variant }) {
     });
   };
 
+  const getTotalQuantity = (data) => {
+    let total = 0;
+
+    for (let i = 0; i < data.variants.length; i++) {
+      total += data.variants[i].availableQuanity;
+    }
+
+    return total;
+  };
+
+  const onAddToCart = () => {
+    if (customerRequest.isError) {
+      setUserError(true);
+      return;
+    }
+
+    if (variantAttributes.includes(null)) {
+      setVariantError(true);
+      return;
+    }
+
+    if (onGetVariant().availableQuanity == 0) {
+      setOutOfStockError(true);
+      return;
+    }
+
+    if (variant.length > 0) {
+      const variant = onGetVariant();
+      const formData = new FormData();
+      formData.append("VariantId", variant.id);
+      formData.append("Quantity", quantity);
+      createCartItemRequest.mutate(formData, {
+        onSuccess: (response) => {
+          if (response.status == 201) {
+            setCartSuccess(true);
+            queryClient.invalidateQueries({ queryKey: ["cart-quantity"] });
+            return;
+          }
+
+          if (response.status == 405) {
+            setErrorMessage(`The remaining quantity of this product is ${response.data.quanity}.`);
+            setCartError(true);
+            request.refetch();
+          }
+        },
+        onError: (response) => {
+          console.log(response);
+        },
+      });
+    }
+  };
+
   useEffect(() => {
-    setQuantity(1);
-  }, [first, second, third]);
+    if (!variantAttributes.includes(null) && onGetVariant().availableQuanity == 0) {
+      setQuantity(0);
+    } else {
+      if (getTotalQuantity(data) == 0) {
+        setQuantity(0);
+        return;
+      }
+      setQuantity(1);
+    }
+  }, [variantAttributes[0], variantAttributes[1], variantAttributes[2]]);
 
   return (
     <Container>
@@ -281,61 +521,192 @@ export default function ProductSingleMain({ data, variant }) {
       <Detail>
         <Header>
           <div>
-            <span>
-              ID:{convertToLetterString(data.categoryId, 2) + convertToLetterString(data.id, 5)}
-            </span>
+            <ID>
+              <span> Code:</span>
+              <span>
+                {convertToLetterString(data.categoryId, 2) + convertToLetterString(data.id, 5)}
+              </span>
+            </ID>
           </div>
-          <h3>{data.name}</h3>
-          <div></div>
-          <Prices>
-            <h4>
-              <FaDollarSign />
-              {onGetVariant().price}
-            </h4>
-            <h4>
-              <FaDollarSign />
-              {onGetVariant().salePrice}
-            </h4>
-          </Prices>
-          {onGetVariant().quanity > 0 ? (
-            <StyledProductSingleAction>
-              <StyledProductAddCarts>
-                <StyledGroupButtonAddCart>
-                  <StyledButtonSub onClick={onClickSubQuantity}>-</StyledButtonSub>
-                  <span>{quantity}</span>
-                  <StyledButtonAdd onClick={onClickAddQuantity}>+</StyledButtonAdd>
-                </StyledGroupButtonAddCart>
-                <AddToCartButton>Add to cart</AddToCartButton>
-              </StyledProductAddCarts>
-            </StyledProductSingleAction>
+          <h2>{data.name}</h2>
+          {variantAttributes.includes(null) ? (
+            <InitialPrice>
+              <div>
+                {getPrices(data).map((item, index) => {
+                  return (
+                    <>
+                      {index == 1 && <span>-</span>}
+                      <h4 key={index}>
+                        <FaDollarSign />
+                        {item}
+                      </h4>
+                    </>
+                  );
+                })}
+              </div>
+              <div>
+                {getSalePrices(data).map((item, index) => {
+                  return (
+                    <>
+                      {index == 1 && <span>-</span>}
+                      <h4 key={index}>
+                        <FaDollarSign />
+                        {item}
+                      </h4>
+                    </>
+                  );
+                })}
+              </div>
+            </InitialPrice>
           ) : (
-            <OutOfStock>Out of Stock</OutOfStock>
+            <Prices>
+              <h4>
+                <FaDollarSign />
+                {onGetVariant().price}
+              </h4>
+              <h4>
+                <FaDollarSign />
+                {onGetVariant().salePrice}
+              </h4>
+            </Prices>
           )}
+          <ProductDetail>
+            <div>
+              <h4>
+                <IoIosReturnLeft /> Return Policy
+              </h4>
+              <p>7-day return policy, Free change of mind returns</p>
+            </div>
+            {data.warrantyDuration > 0 && (
+              <div>
+                <h4>
+                  <IoShieldCheckmark /> Warranty information
+                </h4>
+                <p>
+                  <span>Warranty duration: {data.warrantyDuration} months</span>
+                  <span>Warranty type: Electronics</span>
+                  <span>Warranty location: Manufacturer's warranty</span>
+                  <span>
+                    Warranty instructions: <Link>See details</Link>
+                  </span>
+                </p>
+              </div>
+            )}
+          </ProductDetail>
         </Header>
 
-        <Variants>
-          {variant.map((item, index) => {
-            return (
-              <div key={index}>
-                <h4>{item.variant}</h4>
-                <VariantContainer>
-                  {item.values.map((value, i) => {
-                    return (
-                      <Variant
-                        $active={onActive(index, i)}
-                        onClick={() => onClickVariant(index, i)}
-                        key={i}
-                      >
-                        {value}
-                      </Variant>
-                    );
-                  })}
-                </VariantContainer>
-              </div>
-            );
-          })}
-        </Variants>
+        {variant.length > 0 && (
+          <Variants>
+            {variant.map((item, index) => {
+              return (
+                <div key={index}>
+                  <h4>{item.variant}</h4>
+                  <VariantContainer>
+                    {item.values.map((value, i) => {
+                      return (
+                        <Variant
+                          $active={onActive(index, i)}
+                          onClick={() =>
+                            setVariantAttributes((prev) => {
+                              prev[index] = i;
+                              return [...prev];
+                            })
+                          }
+                          key={i}
+                        >
+                          {value}
+                          <FaCheck />
+                        </Variant>
+                      );
+                    })}
+                  </VariantContainer>
+                </div>
+              );
+            })}
+          </Variants>
+        )}
+
         <Payment>
+          <h4>Quantity</h4>
+          {!variantAttributes.includes(null) && variant.length != 0 && (
+            <VariantDetail>
+              <div>
+                <img
+                  src={
+                    import.meta.env.VITE_API_IMAGE_PATH +
+                    (onGetVariant().variantImage || data.productImages[0].imageName)
+                  }
+                />
+              </div>
+              {variant.map((item, index) => {
+                return (
+                  <div key={index}>
+                    <span>{item.variant}</span>:{" "}
+                    <span>{item.values[variantAttributes[index]]}</span>
+                  </div>
+                );
+              })}
+            </VariantDetail>
+          )}
+
+          <Quantity>
+            <button onClick={onClickSubQuantity}>
+              <CiSquareMinus />
+            </button>
+            <NumberInput
+              state={quantity}
+              setState={(value) => {
+                if (variantAttributes.includes(null)) {
+                  const max = getTotalQuantity(data);
+                  if (value > max) {
+                    setQuantity(max);
+                    return;
+                  }
+                  setQuantity(value);
+                } else {
+                  const max = onGetVariant().availableQuanity;
+                  if (value > max) {
+                    setQuantity(max);
+                    return;
+                  }
+
+                  if (value == 0) {
+                    if (value == 0 && max != 0) {
+                      setQuantity(1);
+                      return;
+                    }
+                  }
+                  setQuantity(value);
+                }
+              }}
+            />
+            <button onClick={onClickAddQuantity}>
+              <CiSquarePlus />
+            </button>
+            {!variantAttributes.includes(null) ? (
+              <span>{onGetVariant().availableQuanity} Available in Stock </span>
+            ) : (
+              <span>{getTotalQuantity(data)} Total Available in Stock</span>
+            )}
+          </Quantity>
+
+          {!variantAttributes.includes(null) && (
+            <TotalAmount>
+              <h3>Total amount</h3>
+              <h2>
+                <FaDollarSign /> {onGetVariant().price * quantity}
+              </h2>
+            </TotalAmount>
+          )}
+
+          <CartButton>
+            <button onClick={onAddToCart}>
+              Add To Cart <CiShoppingCart />
+            </button>
+          </CartButton>
+        </Payment>
+
+        <ShipmentDetail>
           <StyledShippingBoxWrap>
             <div>
               <h4>Shipping Fee</h4>
@@ -352,9 +723,34 @@ export default function ProductSingleMain({ data, variant }) {
               </ul>
             </div>
           </StyledShippingBoxWrap>
-        </Payment>
+        </ShipmentDetail>
         <ProductSingleInformation data={data} />
       </Detail>
+      {variantError && (
+        <AlertPopUp
+          action={() => setVariantError(false)}
+          message={"Please choose the product variant"}
+        />
+      )}
+      {userError && (
+        <AlertPopUp action={() => setUserError(false)} message={"Please login first"} />
+      )}
+      {outOfStockError && (
+        <AlertPopUp
+          action={() => setOutOfStockError(false)}
+          message={"Sorry this product out of stock"}
+        />
+      )}
+      {cartSuccess && (
+        <SuccessPopUp
+          action={() => setCartSuccess(false)}
+          header={"Success add to Cart"}
+          message={"Please check you cart "}
+        />
+      )}
+      {cartError && (
+        <AlertPopUp action={() => setCartError(false)} header={"Error"} message={errorMessage} />
+      )}
     </Container>
   );
 }

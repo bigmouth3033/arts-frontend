@@ -11,6 +11,11 @@ import { CustomerRequest } from "@/shared/api/customerApi";
 import { FaSortDown } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { MdCurrencyExchange } from "react-icons/md";
+import { ReadCategoryRequest } from "@/shared/api/categoryApi";
+import { readCategoriesData } from "@/shared/utils/readCategoriesData";
+import arts from "@/shared/assets/images/ArTS.svg";
+import { GetCartQuantityRequest } from "./api/cartQuantityApi";
+import { Link } from "react-router-dom";
 
 const StyledContainer = styled.div`
   background-color: #0272c0;
@@ -19,23 +24,27 @@ const StyledContainer = styled.div`
   flex-direction: column;
 `;
 
-const StyledHeaderTop = styled.div`
+const StyledHeader = styled.div`
   display: grid;
-  grid-template-columns: 1fr 6fr 1fr;
+  grid-template-columns: 1fr 9.5fr;
   column-gap: 1rem;
   align-items: center;
-  padding: 0 6rem;
+
+  max-width: 1280px;
+
+  padding: 15px;
+  margin: auto;
 `;
 
 const StyledContainerLogo = styled.div`
   width: 7.5rem;
-  height: 4rem;
+  height: 5rem;
 `;
 
 const StyledLogo = styled.img`
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 `;
 
 const StyledSearchBar = styled.div`
@@ -61,13 +70,6 @@ const StyledInputSearch = styled.input`
   }
 `;
 
-const StyledSearchIcon = styled(FaSearch)`
-  position: absolute;
-  right: 0.75rem;
-  color: #8aaae5;
-  font-weight: 100;
-`;
-
 const StyledHeaderCustomer = styled.div`
   display: flex;
   align-items: center;
@@ -75,7 +77,9 @@ const StyledHeaderCustomer = styled.div`
   gap: 1rem;
 
   & svg {
-    font-size: 1.4rem;
+    display: block;
+    width: 1.4rem;
+    height: 1.4rem;
     color: white;
     cursor: pointer;
   }
@@ -83,42 +87,6 @@ const StyledHeaderCustomer = styled.div`
   > div {
     position: relative;
   }
-`;
-
-const StyledHeaderBot = styled.div`
-  display: grid;
-  grid-template-columns: 5fr 1fr;
-  column-gap: 2rem;
-  padding: 5px 6.5rem;
-`;
-
-const StyledContainerCategory = styled.div`
-  display: flex;
-  column-gap: 3rem;
-  align-items: center;
-  color: #ffffff;
-
-  > button {
-    transition: all 0.2s;
-    background-color: #0272c0;
-    border: none;
-    font-size: 14px;
-    font-weight: 700;
-    color: white;
-    border-bottom: 2px solid #0272c0;
-    cursor: pointer;
-
-    &:hover {
-      border-bottom: 2px solid white;
-    }
-  }
-`;
-
-const StyledContainerAboutArts = styled.div`
-  color: #ffffff;
-  display: flex;
-  column-gap: 2.5rem;
-  align-items: center;
 `;
 
 const StyedPopUp = styled(PopUp)`
@@ -167,6 +135,7 @@ const UserDropDown = styled.div`
 
 const UserContainer = styled.div`
   display: flex;
+  color: white;
 
   &:hover + div {
     display: block;
@@ -197,7 +166,39 @@ const Exchange = styled.div`
   }
 `;
 
+const Main = styled.div`
+  display: grid;
+  grid-template-columns: 6fr 1fr;
+  column-gap: 1rem;
+`;
+
+const Button = styled.button`
+  background-color: inherit;
+  border: none;
+  color: white;
+`;
+
+const Cart = styled(Link)`
+  position: relative;
+`;
+
+const CartQuantity = styled.span`
+  position: absolute;
+  background-color: #ff424f;
+  font-size: 12px;
+  top: 0;
+  right: 0;
+  border-radius: 50%;
+  padding: 0 6px;
+  font-weight: 700;
+  color: white;
+  transform: translate(15px, -15px);
+`;
+
 export default function UserNavbar() {
+  const readCategoryRequest = ReadCategoryRequest();
+  const getCartQuantityRequest = GetCartQuantityRequest();
+
   const customerRequest = CustomerRequest();
   const [isPopUpVisible, setIsPopUpVisible] = useState(false);
   const [isLoginForm, setIsLoginForm] = useState(true);
@@ -214,64 +215,62 @@ export default function UserNavbar() {
   return (
     <>
       <StyledContainer>
-        <StyledHeaderTop>
+        <StyledHeader>
           <StyledContainerLogo>
-            <StyledLogo src={logo} alt="Logo" />
+            <StyledLogo src={arts} alt="Logo" />
           </StyledContainerLogo>
-          <StyledSearchBar>
-            <StyledInputSearch type="text" placeholder="Search desired products, categories..." />
-            <StyledSearchIcon size="1.4rem" />
-          </StyledSearchBar>
-          <StyledHeaderCustomer>
-            <FaHome
-              onClick={() => {
-                navigate("/");
-              }}
-            />
-            <div>
-              <UserContainer>
-                <FaUser
-                  onClick={() => {
-                    if (customerRequest.isError) {
-                      setIsPopUpVisible(true);
-                      setIsLoginForm(true);
-                    }
-                  }}
-                />
-                {customerRequest.isSuccess && <FaSortDown />}
-              </UserContainer>
-              {customerRequest.isSuccess && (
-                <UserDropDown>
-                  <button>Account detail</button>
-                  <button>My order</button>
-                  <button
+          <Main>
+            <StyledSearchBar>
+              <StyledInputSearch type="text" placeholder="Search desired products, categories..." />
+            </StyledSearchBar>
+            <StyledHeaderCustomer>
+              <FaHome
+                onClick={() => {
+                  navigate("/");
+                }}
+              />
+              <div>
+                <UserContainer>
+                  <FaUser
                     onClick={() => {
-                      localStorage.removeItem("ACCESS_TOKEN");
-                      customerRequest.refetch();
+                      if (customerRequest.isError) {
+                        setIsPopUpVisible(true);
+                        setIsLoginForm(true);
+                      }
                     }}
-                  >
-                    Logout
-                  </button>
-                </UserDropDown>
-              )}
+                  />
+                  {customerRequest.isSuccess && <FaSortDown />}
+                </UserContainer>
+                {customerRequest.isSuccess && (
+                  <UserDropDown>
+                    <button>Account detail</button>
+                    <button>My order</button>
+                    <button
+                      onClick={() => {
+                        localStorage.removeItem("ACCESS_TOKEN");
+                        customerRequest.refetch();
+                        getCartQuantityRequest.refetch();
+                      }}
+                    >
+                      Logout
+                    </button>
+                  </UserDropDown>
+                )}
+              </div>
+              <Cart to="/cart">
+                <FaShoppingCart />
+                {getCartQuantityRequest.isSuccess && (
+                  <CartQuantity>{getCartQuantityRequest.data.data}</CartQuantity>
+                )}
+              </Cart>
+            </StyledHeaderCustomer>
+            <div>
+              {readCategoriesData(readCategoryRequest).map((item, key) => {
+                return <Button key={key}>{item.name}</Button>;
+              })}
             </div>
-            <FaShoppingCart />
-          </StyledHeaderCustomer>
-        </StyledHeaderTop>
-        <StyledHeaderBot>
-          <StyledContainerCategory>
-            <button>Sale</button>
-            <button>Office</button>
-            <button>Personal Items</button>
-            <button>Souvenirs</button>
-            <button>Gifts</button>
-            <button>Others</button>
-          </StyledContainerCategory>
-          <StyledContainerAboutArts>
-            <h4>About Arts</h4>
-            <h4>Blog</h4>
-          </StyledContainerAboutArts>
-        </StyledHeaderBot>
+          </Main>
+        </StyledHeader>
         <Exchange>
           <h4>
             <span>

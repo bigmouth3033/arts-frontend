@@ -148,6 +148,7 @@ export default function Login({ switchToRegister, action }) {
           localStorage.setItem("ACCESS_TOKEN", response.data);
           setSuccessPopUp(true);
           queryClient.invalidateQueries({ queryKey: ["customer"] });
+          queryClient.invalidateQueries({ queryKey: ["cart-quantity"] });
         }
       },
     });

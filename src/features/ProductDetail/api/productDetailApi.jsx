@@ -1,5 +1,5 @@
 import axiosClient from "@/shared/api/axiosClient";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 const onGetProduct = async (id) => {
   const response = await axiosClient.get("product", {
@@ -39,4 +39,15 @@ export const GetProductVariantDetailRequest = (id) => {
     },
   });
   return query;
+};
+
+const createCartItem = async (payload) => {
+  const response = await axiosClient.post("cart", payload);
+  return response.data;
+};
+
+export const CreateCartItemRequest = () => {
+  return useMutation({
+    mutationFn: createCartItem,
+  });
 };

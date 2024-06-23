@@ -5,7 +5,9 @@ import { useState, useEffect } from "react";
 import WebFont from "webfontloader";
 import UserNavbar from "@/features/User/header/Index";
 import Footer from "@/features/User/footer/Index";
-import { CustomerRequest } from "../api/customerApi";
+import { ReadCategoryRequest } from "../api/categoryApi";
+import { ReadTypeRequest } from "../api/typeApi";
+import CustomerChatBox from "@/features/CustomerChatBox/Index";
 
 const Container = styled.div`
   font-size: 14px;
@@ -17,10 +19,26 @@ const Container = styled.div`
   background-color: rgb(245, 245, 250);
 `;
 
+const CustomerChatBoxStyled = styled(CustomerChatBox)`
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  transform: translate(-10px, -10px);
+`;
+
 const OutletContainer = styled.div``;
 
 export default function UserLayout() {
-  const customerRequest = CustomerRequest();
+  const readCategoryRequest = ReadCategoryRequest();
+  const readTypeRequest = ReadTypeRequest();
+
+  if (readCategoryRequest.isSuccess) {
+    localStorage.setItem("categories", JSON.stringify(readCategoryRequest.data.data));
+  }
+
+  if (readTypeRequest.isSuccess) {
+    localStorage.setItem("types", JSON.stringify(readTypeRequest.data.data));
+  }
 
   useEffect(() => {
     WebFont.load({
@@ -37,6 +55,7 @@ export default function UserLayout() {
         <Outlet />
       </OutletContainer>
       <Footer />
+      <CustomerChatBoxStyled />
     </Container>
   );
 }

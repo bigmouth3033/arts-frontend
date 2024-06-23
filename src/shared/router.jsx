@@ -11,10 +11,10 @@ import ListingPage from "@/features/listing-page/ListingPage";
 import AdminProductDetail from "@/features/admin-product-detail/Index";
 import Cart from "@/features/customer-cart/Index";
 
-// giu
 import ProductDetail from "@/features/ProductDetail/Index";
 import Account from "@/features/account/Index";
-import AccountInformation from "@/features/account/account-information/Index";
+import AccountInformation from "@/features/account-information/Index";
+import AccountAddress from "@/features/account-address/Index";
 
 const router = createBrowserRouter([
   {
@@ -36,6 +36,10 @@ const router = createBrowserRouter([
           {
             path: "account-information",
             element: <AccountInformation />,
+          },
+          {
+            path: "address",
+            element: <AccountAddress />,
           },
         ],
       },
