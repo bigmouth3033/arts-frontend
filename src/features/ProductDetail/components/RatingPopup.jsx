@@ -83,6 +83,9 @@ const StyledPopupErrorType = styled(PopUp)`
   width: 400px;
   height: 400px;
 `;
+const StyledSubmit = styled.button`
+  padding: 0 1rem;
+`;
 export default function RatingPopup({ action, data }) {
   const inputRef = useRef();
   const [images, setImages] = useState([]);
@@ -185,7 +188,7 @@ export default function RatingPopup({ action, data }) {
             <IoCameraOutline />
           </button>
         </StyledImages>
-        <button onClick={handleSubmit}>Submit</button>
+        <StyledSubmit onClick={handleSubmit}>Submit</StyledSubmit>
       </StyledContainer>
       {imageError && (
         <ErrorPopUp
