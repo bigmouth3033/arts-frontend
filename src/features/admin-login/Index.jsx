@@ -96,7 +96,7 @@ export default function AdminLogin() {
         }
 
         if (response.status == 200) {
-          localStorage.setItem("ACCESS_TOKEN", response.data);
+          localStorage.setItem("ADMIN_ACCESS_TOKEN", response.data);
           navigate("/admin");
         }
       },

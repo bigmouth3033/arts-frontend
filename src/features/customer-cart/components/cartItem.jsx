@@ -2,15 +2,20 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 import {
   DeleteCartByIdMutation,
+  PutCartCheckedByIdMutate,
   UpdateCartById,
   UpdateCartByIdRequest,
 } from "../api/customerCartApi";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import InputCheckBox from "@/shared/components/Input/InputCheckBox";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { FaDollarSign } from "react-icons/fa6";
+import formatDollar from "@/shared/utils/FormatDollar";
 
 const CartItemStyle = styled.div`
-  padding: 1rem 0;
+  padding: 1.4rem 0;
+  background-color: white;
 
   .cart-item-container {
     display: grid;
@@ -32,29 +37,56 @@ const CartItemStyle = styled.div`
 
     .cart-item2 {
       display: flex;
-      justify-content: center;
+
+      align-items: center;
       font-weight: bolder;
+
+      & .price {
+        display: flex;
+        font-size: 16px;
+        font-weight: 500;
+        color: rgba(0, 0, 0, 1);
+
+        > svg {
+          color: black;
+          font-size: 0.8rem;
+          margin-top: 4px;
+        }
+      }
     }
 
     .cart-item3 {
       display: flex;
-      gap: 1px;
 
       > button {
         background-color: white;
-        border: 1px solid rgba(0, 0, 0);
+        box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+        border: none;
+        cursor: pointer;
       }
       .quanity {
         width: 32px;
         height: 27px;
       }
+
+      > input {
+        border: none;
+        box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+      }
     }
 
     .cart-item4 {
       display: flex;
-      justify-content: center;
       font-weight: bolder;
       color: red;
+      font-size: 1rem;
+      font-weight: 400;
+
+      > svg {
+        color: red;
+        font-size: 0.8rem;
+        margin-top: 4px;
+      }
     }
     .cart-item5 {
       display: flex;
@@ -98,52 +130,27 @@ export default function CartItem(props) {
     props?.detailCart?.variant?.availableQuanity
   );
   const [isChecked, setIsChecked] = useState(props?.detailCart?.isChecked);
-  // const updateCartByIdRequest = UpdateCartByIdRequest();
+  const updateCartByIdRequest = UpdateCartByIdRequest();
   const deleteCartByIdMutation = DeleteCartByIdMutation();
-
-  // useEffect(() => {
-  //   // console.log('props', props)
-  // }, [props])
+  const putCartCheckedByIdMutate = PutCartCheckedByIdMutate();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     setTotalPrice(price * quanity);
   }, []);
 
-  //dung trong checked Alll
-  useEffect(() => {
-    setIsChecked(props?.isCheckedAll);
-
-    if (isChecked != props.isCheckedAll) {
-      props.setData({
-        idCart,
-        price,
-        quanity,
-        totalPrice,
-      });
-    }
-  }, [props?.isCheckedAll]);
   const handleQuanity = (operator) => {
     if (operator == "+") {
       UpdateCartById(idCart, quanity + 1).then((res) => {
         if (res?.data?.isOkay) {
           setQuanity(quanity + 1);
           setTotalPrice(res?.data?.total);
-          props.configurateData({
-            idCart,
-            price,
-            quanity: res?.data?.quanity,
-            totalPrice: res?.data?.total,
-          });
-          if (!res?.data?.isOkay) {
-            setQuanity(res?.data?.quanity);
-            setTotalPrice(res?.data?.total);
-            props.configurateData({
-              idCart,
-              price,
-              quanity: res?.data?.quanity,
-              totalPrice: res?.data?.total,
-            });
-          }
+          queryClient.invalidateQueries({ queryKey: ["cart-totalAmount"] });
+        }
+        if (!res?.data?.isOkay) {
+          setQuanity(res?.data?.quanity);
+          setTotalPrice(res?.data?.total);
+          queryClient.invalidateQueries({ queryKey: ["cart-totalAmount"] });
         }
       });
     }
@@ -153,15 +160,9 @@ export default function CartItem(props) {
           if (res?.data?.isOkay) {
             setQuanity(quanity - 1);
             setTotalPrice(res?.data?.total);
-            props.configurateData({
-              idCart,
-              price,
-              quanity: res?.data?.quanity,
-              totalPrice: res?.data?.total,
-            });
+            queryClient.invalidateQueries({ queryKey: ["cart-totalAmount"] });
           }
         });
-        // setQuanity(quanity - 1);
       } else {
         setQuanity(1);
       }
@@ -179,26 +180,15 @@ export default function CartItem(props) {
 
   const onBlurInput = () => {
     UpdateCartById(idCart, quanity).then((res) => {
-      console.log(res);
       if (res?.data?.isOkay) {
         setQuanity(res?.data?.quanity);
         setTotalPrice(res?.data?.total);
-        props.configurateData({
-          idCart,
-          price,
-          quanity: res?.data?.quanity,
-          totalPrice: res?.data?.total,
-        });
+        queryClient.invalidateQueries({ queryKey: ["cart-totalAmount"] });
       }
       if (!res?.data?.isOkay) {
         setQuanity(res?.data?.quanity);
         setTotalPrice(res?.data?.total);
-        props.configurateData({
-          idCart,
-          price,
-          quanity: res?.data?.quanity,
-          totalPrice: res?.data?.total,
-        });
+        queryClient.invalidateQueries({ queryKey: ["cart-totalAmount"] });
       }
     });
   };
@@ -207,26 +197,33 @@ export default function CartItem(props) {
       { cartId: idCart },
       {
         onSuccess: (res) => {
+          queryClient.invalidateQueries({ queryKey: ["user-cart"] });
+          queryClient.invalidateQueries({ queryKey: ["cart-totalAmount"] });
           alert("asdasd");
         },
       }
     );
   };
 
-  const handleIsChecked = (event) => {
-    props.setData({
-      idCart,
-      price,
-      quanity,
-      totalPrice,
+  const handleCheck = (event) => {
+    const formData = new FormData();
+    formData.append("cartId", idCart);
+    formData.append("isCheckedState", event.target.checked);
+    putCartCheckedByIdMutate.mutate(formData, {
+      onSuccess: (res) => {
+        queryClient.invalidateQueries({ queryKey: ["user-cart"] });
+        queryClient.invalidateQueries({ queryKey: ["cart-totalAmount"] });
+      },
     });
-    setIsChecked(event.target.checked);
   };
 
   return (
     <CartItemStyle>
       <div className="cart-item-container">
-        <InputCheckBox checked={isChecked} onChange={(event) => handleIsChecked(event)} />
+        <InputCheckBox
+          checked={props?.detailCart?.isChecked}
+          onChange={(event) => handleCheck(event)}
+        />
         <div className="cart-item1">
           <Image>
             <img
@@ -240,7 +237,7 @@ export default function CartItem(props) {
           </Image>
 
           <div>
-            <StyledLink>{productName}</StyledLink>
+            <StyledLink to={`/productdetail?id=${variant.product.id}`}>{productName}</StyledLink>
             <p className="variant-text">
               {variant.variantAttributes.map((item, index) => {
                 return (
@@ -255,7 +252,9 @@ export default function CartItem(props) {
         </div>
 
         <span className="cart-item2">
-          <p className="price">{price}</p>
+          <p className="price">
+            <FaDollarSign /> {formatDollar(price)}
+          </p>
         </span>
         <span className="cart-item3">
           <button onClick={() => handleQuanity("-")}>-</button>
@@ -268,7 +267,10 @@ export default function CartItem(props) {
           />
           <button onClick={() => handleQuanity("+")}>+</button>
         </span>
-        <span className="cart-item4">{totalPrice ? totalPrice : 0}</span>
+        <span className="cart-item4">
+          <FaDollarSign />
+          {formatDollar(totalPrice ? totalPrice : 0)}
+        </span>
         <span className="cart-item5" onClick={deleteCartBtn}>
           <FaRegTrashAlt />
         </span>

@@ -43,7 +43,7 @@ export default function UserLayout() {
   useEffect(() => {
     WebFont.load({
       google: {
-        families: ["Poppins"],
+        families: ["Poppins", "Open Sans"],
       },
     });
   }, []);

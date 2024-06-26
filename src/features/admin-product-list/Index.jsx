@@ -21,7 +21,6 @@ const Container = styled.div`
   margin: auto;
   max-width: 75rem;
   font-size: 14px;
-  min-height: 40rem;
   padding: 3rem 0;
 
   display: flex;
@@ -61,6 +60,8 @@ const Content = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+
+  min-height: 50rem;
 `;
 
 const Footer = styled.div`
@@ -69,9 +70,9 @@ const Footer = styled.div`
 
 const TableContent = styled.table`
   border-collapse: collapse;
+  width: 100%;
 
   font-size: 0.9em;
-  min-width: 400px;
 
   overflow: hidden;
 
@@ -297,196 +298,203 @@ export default function AdminProductList() {
         </button>
       </Header>
       <Content>
-        <FilterBar>
-          <FilterCotainer>
-            <button ref={buttonRef} onClick={() => setOnShowDropDown((prev) => !prev)}>
-              <IoFilterOutline />
-              Filter
-            </button>
-            {onShowDropDown && (
-              <FilterDropDown ref={dropDownRef}>
-                <h4>Filter by categories:</h4>
-                <SelectMultiple
-                  state={categorySelect}
-                  setState={setCategorySelect}
-                  options={transformCategoriesData()}
-                />
-              </FilterDropDown>
-            )}
-          </FilterCotainer>
-          <TextInput
-            state={displaySearch}
-            setState={(value) => {
-              setDisplaySearch(value);
-            }}
-            placeholder={"Search"}
-          />
-          <SelectInput
-            state={pageSize}
-            options={pageOptions}
-            setState={(value) => {
-              setSearchParams({ currentpage: currentPage, pagesize: value.value, search: search });
-              setPageSize(value);
-            }}
-          />
-        </FilterBar>
-        <TableContent>
-          <thead>
-            <tr>
-              <th style={{ width: "65%" }}>NAME</th>
-              <th>AVAILABLE</th>
-              <th>ON STOCK</th>
-              <th>ACTIVE</th>
-              <th>TYPE</th>
-              <th>ACTION</th>
-            </tr>
-          </thead>
-          <tbody>
-            {getAdminProductRequest.isSuccess ? (
-              getAdminProductRequest.data.data.map((item, index) => {
-                return (
-                  <React.Fragment key={index}>
-                    <tr>
-                      <DisplayName>
-                        <div>
-                          <img
-                            src={
-                              import.meta.env.VITE_API_IMAGE_PATH + item.productImages[0].imageName
-                            }
-                          />
-                        </div>
-                        <div>
-                          <Link to={`/admin/product?id=${item.id}`}>{item.name}</Link>{" "}
-                          <span>{item.variants.length} variants</span>
-                        </div>
-                      </DisplayName>
-                      <td>
-                        {item.variants.reduce((accumulator, currentValue) => {
-                          return accumulator + currentValue.availableQuanity;
-                        }, 0)}
-                      </td>
-                      <td>
-                        {item.variants.reduce((accumulator, currentValue) => {
-                          return accumulator + currentValue.quanity;
-                        }, 0)}
-                      </td>
-                      <td>{item.isActive == true ? "ACTIVE" : "UNACTIVE"}</td>
-                      <td>{item.category.name}</td>
-                      <td>
-                        {!showMore.includes(index) && (
-                          <button
-                            onClick={() => {
-                              setShowMore((prev) => {
-                                if (prev.includes(index)) {
-                                  return prev.filter((item) => item != index);
-                                }
-                                return [...prev, index];
-                              });
-
-                              setInputs((prev) => {
-                                return { ...prev, [index]: JSON.parse(JSON.stringify(item)) };
-                              });
-                            }}
-                          >
-                            More
-                            <MdOutlineExpandMore />
-                          </button>
-                        )}
-
-                        {showMore.includes(index) && (
-                          <button
-                            onClick={() => {
-                              setShowMore((prev) => {
-                                if (prev.includes(index)) {
-                                  return prev.filter((item) => item != index);
-                                }
-                                return [...prev, index];
-                              });
-
-                              setInputs((prev) => {
-                                return { ...prev, [index]: null };
-                              });
-                            }}
-                          >
-                            Hide
-                            <MdOutlineExpandLess />
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                    {showMore.includes(index) && (
+        <div>
+          <FilterBar>
+            <FilterCotainer>
+              <button ref={buttonRef} onClick={() => setOnShowDropDown((prev) => !prev)}>
+                <IoFilterOutline />
+                Filter
+              </button>
+              {onShowDropDown && (
+                <FilterDropDown ref={dropDownRef}>
+                  <h4>Filter by categories:</h4>
+                  <SelectMultiple
+                    state={categorySelect}
+                    setState={setCategorySelect}
+                    options={transformCategoriesData()}
+                  />
+                </FilterDropDown>
+              )}
+            </FilterCotainer>
+            <TextInput
+              state={displaySearch}
+              setState={(value) => {
+                setDisplaySearch(value);
+              }}
+              placeholder={"Search"}
+            />
+            <SelectInput
+              state={pageSize}
+              options={pageOptions}
+              setState={(value) => {
+                setSearchParams({
+                  currentpage: currentPage,
+                  pagesize: value.value,
+                  search: search,
+                });
+                setPageSize(value);
+              }}
+            />
+          </FilterBar>
+          <TableContent>
+            <thead>
+              <tr>
+                <th style={{ width: "50%" }}>NAME</th>
+                <th>AVAILABLE</th>
+                <th>ON STOCK</th>
+                <th>ACTIVE</th>
+                <th>TYPE</th>
+                <th>ACTION</th>
+              </tr>
+            </thead>
+            <tbody>
+              {getAdminProductRequest.isSuccess ? (
+                getAdminProductRequest.data.data.map((item, index) => {
+                  return (
+                    <React.Fragment key={index}>
                       <tr>
-                        <td colSpan={"100%"}>
-                          <Variants>
-                            <VariantDetail>
-                              <h4></h4>
-                              <h4>Sale Price</h4>
-                              <h4>Compare Price</h4>
-                              <h4>Available Quantity</h4>
-                            </VariantDetail>
-                            {inputs[index].variants.map((item, index) => {
-                              const name = [];
-                              item.variantAttributes.forEach((item, index) =>
-                                name.push(item.attributeValue)
-                              );
-                              return (
-                                <VariantDetail key={index}>
-                                  <h4>{name.join("/")}</h4>
-                                  <div>
-                                    <NumberInput
-                                      state={item.price}
-                                      setState={(value) => {
-                                        item.price = value;
-                                        setInputs({ ...inputs });
-                                      }}
-                                    />
-                                  </div>
+                        <DisplayName>
+                          <div>
+                            <img
+                              src={
+                                import.meta.env.VITE_API_IMAGE_PATH +
+                                item.productImages[0].imageName
+                              }
+                            />
+                          </div>
+                          <div>
+                            <Link to={`/admin/product?id=${item.id}`}>{item.name}</Link>{" "}
+                            <span>{item.variants.length} variants</span>
+                          </div>
+                        </DisplayName>
+                        <td>
+                          {item.variants.reduce((accumulator, currentValue) => {
+                            return accumulator + currentValue.availableQuanity;
+                          }, 0)}
+                        </td>
+                        <td>
+                          {item.variants.reduce((accumulator, currentValue) => {
+                            return accumulator + currentValue.quanity;
+                          }, 0)}
+                        </td>
+                        <td>{item.isActive == true ? "ACTIVE" : "UNACTIVE"}</td>
+                        <td>{item.category.name}</td>
+                        <td>
+                          {!showMore.includes(index) && (
+                            <button
+                              onClick={() => {
+                                setShowMore((prev) => {
+                                  if (prev.includes(index)) {
+                                    return prev.filter((item) => item != index);
+                                  }
+                                  return [...prev, index];
+                                });
 
-                                  <div>
-                                    <NumberInput
-                                      state={item.salePrice}
-                                      setState={(value) => {
-                                        item.salePrice = value;
-                                        setInputs({ ...inputs });
-                                      }}
-                                    />
-                                  </div>
-                                  <div>
-                                    <NumberInput
-                                      state={item.availableQuanity}
-                                      setState={(value) => {
-                                        item.availableQuanity = value;
-                                        setInputs({ ...inputs });
-                                      }}
-                                    />
-                                  </div>
-                                </VariantDetail>
-                              );
-                            })}
-                            <VariantDetail>
-                              <span></span>
-                              <span></span>
-                              <span></span>
-                              <SaveButton onClick={() => onMakeChanges(inputs[index])}>
-                                save
-                              </SaveButton>
-                            </VariantDetail>
-                          </Variants>
+                                setInputs((prev) => {
+                                  return { ...prev, [index]: JSON.parse(JSON.stringify(item)) };
+                                });
+                              }}
+                            >
+                              More
+                              <MdOutlineExpandMore />
+                            </button>
+                          )}
+
+                          {showMore.includes(index) && (
+                            <button
+                              onClick={() => {
+                                setShowMore((prev) => {
+                                  if (prev.includes(index)) {
+                                    return prev.filter((item) => item != index);
+                                  }
+                                  return [...prev, index];
+                                });
+
+                                setInputs((prev) => {
+                                  return { ...prev, [index]: null };
+                                });
+                              }}
+                            >
+                              Hide
+                              <MdOutlineExpandLess />
+                            </button>
+                          )}
                         </td>
                       </tr>
-                    )}
-                  </React.Fragment>
-                );
-              })
-            ) : (
-              <tr>
-                <td>
-                  <WaitingIcon />
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </TableContent>
+                      {showMore.includes(index) && (
+                        <tr>
+                          <td colSpan={"100%"}>
+                            <Variants>
+                              <VariantDetail>
+                                <h4></h4>
+                                <h4>Sale Price</h4>
+                                <h4>Compare Price</h4>
+                                <h4>Available Quantity</h4>
+                              </VariantDetail>
+                              {inputs[index].variants.map((item, index) => {
+                                const name = [];
+                                item.variantAttributes.forEach((item, index) =>
+                                  name.push(item.attributeValue)
+                                );
+                                return (
+                                  <VariantDetail key={index}>
+                                    <h4>{name.join("/")}</h4>
+                                    <div>
+                                      <NumberInput
+                                        state={item.price}
+                                        setState={(value) => {
+                                          item.price = value;
+                                          setInputs({ ...inputs });
+                                        }}
+                                      />
+                                    </div>
+
+                                    <div>
+                                      <NumberInput
+                                        state={item.salePrice}
+                                        setState={(value) => {
+                                          item.salePrice = value;
+                                          setInputs({ ...inputs });
+                                        }}
+                                      />
+                                    </div>
+                                    <div>
+                                      <NumberInput
+                                        state={item.availableQuanity}
+                                        setState={(value) => {
+                                          item.availableQuanity = value;
+                                          setInputs({ ...inputs });
+                                        }}
+                                      />
+                                    </div>
+                                  </VariantDetail>
+                                );
+                              })}
+                              <VariantDetail>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <SaveButton onClick={() => onMakeChanges(inputs[index])}>
+                                  save
+                                </SaveButton>
+                              </VariantDetail>
+                            </Variants>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td>
+                    <WaitingIcon />
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </TableContent>
+        </div>
         <Footer>
           {getAdminProductRequest.isSuccess && (
             <ProductPagination

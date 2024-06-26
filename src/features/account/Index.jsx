@@ -12,6 +12,7 @@ const Container = styled.div`
   max-width: 1230px;
   padding: 15px;
   margin: 0 auto;
+  min-height: 50rem;
 `;
 
 const BreadCrumb = styled.div`

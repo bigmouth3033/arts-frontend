@@ -7,8 +7,6 @@ const customer = async () => {
 };
 
 export const CustomerRequest = () => {
-  const token = localStorage.getItem("ACCESS_TOKEN");
-
   const query = useQuery({
     queryKey: ["customer"],
     queryFn: customer,

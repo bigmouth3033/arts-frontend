@@ -76,6 +76,10 @@ export default function ProductPagination({ currentPage, totalPage, setCurrentPa
     setRenderPage(paginate());
   }, [currentPage]);
 
+  // useEffect(() => {
+  //   setCurrentPage(1);
+  // }, [totalPage]);
+
   return (
     <Container>
       <Icon onClick={() => setCurrentPage(1)} disabled={currentPage == 1}>

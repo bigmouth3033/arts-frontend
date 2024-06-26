@@ -1,8 +1,8 @@
-import axiosClient from "@/shared/api/axiosClient";
+import axiosAdmin from "@/shared/api/axiosAdmin";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 const onCreateEmployee = async (payload) => {
-  const response = await axiosClient.post("user/create-employee", payload);
+  const response = await axiosAdmin.post("user/create-employee", payload);
   return response.data;
 };
 
@@ -15,7 +15,7 @@ export const CreateEmployeeRequest = () => {
 };
 
 const onGetEmployee = async (pageNumber, pageSize = 20) => {
-  const response = await axiosClient.get("user/get-employee", {
+  const response = await axiosAdmin.get("user/get-employee", {
     params: {
       pageNumber: pageNumber,
       pageSize: pageSize,

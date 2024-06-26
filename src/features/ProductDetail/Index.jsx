@@ -8,6 +8,7 @@ import WaitingPopUp from "@/shared/components/PopUp/WaitingPopUp";
 import { GetProductVariantDetailRequest } from "./api/productDetailApi";
 import { FaAngleRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import ProductReview from "./components/ProductReview";
 
 const ProductSingleContainer = styled.div`
   max-width: 1280px;
@@ -52,7 +53,7 @@ export default function ProductDetail() {
         variant={getProductVariantDetailRequest.data.data}
         request={getProductDetailRequest}
       />
-
+      <ProductReview data={getProductDetailRequest.data.data} />
       <ProductRelated />
     </ProductSingleContainer>
   );

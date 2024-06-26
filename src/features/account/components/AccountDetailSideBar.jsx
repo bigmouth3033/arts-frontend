@@ -89,7 +89,12 @@ export default function AccountDetailSideBar({ data }) {
     <Container>
       <WrapItemAvatar>
         <div>
-          <Avatar name={data.fullname} round size="2.4rem" />
+          <Avatar
+            src={import.meta.env.VITE_API_IMAGE_PATH + data.avatar}
+            name={data.fullname}
+            round
+            size="2.4rem"
+          />
         </div>
         <StyledAvatarText>
           <StyledSpan>Account of</StyledSpan> {data.fullname}

@@ -16,11 +16,20 @@ const Input = styled(Select)`
   }
 `;
 
-export default function SelectInput({ state, setState, options, selectRef }) {
+export default function SelectInput({ state, setState, options, selectRef, placeholder }) {
   useEffect(() => {
     if (state == null) {
       setState(options[0]);
     }
   });
-  return <Input ref={selectRef} value={state} onChange={setState} options={options} isSearchable />;
+  return (
+    <Input
+      placeholder={placeholder}
+      ref={selectRef}
+      value={state}
+      onChange={setState}
+      options={options}
+      isSearchable
+    />
+  );
 }

@@ -28,6 +28,23 @@ const Header = styled.div`
     font-size: 1.4rem;
     font-weight: 400;
   }
+
+  > button {
+    cursor: pointer;
+    background-color: #2962ff;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: white;
+    border: none;
+    font-size: 15px;
+    padding: 10px;
+    border-radius: 5px;
+  }
+
+  > button:hover {
+    background-color: #0052cc;
+  }
 `;
 
 const Content = styled.div`
@@ -36,7 +53,6 @@ const Content = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 2rem 3rem;
 `;
 
 const Footer = styled.div`

@@ -28,7 +28,8 @@ const ProductFilter = ({
   handlePriceRadioChange,
   categoryData,
   selectedCategory,
-  selectedPrice,
+  priceMin,
+  priceMax,
 }) => {
   return (
     <StyleProductFilter>
@@ -37,10 +38,11 @@ const ProductFilter = ({
         handleChange={handleChange}
         categoryData={categoryData}
       />
-      {/* <PriceFilter
-        selectedPrice={selectedPrice}
+      <PriceFilter
+        priceMin={priceMin}
+        priceMax={priceMax}
         handlePriceRadioChange={handlePriceRadioChange}
-      /> */}
+      />
     </StyleProductFilter>
   );
 };

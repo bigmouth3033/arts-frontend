@@ -16,6 +16,7 @@ import { readCategoriesData } from "@/shared/utils/readCategoriesData";
 import arts from "@/shared/assets/images/ArTS.svg";
 import { GetCartQuantityRequest } from "./api/cartQuantityApi";
 import { Link } from "react-router-dom";
+import Avatar from "react-avatar";
 
 const StyledContainer = styled.div`
   background-color: #0272c0;
@@ -116,12 +117,13 @@ const UserDropDown = styled.div`
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   border-radius: 5px;
 
-  > button {
+  > a {
     background-color: white;
     width: 100%;
     border: none;
     cursor: pointer;
     padding: 10px 2rem;
+    text-decoration: none;
 
     &:hover {
       background-color: #f5f5fa;
@@ -129,16 +131,19 @@ const UserDropDown = styled.div`
   }
 
   &:hover {
-    display: block;
+    display: flex;
+    flex-direction: column;
   }
 `;
 
 const UserContainer = styled.div`
   display: flex;
   color: white;
+  cursor: pointer;
 
   &:hover + div {
-    display: block;
+    display: flex;
+    flex-direction: column;
   }
 `;
 
@@ -231,21 +236,30 @@ export default function UserNavbar() {
               />
               <div>
                 <UserContainer>
-                  <FaUser
-                    onClick={() => {
-                      if (customerRequest.isError) {
-                        setIsPopUpVisible(true);
-                        setIsLoginForm(true);
-                      }
-                    }}
-                  />
+                  {customerRequest.isSuccess ? (
+                    <Avatar
+                      round
+                      size="2rem"
+                      name={customerRequest.data.data.fullname}
+                      src={import.meta.env.VITE_API_IMAGE_PATH + customerRequest.data.data.avatar}
+                    />
+                  ) : (
+                    <FaUser
+                      onClick={() => {
+                        if (customerRequest.isError) {
+                          setIsPopUpVisible(true);
+                          setIsLoginForm(true);
+                        }
+                      }}
+                    />
+                  )}
                   {customerRequest.isSuccess && <FaSortDown />}
                 </UserContainer>
                 {customerRequest.isSuccess && (
                   <UserDropDown>
-                    <button>Account detail</button>
-                    <button>My order</button>
-                    <button
+                    <Link to={"/account/account-information"}>Account detail</Link>
+                    <Link>My order</Link>
+                    <Link
                       onClick={() => {
                         localStorage.removeItem("ACCESS_TOKEN");
                         customerRequest.refetch();
@@ -253,7 +267,7 @@ export default function UserNavbar() {
                       }}
                     >
                       Logout
-                    </button>
+                    </Link>
                   </UserDropDown>
                 )}
               </div>

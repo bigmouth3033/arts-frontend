@@ -1,8 +1,8 @@
-import axiosClient from "./axiosClient";
+import axiosAdmin from "./axiosAdmin";
 import { useQuery } from "@tanstack/react-query";
 
 const admin = async () => {
-  const response = await axiosClient.get("auth/admin");
+  const response = await axiosAdmin.get("auth/admin");
   return response.data;
 };
 

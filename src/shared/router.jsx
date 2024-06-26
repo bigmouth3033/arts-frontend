@@ -14,7 +14,9 @@ import Cart from "@/features/customer-cart/Index";
 import ProductDetail from "@/features/ProductDetail/Index";
 import Account from "@/features/account/Index";
 import AccountInformation from "@/features/account-information/Index";
-import AccountAddress from "@/features/account-address/Index";
+import AccountAddress from "@/features/account-address/AccountAddress";
+import CustomerPayment from "@/features/customer-payment/Index";
+import AdminOrder from "@/features/admin-order/Index";
 
 const router = createBrowserRouter([
   {
@@ -51,6 +53,10 @@ const router = createBrowserRouter([
         path: "cart",
         element: <Cart />,
       },
+      {
+        path: "payment",
+        element: <CustomerPayment />,
+      },
     ],
   },
   {
@@ -76,6 +82,10 @@ const router = createBrowserRouter([
       {
         path: "product",
         element: <AdminProductDetail />,
+      },
+      {
+        path: "order",
+        element: <AdminOrder />,
       },
     ],
   },

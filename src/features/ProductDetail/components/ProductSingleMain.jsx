@@ -25,6 +25,7 @@ import { CreateCartItemRequest } from "../api/productDetailApi";
 import SuccessPopUp from "@/shared/components/PopUp/SuccessPopUp";
 import ErrorPopUp from "@/shared/components/PopUp/ErrorPopUp";
 import { useQueryClient } from "@tanstack/react-query";
+import formatDollar from "@/shared/utils/FormatDollar";
 
 const Container = styled.div`
   margin: 1rem 0;
@@ -538,7 +539,7 @@ export default function ProductSingleMain({ data, variant, request }) {
                       {index == 1 && <span>-</span>}
                       <h4 key={index}>
                         <FaDollarSign />
-                        {item}
+                        {formatDollar(item)}
                       </h4>
                     </>
                   );
@@ -551,7 +552,7 @@ export default function ProductSingleMain({ data, variant, request }) {
                       {index == 1 && <span>-</span>}
                       <h4 key={index}>
                         <FaDollarSign />
-                        {item}
+                        {formatDollar(item)}
                       </h4>
                     </>
                   );
@@ -562,11 +563,11 @@ export default function ProductSingleMain({ data, variant, request }) {
             <Prices>
               <h4>
                 <FaDollarSign />
-                {onGetVariant().price}
+                {formatDollar(onGetVariant().price)}
               </h4>
               <h4>
                 <FaDollarSign />
-                {onGetVariant().salePrice}
+                {formatDollar(onGetVariant().salePrice)}
               </h4>
             </Prices>
           )}
@@ -694,7 +695,7 @@ export default function ProductSingleMain({ data, variant, request }) {
             <TotalAmount>
               <h3>Total amount</h3>
               <h2>
-                <FaDollarSign /> {onGetVariant().price * quantity}
+                <FaDollarSign /> {formatDollar(onGetVariant().price * quantity)}
               </h2>
             </TotalAmount>
           )}

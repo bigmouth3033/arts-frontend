@@ -2,124 +2,91 @@ import React from "react";
 import styled from "styled-components";
 import { useState } from "react";
 import ProductFilter from "./ProductFilter";
+import NumberInput from "@/shared/components/Input/NumberInput";
 
 const StylePriceBlock = styled.div`
-  & h2 {
-    font-weight: normal;
-  }
-  font-size: small;
+  border-top: 1px solid lightgray;
+  margin: 2rem auto;
+  padding-top: 1.7rem;
 `;
 
-const StylePriceTitle = styled.div`
-  display: inline-block;
+const StylePriceTilte = styled.div`
+  & h2 {
+    font-size: 1.2rem;
+    font-weight: 300;
+    margin-bottom: 0.5rem;
+  }
 `;
+
 const StylePriceContent = styled.div`
   display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
+  flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  margin: 0.2rem;
-`;
 
-const StyleInputRadio = styled.input`
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  width: 1rem;
-  height: 1rem;
-  border-radius: 50%;
-  border: 2px solid #ccc;
-  outline: none;
-  transition: border-color 0.2s ease-in-out;
-  position: relative;
-  cursor: pointer;
+  .price-input-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 
-  &:before {
-    content: "";
-    display: block;
-    width: 0.75rem;
-    height: 0.75rem;
-    border-radius: 50%;
-    background-color: transparent;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    transition: background-color 0.2s ease-in-out;
+    input {
+      width: 4rem;
+      height: fit-content;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.5rem;
+    }
   }
 
-  &:checked {
-    border-color: lightpink;
+  .apply-button {
+    padding: 0.5rem 0.5rem;
+    background-color: #5dc4ff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
 
-    &:before {
-      background-color: #c781fd;
+    &:hover {
+      background-color: #d48fff;
     }
   }
 `;
 
-// Price Filter Block in Sidebar of Product Listing Page
-const PriceFilter = ({ handlePriceRadioChange }) => {
-  const [selectedPrice, setSelectedPrice] = useState(null);
+const PriceFilter = ({ handlePriceRadioChange, priceMin, priceMax }) => {
+  const [localPriceMin, setLocalPriceMin] = useState(priceMin);
+  const [localPriceMax, setLocalPriceMax] = useState(priceMax);
 
-  //handle which price range is selected
-  const handlePriceChange = (priceValue) => {
-    setSelectedPrice(parseInt(priceValue));
-    handlePriceRadioChange(parseInt(priceValue)); // Call the handleChange prop with the selected price value
+  const handleMinPriceChange = (value) => {
+    setLocalPriceMin(value);
+  };
+
+  const handleMaxPriceChange = (value) => {
+    setLocalPriceMax(value);
+  };
+
+  const handleApplyFilter = () => {
+    handlePriceRadioChange(localPriceMin, localPriceMax);
   };
 
   return (
     <StylePriceBlock>
-      <h2>Price</h2>
+      <StylePriceTilte>
+        <h2>Price</h2>
+      </StylePriceTilte>
+
       <StylePriceContent>
-        <StyleInputRadio
-          type="radio"
-          name="price"
-          value={0}
-          checked={selectedPrice === 0}
-          onChange={(event) => handlePriceChange(event.target.value)}
-        />
-        <StylePriceTitle>All</StylePriceTitle>
-      </StylePriceContent>
-      <StylePriceContent>
-        <StyleInputRadio
-          type="radio"
-          name="price"
-          value={50}
-          checked={selectedPrice === 50}
-          onChange={(event) => handlePriceChange(event.target.value)}
-        />
-        <StylePriceTitle>0 - $50</StylePriceTitle>
-      </StylePriceContent>
-      <StylePriceContent>
-        <StyleInputRadio
-          type="radio"
-          name="price"
-          value={100}
-          checked={selectedPrice === 100}
-          onChange={(event) => handlePriceChange(event.target.value)}
-        />
-        <StylePriceTitle>$50 - $100</StylePriceTitle>
-      </StylePriceContent>
-      <StylePriceContent>
-        <StyleInputRadio
-          type="radio"
-          name="price"
-          value={200}
-          checked={selectedPrice === 200}
-          onChange={(event) => handlePriceChange(event.target.value)}
-        />
-        <StylePriceTitle>$100 - $200</StylePriceTitle>
-      </StylePriceContent>
-      <StylePriceContent>
-        <StyleInputRadio
-          type="radio"
-          name="price"
-          value={201}
-          checked={selectedPrice === 201}
-          onChange={(event) => handlePriceChange(event.target.value)}
-        />
-        <StylePriceTitle>Over $200</StylePriceTitle>
+        <div className="price-input-row">
+          $
+          <NumberInput placeholder="From" state={localPriceMin} setState={handleMinPriceChange} />
+          -
+          <NumberInput placeholder="To" state={localPriceMax} setState={handleMaxPriceChange} />
+        </div>
+
+        <button className="apply-button" onClick={handleApplyFilter}>
+          Apply
+        </button>
       </StylePriceContent>
     </StylePriceBlock>
   );

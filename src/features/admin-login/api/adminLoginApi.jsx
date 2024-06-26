@@ -1,8 +1,8 @@
-import axiosClient from "@/shared/api/axiosClient";
+import axiosAdmin from "@/shared/api/axiosAdmin";
 import { useMutation } from "@tanstack/react-query";
 
 const login = async (payload) => {
-  const response = await axiosClient.post("auth/admin-login", payload);
+  const response = await axiosAdmin.post("auth/admin-login", payload);
   return response.data;
 };
 

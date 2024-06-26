@@ -6,16 +6,25 @@ const readCustomerProducts = async (
   pageSize,
   pageNumber,
   sort,
-  searchValue
+  searchValue,
+  priceRangeMin,
+  priceRangeMax
 ) => {
+  const paramObject = {
+    categoryId: categoryId,
+    pageSize: pageSize,
+    pageNumber: pageNumber,
+    sort: sort,
+    searchValue: searchValue,
+  };
+  if (priceRangeMin) {
+    paramObject.priceRangeMin = priceRangeMin;
+  }
+  if (priceRangeMax) {
+    paramObject.priceRangeMax = priceRangeMax;
+  }
   const response = await axiosClient.get("product/listing-page", {
-    params: {
-      categoryId: categoryId,
-      pageSize: pageSize,
-      pageNumber: pageNumber,
-      sort: sort,
-      searchValue: searchValue,
-    },
+    params: paramObject,
   });
 
   return response.data;
@@ -25,17 +34,29 @@ export const ReadCustomerProductsRequest = (
   categoryId,
   pageSize,
   sort,
-  searchValue
+  searchValue,
+  priceRangeMin,
+  priceRangeMax
 ) => {
   const query = useInfiniteQuery({
-    queryKey: ["CustomerProducts", categoryId, pageSize, sort, searchValue],
+    queryKey: [
+      "CustomerProducts",
+      categoryId,
+      pageSize,
+      sort,
+      searchValue,
+      priceRangeMin,
+      priceRangeMax,
+    ],
     queryFn: ({ pageParam = 1 }) => {
       return readCustomerProducts(
         categoryId,
         pageSize,
         pageParam,
         sort,
-        searchValue
+        searchValue,
+        priceRangeMin,
+        priceRangeMax
       );
     },
     intialPageParam: 1,

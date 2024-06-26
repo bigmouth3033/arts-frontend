@@ -611,12 +611,11 @@ export default function AdminProductNew() {
       if (!isValidFileType) {
         setImageError(true);
         // Clear the file input if the file type is invalid
-
         return;
       }
 
       dispatch({ type: ACTIONS.CHANGE_IMAGES, next: [...state.images, ...ev.target.files] });
-      ev.target.value = null;
+      ev.target.files = null;
     }
   };
 

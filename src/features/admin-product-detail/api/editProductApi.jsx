@@ -1,9 +1,9 @@
-import axiosClient from "@/shared/api/axiosClient";
+import axiosAdmin from "@/shared/api/axiosAdmin";
 import { useMutation } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
 
 const onUploadNewImage = async (payload) => {
-  const response = await axiosClient.post("product/add-images", payload);
+  const response = await axiosAdmin.post("product/add-images", payload);
   return response.data;
 };
 
@@ -14,7 +14,7 @@ export const UploadImageRequest = () => {
 };
 
 const onDeleteImage = async (payload) => {
-  const response = await axiosClient.delete("product/remove-image", {
+  const response = await axiosAdmin.delete("product/remove-image", {
     params: {
       imageId: payload.imageId,
     },
@@ -28,7 +28,7 @@ export const DeleteImageRequest = () => {
 };
 
 const onGetProductAdmin = async (id) => {
-  const response = await axiosClient.get("product/admin", {
+  const response = await axiosAdmin.get("product/admin", {
     params: {
       id: id,
     },

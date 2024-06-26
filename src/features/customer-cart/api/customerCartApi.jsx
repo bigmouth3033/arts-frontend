@@ -43,14 +43,36 @@ export const DeleteCartByIdMutation = () => {
   return mutation;
 };
 
-export const GetTotalAmountByCartsId = async (cartsId) => {
-  const response = await axiosClient.post(`Cart/TotalAmount`, cartsId);
+const GetTotalAmountByUserId = async () => {
+  const response = await axiosClient.get(`Cart/TotalAmount`);
   return response.data;
 };
 
-export const GetTotalAmountByCartsIdRequest = () => {
+export const GetTotalAmountByUserIdQuery = () => {
+  const query = useQuery({
+    queryKey: ["cart-totalAmount"],
+    queryFn: GetTotalAmountByUserId,
+  });
+  return query;
+};
+
+const PutAllCartChecked = async (payload) => {
+  const response = await axiosClient.put(`Cart/UpdateAllCartChecked`, payload);
+  return response.data;
+};
+export const PutAllCartCheckedMutate = () => {
   const mutation = useMutation({
-    mutationFn: GetTotalAmountByCartsId,
+    mutationFn: PutAllCartChecked,
+  });
+  return mutation;
+};
+const PutCartCheckedById = async (payload) => {
+  const response = await axiosClient.put(`Cart/UpdateCartCheckedById`, payload);
+  return response.data;
+};
+export const PutCartCheckedByIdMutate = () => {
+  const mutation = useMutation({
+    mutationFn: PutCartCheckedById,
   });
   return mutation;
 };

@@ -15,7 +15,7 @@ const StyleListingPage = styled.div`
   display: grid;
   grid-template-columns: 1fr 4fr;
   margin: 0 auto;
-  max-width: 1280px;
+  max-width: 1230px;
   padding-left: 15px;
   padding-right: 15px;
   width: 100%;
@@ -48,7 +48,8 @@ const StyleRight = styled.div`
 
 const ListingPage = () => {
   const [selectedCategory, setSelectedCategory] = useState(0);
-  const [selectedPrice, setSelectedPrice] = useState(null);
+  const [priceMin, setPriceMin] = useState(null);
+  const [priceMax, setPriceMax] = useState(null);
   const [searchValue, setSearchValue] = useState("");
   const [sort, setSort] = useState();
   const pageSize = 2;
@@ -59,19 +60,21 @@ const ListingPage = () => {
     selectedCategory,
     pageSize,
     sort?.value,
-    searchValue
+    searchValue,
+    priceMin,
+    priceMax
   ); //category ID, pageSize
+
+  //------------Radio Price Filter---------------
+  const handlePriceRadioChange = (priceMin, priceMax) => {
+    setPriceMin(priceMin);
+    setPriceMax(priceMax);
+  };
 
   //------------Radio Cate Filter---------------
   const handleChange = (categoryId) => {
     setSelectedCategory(categoryId);
   };
-
-  //------------Radio Price Filter---------------
-  const handlePriceRadioChange = (PriceValue) => {
-    setSelectedPrice(PriceValue);
-  };
-
   //------------SEARCH---------------------------
   const handleSearchChange = (searchValue) => {
     setSearchValue(searchValue);
@@ -87,7 +90,8 @@ const ListingPage = () => {
       <StyleListingPage>
         <ProductFilter
           selectedCategory={selectedCategory}
-          selectedPrice={selectedPrice}
+          priceMin={priceMin}
+          priceMax={priceMax}
           handleChange={handleChange}
           handlePriceRadioChange={handlePriceRadioChange}
           categoryData={readCategories.data.data}
