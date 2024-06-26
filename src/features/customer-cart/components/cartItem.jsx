@@ -213,6 +213,10 @@ export default function CartItem(props) {
       onSuccess: (res) => {
         queryClient.invalidateQueries({ queryKey: ["user-cart"] });
         queryClient.invalidateQueries({ queryKey: ["cart-totalAmount"] });
+
+        if (res.status == 203) {
+          alert("product is not available or quantity is larger than available quantity");
+        }
       },
     });
   };

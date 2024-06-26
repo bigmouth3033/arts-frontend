@@ -89,6 +89,10 @@ export default function Cart() {
         console.log(res);
         queryClient.invalidateQueries({ queryKey: ["user-cart"] });
         queryClient.invalidateQueries({ queryKey: ["cart-totalAmount"] });
+
+        if (res.status == 201) {
+          alert("Some product can not be select");
+        }
       },
     });
   };
