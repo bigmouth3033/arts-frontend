@@ -8,7 +8,6 @@ import Footer from "@/features/User/footer/Index";
 import { ReadCategoryRequest } from "../api/categoryApi";
 import { ReadTypeRequest } from "../api/typeApi";
 import CustomerChatBox from "@/features/CustomerChatBox/Index";
-import ProductRelated from "@/features/ProductDetail/components/ProductRelated";
 
 const Container = styled.div`
   font-size: 14px;
@@ -34,10 +33,7 @@ export default function UserLayout() {
   const readTypeRequest = ReadTypeRequest();
 
   if (readCategoryRequest.isSuccess) {
-    localStorage.setItem(
-      "categories",
-      JSON.stringify(readCategoryRequest.data.data)
-    );
+    localStorage.setItem("categories", JSON.stringify(readCategoryRequest.data.data));
   }
 
   if (readTypeRequest.isSuccess) {

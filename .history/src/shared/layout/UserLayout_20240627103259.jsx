@@ -56,6 +56,8 @@ export default function UserLayout() {
     <Container>
       <UserNavbar />
       <OutletContainer>
+        <ProductRelated />
+        <ProductRelated />
         <Outlet />
       </OutletContainer>
       <Footer />
