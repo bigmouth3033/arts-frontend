@@ -73,12 +73,17 @@ export default function ProductPagination({ currentPage, totalPage, setCurrentPa
   };
 
   useEffect(() => {
-    setRenderPage(paginate());
-  }, [currentPage]);
+    const total = paginate();
+    setRenderPage(total);
+
+    if (totalPage < currentPage) {
+      setCurrentPage(1);
+    }
+  }, [currentPage, totalPage]);
 
   // useEffect(() => {
   //   setCurrentPage(1);
-  // }, [totalPage]);
+  // }, []);
 
   return (
     <Container>
@@ -96,7 +101,10 @@ export default function ProductPagination({ currentPage, totalPage, setCurrentPa
           </Button>
         );
       })}
-      <Icon onClick={() => setCurrentPage(totalPage)} disabled={currentPage == totalPage}>
+      <Icon
+        onClick={() => setCurrentPage(totalPage)}
+        disabled={currentPage == totalPage || totalPage == 0}
+      >
         <MdKeyboardDoubleArrowRight />
       </Icon>
     </Container>

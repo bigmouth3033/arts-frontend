@@ -9,6 +9,8 @@ import { GetProductVariantDetailRequest } from "./api/productDetailApi";
 import { FaAngleRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import ProductReview from "./components/ProductReview";
+import image404 from "./assets/404.png";
+import { useNavigate } from "react-router-dom";
 
 const ProductSingleContainer = styled.div`
   max-width: 1280px;
@@ -31,14 +33,48 @@ const BreadCrumb = styled.div`
   }
 `;
 
+const NoProduct = styled.div`
+  margin: 5rem auto;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  width: fit-content;
+  align-items: center;
+  gap: 1rem;
+
+  > p {
+    font-size: 15px;
+  }
+
+  > button {
+    background-color: white;
+    color: #0b74e5;
+    border-radius: 5px;
+    border: 1px solid #0b74e5;
+    padding: 8px 8px;
+    cursor: pointer;
+  }
+`;
+
 export default function ProductDetail() {
   let [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const getProductDetailRequest = GetProductDetailRequest(searchParams.get("id"));
   const getProductVariantDetailRequest = GetProductVariantDetailRequest(searchParams.get("id"));
 
   if (getProductDetailRequest.isLoading || getProductVariantDetailRequest.isLoading) {
     return <WaitingPopUp />;
+  }
+
+  if (getProductDetailRequest.data.data == null) {
+    return (
+      <NoProduct>
+        <img src={image404} />
+        <p>The page you are looking for does not exist</p>
+        <button onClick={() => navigate("/")}>Continue Shopping</button>
+      </NoProduct>
+    );
   }
 
   return (

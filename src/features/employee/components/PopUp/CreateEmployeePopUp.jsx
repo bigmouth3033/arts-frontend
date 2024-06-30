@@ -6,10 +6,16 @@ import TextInput from "@/shared/components/Input/TextInput";
 import { LuImagePlus } from "react-icons/lu";
 import { CreateEmployeeRequest } from "../../api/employeeApi";
 import { useQueryClient } from "@tanstack/react-query";
+import XButton from "@/shared/components/Button/XButton";
 
 const StyledPopUp = styled(PopUp)`
+  padding: 1rem;
   & #upload-input {
     display: none;
+  }
+
+  & .red {
+    color: red;
   }
 `;
 
@@ -21,11 +27,23 @@ const Content = styled.div`
 
 const Header = styled.div`
   & h4 {
-    font-size: 18px;
+    font-size: 16px;
+  }
+
+  display: flex;
+  justify-content: space-between;
+
+  > svg {
+    transform: translate(100%, -100%);
+    background-color: white;
+    &:hover {
+      background-color: white;
+    }
   }
 `;
 
 const UploadImageButtonn = styled.button`
+  border-radius: 50%;
   background-color: white;
   width: 6rem;
   aspect-ratio: 1/1;
@@ -41,7 +59,21 @@ const UploadImageButtonn = styled.button`
   }
 `;
 
-const Footer = styled.div``;
+const Footer = styled.div`
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+
+  > button {
+    background-color: white;
+    color: #0b74e5;
+    border-radius: 5px;
+    border: 1px solid #0b74e5;
+    padding: 8px 8px;
+    cursor: pointer;
+  }
+`;
 
 const ImageContainer = styled.div`
   background-color: white;
@@ -49,6 +81,8 @@ const ImageContainer = styled.div`
   aspect-ratio: 1/1;
   border: 1px dotted rgba(0, 0, 0, 0.4);
   cursor: pointer;
+  border-radius: 50%;
+  overflow: hidden;
 
   > img {
     display: block;
@@ -73,6 +107,7 @@ export default function CreateEmployeePopUp({ action }) {
   const inputRef = useRef();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [avatar, setAvatar] = useState();
@@ -125,9 +160,20 @@ export default function CreateEmployeePopUp({ action }) {
       });
     }
 
+    if (name == "") {
+      setErrors((prev) => {
+        return { ...prev, nameError: "Please fill up employee name" };
+      });
+    } else {
+      setErrors((prev) => {
+        return { ...prev, nameError: null };
+      });
+    }
+
     const formData = new FormData();
     formData.append("Email", email);
     formData.append("Password", password);
+    formData.append("FullName", name);
     formData.append("Address", address);
     formData.append("Phone", phoneNumber);
     formData.append("Avatar", avatar);
@@ -156,6 +202,7 @@ export default function CreateEmployeePopUp({ action }) {
       <input type="file" ref={inputRef} onChange={handleImageChange} id="upload-input" />
       <Header>
         <h4>Create new Employee</h4>
+        <XButton action={action} />
       </Header>
       <Content>
         <div>
@@ -165,17 +212,27 @@ export default function CreateEmployeePopUp({ action }) {
             </UploadImageButtonn>
           ) : (
             <ImageContainer>
-              <img src={URL.createObjectURL(avatar)} />
+              <img onClick={onClickUpload} src={URL.createObjectURL(avatar)} />
             </ImageContainer>
           )}
         </div>
         <div>
-          <label>Email</label>
+          <label>
+            Email <span className="red">*</span>
+          </label>
           <TextInput state={email} setState={(value) => setEmail(value)} />
         </div>
         <div>
-          <label>Password</label>
-          <TextInput state={password} setState={(value) => setPassword(value)} />
+          <label>
+            Password <span className="red">*</span>
+          </label>
+          <TextInput type={"password"} state={password} setState={(value) => setPassword(value)} />
+        </div>
+        <div>
+          <label>
+            Full name <span className="red">*</span>
+          </label>
+          <TextInput state={name} setState={(value) => setName(value)} />
         </div>
         <div>
           <label>Address</label>

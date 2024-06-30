@@ -63,7 +63,7 @@ const Footer = styled.div`
   }
 `;
 
-export default function CardPopUp({ action }) {
+export default function CardPopUp({ action, submit }) {
   const [state, setState] = useState({
     number: "",
     expiry: "",
@@ -71,6 +71,30 @@ export default function CardPopUp({ action }) {
     name: "",
     focus: "",
   });
+
+  const onSubmit = () => {
+    if (state.number.length != 16) {
+      alert("cart number must be 16 number");
+      return;
+    }
+
+    if (state.name.length == 0) {
+      alert("name not must be empty");
+      return;
+    }
+
+    if (state.expiry.length != 4) {
+      alert("wrong expire date");
+      return;
+    }
+
+    if (state.cvc.length != 3) {
+      alert("wrong cvc number");
+      return;
+    }
+
+    submit();
+  };
 
   return (
     <StyledPopUp action={() => {}}>
@@ -118,7 +142,7 @@ export default function CardPopUp({ action }) {
         </Form>
       </Content>
       <Footer>
-        <button>Submit</button>
+        <button onClick={() => onSubmit()}>Submit</button>
       </Footer>
     </StyledPopUp>
   );

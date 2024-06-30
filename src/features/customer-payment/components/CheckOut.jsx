@@ -11,6 +11,8 @@ import CardPopUp from "./CardPopUp";
 import { useSearchParams } from "react-router-dom";
 import { CreatePaymentRequest } from "../api/CustomerPaymentAPI";
 import SuccessPopUp from "@/shared/components/PopUp/SuccessPopUp";
+import ErrorPopUp from "@/shared/components/PopUp/ErrorPopUp";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Container = styled.div`
   display: flex;
@@ -157,6 +159,7 @@ const StyledLink = styled(Link)`
 `;
 
 export default function CheckOut({ cartData, addressData, total, delivery, payment }) {
+  const queryClient = useQueryClient();
   const createPaymentRequest = CreatePaymentRequest();
   const [searchParams, setSearchParams] = useSearchParams();
   const [cardPopUp, setCardPopUp] = useState(false);
@@ -182,7 +185,6 @@ export default function CheckOut({ cartData, addressData, total, delivery, payme
   }, [address]);
 
   const onSubmit = () => {
-    console.log(address.id, payment, delivery);
     const formData = new FormData();
     formData.append("PaymentTypeId", payment);
     formData.append("AddressId", address.id);
@@ -191,6 +193,7 @@ export default function CheckOut({ cartData, addressData, total, delivery, payme
     createPaymentRequest.mutate(formData, {
       onSuccess: (response) => {
         if (response.status == 200) {
+          queryClient.invalidateQueries({ queryKey: ["cart-quantity"] });
           setPaySuccess(true);
           return;
         }
@@ -247,7 +250,17 @@ export default function CheckOut({ cartData, addressData, total, delivery, payme
                 <FaDollarSign /> {formatDollar((delivery == 1 ? 5 : 3) + total)}
               </span>
             </div>
-            <button onClick={() => onSubmit()}>Order</button>
+            <button
+              onClick={() => {
+                if (payment == 9) {
+                  setCardPopUp(true);
+                  return;
+                }
+                onSubmit();
+              }}
+            >
+              Order
+            </button>
           </PaymentTotal>
         </PaymentBox>
       </Container>
@@ -261,7 +274,7 @@ export default function CheckOut({ cartData, addressData, total, delivery, payme
           action={() => setChangeAddress(false)}
         />
       )}
-      {cardPopUp && <CardPopUp action={() => setCardPopUp(false)} />}
+      {cardPopUp && <CardPopUp submit={onSubmit} action={() => setCardPopUp(false)} />}
       {paySuccess && (
         <SuccessPopUp
           action={() => {

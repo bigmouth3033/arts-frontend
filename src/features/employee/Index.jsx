@@ -6,8 +6,11 @@ import WaitingPopUp from "@/shared/components/PopUp/WaitingPopUp";
 import EmployeePagination from "./components/pagination/EmployeePagination";
 import WaitingIcon from "@/shared/components/AnimationIcon/WaitingIcon";
 import { useSearchParams } from "react-router-dom";
-import Skeleton from "react-loading-skeleton";
-import "react-loading-skeleton/dist/skeleton.css";
+import ConfirmPopUp from "@/shared/components/PopUp/ConfirmPopUp";
+import ProductPagination from "../admin-product-list/components/pagination/ProductPagination";
+import { ActivateEmployeeRequest } from "./api/employeeApi";
+import { DeActivateEmployeeRequest } from "./api/employeeApi";
+import UpdateEmployeePopUp from "./components/PopUp/UpdateEmployeePopUp";
 
 const Container = styled.div`
   margin: auto;
@@ -61,7 +64,7 @@ const Footer = styled.div`
 
 const TableContent = styled.table`
   border-collapse: collapse;
-  margin: 25px 0;
+
   font-size: 0.9em;
   min-width: 400px;
 
@@ -95,25 +98,80 @@ const TableContent = styled.table`
     font-weight: bold;
     color: #009879;
   }
+
+  & .action {
+    > button {
+      background-color: white;
+      color: #0b74e5;
+      border-radius: 5px;
+      border: 1px solid #0b74e5;
+      padding: 5px 8px;
+      cursor: pointer;
+      &:hover {
+        color: red;
+      }
+    }
+
+    display: flex;
+    gap: 10px;
+  }
 `;
 
 export default function Employee() {
+  const activateEmployeeRequest = ActivateEmployeeRequest();
+  const deActivateEmployeeRequest = DeActivateEmployeeRequest();
   const [searchParams, setSearchParams] = useSearchParams();
   const [createPopUp, setCreatePopUp] = useState();
   const [totalPage, setTotalPage] = useState(1);
   const [currentPage, setCurrentPage] = useState(searchParams.get("currentpage") || 1);
-  const [pageSize, setPageSize] = useState(searchParams.get("pagesize") || 20);
-  const getEmployeeRequest = GetEmployeeRequest(currentPage, pageSize);
+  const getEmployeeRequest = GetEmployeeRequest(currentPage, 20);
+  const [acitveConfirm, setActiveConfirm] = useState(false);
+  const [deactiveConfirm, setDeactiveConfirm] = useState(false);
+  const [confirmMessage, setConfirmMessage] = useState("");
+  const [chosenEmployee, setChosenEmployee] = useState();
 
-  useEffect(() => {
-    if (getEmployeeRequest.isSuccess) {
-      setTotalPage(getEmployeeRequest.data.totalPages);
-    }
-  }, [getEmployeeRequest.status]);
+  const [update, setUpdate] = useState(false);
 
-  const onChangePage = (page) => {
-    setSearchParams({ currentpage: currentPage, pagesize: pageSize });
-    setCurrentPage(page);
+  if (getEmployeeRequest.isLoading) {
+    return <WaitingPopUp />;
+  }
+
+  const onClickActive = (user) => {
+    setChosenEmployee(user);
+    setConfirmMessage("Are you sure you want to active " + user.fullname);
+    setActiveConfirm(true);
+  };
+
+  const onClickDeactive = (user) => {
+    setChosenEmployee(user);
+    setConfirmMessage("Are you sure you want to deactive " + user.fullname);
+    setDeactiveConfirm(true);
+  };
+
+  const onActivate = (user) => {
+    const formData = new FormData();
+    formData.append("userId", user.id);
+
+    activateEmployeeRequest.mutate(formData, {
+      onSuccess: (response) => {
+        if (response.status == 200) {
+          getEmployeeRequest.refetch();
+        }
+      },
+    });
+  };
+
+  const onDeactivate = (user) => {
+    const formData = new FormData();
+    formData.append("userId", user.id);
+
+    deActivateEmployeeRequest.mutate(formData, {
+      onSuccess: (response) => {
+        if (response.status == 200) {
+          getEmployeeRequest.refetch();
+        }
+      },
+    });
   };
 
   return (
@@ -146,9 +204,20 @@ export default function Employee() {
                     <td>{item.phoneNumber || "_"}</td>
                     <td>{item.active ? "True" : "False"}</td>
                     <td>{item.address || "_"}</td>
-                    <td>
-                      <button>Active</button>
-                      <button>Update</button>
+                    <td className="action">
+                      {item.active == true ? (
+                        <button onClick={() => onClickDeactive(item)}>Deactive</button>
+                      ) : (
+                        <button onClick={() => onClickActive(item)}>Active</button>
+                      )}
+                      <button
+                        onClick={() => {
+                          setUpdate(true);
+                          setChosenEmployee(item);
+                        }}
+                      >
+                        Update
+                      </button>
                     </td>
                   </tr>
                 );
@@ -163,14 +232,42 @@ export default function Employee() {
           </tbody>
         </TableContent>
         <Footer>
-          <EmployeePagination
+          <ProductPagination
             currentPage={currentPage}
-            setCurrentPage={onChangePage}
-            totalPage={totalPage}
+            setCurrentPage={setCurrentPage}
+            totalPage={getEmployeeRequest.data.totalPages}
           />
         </Footer>
       </Content>
       {createPopUp && <CreateEmployeePopUp action={() => setCreatePopUp(false)} />}
+      {acitveConfirm && (
+        <ConfirmPopUp
+          message={confirmMessage}
+          cancel={() => setActiveConfirm(false)}
+          confirm={() => {
+            onActivate(chosenEmployee);
+            setActiveConfirm(false);
+          }}
+        />
+      )}
+      {deactiveConfirm && (
+        <ConfirmPopUp
+          message={confirmMessage}
+          cancel={() => setDeactiveConfirm(false)}
+          confirm={() => {
+            onDeactivate(chosenEmployee);
+            setDeactiveConfirm(false);
+          }}
+        />
+      )}
+      {update && (
+        <UpdateEmployeePopUp
+          action={() => {
+            setUpdate(false);
+          }}
+          employee={chosenEmployee}
+        />
+      )}
     </Container>
   );
 }

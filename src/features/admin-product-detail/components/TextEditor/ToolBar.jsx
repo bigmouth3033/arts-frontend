@@ -46,7 +46,6 @@ const ToolBar = ({ editor }) => {
 
   return (
     <MenuBar>
-      <FaImages onClick={addImage} />
       <FaAlignLeft
         onClick={() => editor.chain().focus().setTextAlign("left").run()}
         className={editor.isActive({ textAlign: "left" }) ? "is-active" : ""}

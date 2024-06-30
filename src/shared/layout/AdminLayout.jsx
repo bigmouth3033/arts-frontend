@@ -58,7 +58,7 @@ export default function AdminLayout() {
   useEffect(() => {
     WebFont.load({
       google: {
-        families: ["Poppins"],
+        families: ["Poppins", "Open Sans"],
       },
     });
   }, []);

@@ -49,9 +49,16 @@ const Button = styled.div`
   gap: 1rem;
 
   > button {
-    background-color: white;
     cursor: pointer;
-    padding: 5px 15px;
+    color: white;
+    background-color: #2962ff;
+    border: none;
+    padding: 0.3rem 1rem;
+    border-radius: 5px;
+
+    &:hover {
+      background-color: #0052cc;
+    }
   }
 `;
 

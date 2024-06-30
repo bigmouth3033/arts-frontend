@@ -53,6 +53,7 @@ const WrapItem = styled(Link)`
   font-size: 13px;
   cursor: pointer;
   display: flex;
+  color: #551a99;
 
   align-items: center;
   padding: 0.5rem 0;
@@ -109,13 +110,7 @@ export default function AccountDetailSideBar({ data }) {
         </div>
         <span>Account information</span>
       </WrapItem>
-      <WrapItem>
-        <div>
-          <IoIosNotifications />
-        </div>
-        <span>My Notifications</span>
-      </WrapItem>
-      <WrapItem>
+      <WrapItem $active={location.pathname.includes("order")} to={"order"}>
         <div>
           <MdOutlineBorderColor />
         </div>
@@ -135,46 +130,11 @@ export default function AccountDetailSideBar({ data }) {
       </WrapItem>
       <WrapItem>
         <div>
-          <MdOutlinePayment />
-        </div>
-        <span>Payment Information </span>
-      </WrapItem>
-      <WrapItem>
-        <div>
           <MdReviews />
         </div>
         <span>Product Reviews</span>
       </WrapItem>
-      <WrapItem>
-        <div>
-          <FaEye />
-        </div>
-        <span>Products you've viewed</span>
-      </WrapItem>
-      <WrapItem>
-        <div>
-          <MdFavorite />
-        </div>
-        <span>Favorite Products</span>
-      </WrapItem>
-      <WrapItem>
-        <div>
-          <IoStarHalfOutline />
-        </div>
-        <span>My Comment</span>
-      </WrapItem>
-      <WrapItem>
-        <div>
-          <FaMoneyBillWave />
-        </div>
-        <span>Discount Code</span>
-      </WrapItem>
-      <WrapItem>
-        <div>
-          <FaBook />
-        </div>
-        <span>My Bookcare</span>
-      </WrapItem>
+
       <WrapItem>
         <div>
           <FaHeadphonesAlt />

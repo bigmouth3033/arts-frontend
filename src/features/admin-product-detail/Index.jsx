@@ -34,6 +34,8 @@ import { useSearchParams } from "react-router-dom";
 import WaitingPopUp from "@/shared/components/PopUp/WaitingPopUp";
 import { DeleteImageRequest, UploadImageRequest } from "./api/editProductApi";
 import { Link } from "react-router-dom";
+import InputCheckBox from "@/shared/components/Input/InputCheckBox";
+import formatDollar from "@/shared/utils/FormatDollar";
 
 const StyledFaRegQuestionCircle = styled(FaRegQuestionCircle)`
   cursor: pointer;
@@ -301,11 +303,28 @@ const UnitContainer = styled.div`
 
 const VariantDetailContainer = styled.div``;
 
+const VariantDetailGrid = styled.div`
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  align-items: center;
+
+  > div:nth-of-type(1) {
+    display: flex;
+    justify-content: center;
+    padding-left: 3px;
+  }
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+`;
+
 const VariantDetail = styled.div`
   display: flex;
   justify-content: space-between;
+
   padding: 1rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+
   align-items: center;
 
   > div:nth-of-type(1) {
@@ -344,9 +363,6 @@ const VariantDetail = styled.div`
   }
 
   cursor: pointer;
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-  }
 `;
 
 const DoneContainer = styled.div`
@@ -397,7 +413,7 @@ const ImageLayout = styled.div`
   background: rgba(0, 0, 0, 0);
   cursor: pointer;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding: 5px;
 
   > svg {
@@ -409,9 +425,8 @@ const ImageLayout = styled.div`
   }
 
   > svg:nth-of-type(1) {
-    align-self: center;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2rem;
+    height: 2rem;
     margin-left: 30px;
     background-color: rgba(0, 0, 0, 0);
     color: white;
@@ -438,8 +453,8 @@ const VariantImage = styled.img`
 `;
 
 const VariantDetailHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 3rem 1fr auto;
   padding: 1rem;
   align-items: center;
 
@@ -539,6 +554,8 @@ const StyledLink = styled(Link)`
 
 const regex = /^-?\d+(\.\d+)?$/;
 
+const moneyRegex = /^(?=.*\d)\d*(?:\.\d*)?$/;
+
 export default function AdminProductDetail() {
   const readCategoryRequest = ReadCategoryRequest();
   const readTypeRequest = ReadTypeRequest();
@@ -562,6 +579,7 @@ export default function AdminProductDetail() {
   const [editComparePrice, setEditComparePrice] = useState(false);
   const [editAmount, setEditAmount] = useState(false);
   const [showWarranty, setShowWarranty] = useState(false);
+  const [variantChosen, setVariantChosen] = useState([]);
 
   const [state, dispatch, ACTIONS] = useCreateProductReducer();
   const inputRef = useRef();
@@ -588,13 +606,13 @@ export default function AdminProductDetail() {
 
       [...ev.target.files].forEach((newFile) => formData.append("Images", newFile));
 
-      formData.append("ProductId", getProductDetailRequest.data.data.id);
+      formData.append("ProductId", getProductAdminDetailRequest.data.data.id);
 
       uploadImageRequest.mutate(formData, {
         onSuccess: (response) => {
           if (response.status == 200) {
             dispatch({ type: ACTIONS.CHANGE_IMAGES, next: [...state.images, ...response.data] });
-            ev.target.value = null;
+            ev.target.files = null;
           }
         },
       });
@@ -664,7 +682,73 @@ export default function AdminProductDetail() {
   };
 
   const onCreateProduct = () => {
-    console.log(state);
+    console.log(state.variant_detail);
+    // if (state.productName.length == 0) {
+    //   setErrorMessage("Product need to have a name");
+    //   setError(true);
+    //   return;
+    // }
+
+    // if (state.images.length == 0) {
+    //   setErrorMessage("Product need atlest one image");
+    //   setError(true);
+    //   return;
+    // }
+
+    // if (state.variants.length != 0 && state.variant_detail.length == 0) {
+    //   setErrorMessage("You need to add variant or turn off variants");
+    //   setError(true);
+
+    //   return;
+    // }
+
+    // if (state.variants.length == 0 && state.variant_detail.length == 0 && state.price == 0) {
+    //   setErrorMessage("Product need to be priced");
+    //   setError(true);
+    //   return;
+    // }
+
+    // const variantWithOutPrice = state.variant_detail.find((item) => {
+    //   return item.sellPrice == 0;
+    // });
+
+    // if (variantWithOutPrice) {
+    //   setErrorMessage(`Every variant need to have a price`);
+    //   setError(true);
+    //   return;
+    // }
+
+    // const formData = new FormData();
+    // formData.append("ProductName", state.productName);
+    // formData.append("Category", state.category.value);
+    // formData.append("Description", state.description);
+    // formData.append("Price", state.price);
+    // formData.append("SalePrice", state.salePrice);
+    // formData.append("Amount", state.amount);
+    // formData.append("Unit", state.unit);
+    // formData.append("Active", state.active);
+    // formData.append("Warranty", state.warrantyTime ? state.warrantyTime : 0);
+
+    // state.images.forEach((item) => formData.append("Images", item));
+    // state.variants.forEach((item) => {
+    //   var copy = item;
+    //   copy.id = item.option.value;
+    //   formData.append("variantsJSON[]", JSON.stringify(copy));
+    // });
+    // state.variant_detail.forEach((item) => {
+    //   formData.append("VariantDetailsJSON[]", JSON.stringify(item));
+    // });
+
+    // createProductRequest.mutate(formData, {
+    //   onSuccess: (response) => {
+    //     if (response.status == 200) {
+    //       navigate(`/admin/product?id=${response.data.id}`);
+    //     }
+    //   },
+    //   onError: (response) => {
+    //     console.log(response);
+    //   },
+    // });
   };
 
   useEffect(() => {
@@ -784,8 +868,6 @@ export default function AdminProductDetail() {
                       return (
                         <ImageItem key={index}>
                           <ImageLayout>
-                            <span></span>
-                            <CiImageOn data-tooltip-id="change_image" />
                             <AiOutlineClose
                               onClick={() => {
                                 dispatch({
@@ -834,7 +916,7 @@ export default function AdminProductDetail() {
                       <TextInput
                         state={state.price}
                         setState={(value) => {
-                          if (regex.test(value) || value == "") {
+                          if (moneyRegex.test(value) || value == "") {
                             dispatch({ type: ACTIONS.CHANGE_PRICE, next: value });
                           }
                         }}
@@ -844,7 +926,7 @@ export default function AdminProductDetail() {
                     <div>
                       <h5>Compare price</h5>
                       <TextInput
-                        state={state.salePrice}
+                        state={moneyRegex.salePrice}
                         setState={(value) => {
                           if (regex.test(value) || value == "") {
                             dispatch({ type: ACTIONS.CHANGE_SALE_PRICE, next: value });
@@ -874,7 +956,7 @@ export default function AdminProductDetail() {
               <hr />
               <ContentItem>
                 <InputCheckContainer>
-                  <input
+                  <InputCheckBox
                     checked={showUnit}
                     onChange={() => {
                       setShowUnit((prev) => !prev);
@@ -905,7 +987,7 @@ export default function AdminProductDetail() {
               <hr />
               <ContentItem>
                 <InputCheckContainer>
-                  <input
+                  <InputCheckBox
                     onChange={() => {
                       setShowWarranty((prev) => {
                         if (prev) {
@@ -967,6 +1049,20 @@ export default function AdminProductDetail() {
                       {checkVariantExist() && (
                         <VariantDetailContainer>
                           <VariantDetailHeader>
+                            <div>
+                              <InputCheckBox
+                                checked={
+                                  variantChosen.length == state.variant_detail.length ? true : false
+                                }
+                                onChange={() => {
+                                  if (variantChosen.length == state.variant_detail.length) {
+                                    setVariantChosen([]);
+                                  } else {
+                                    setVariantChosen(state.variant_detail);
+                                  }
+                                }}
+                              />
+                            </div>
                             <div>{state.variant_detail.length} Variants</div>
                             <div>
                               <EditButton onClick={() => setDropDown((prev) => !prev)}>
@@ -976,6 +1072,7 @@ export default function AdminProductDetail() {
                               {dropDown && (
                                 <DropDown>
                                   <button
+                                    disabled={variantChosen.length == 0}
                                     onClick={() => {
                                       setDropDown(false);
                                       setEditPrice(true);
@@ -984,6 +1081,7 @@ export default function AdminProductDetail() {
                                     Edit price
                                   </button>
                                   <button
+                                    disabled={variantChosen.length == 0}
                                     onClick={() => {
                                       setEditComparePrice(true);
                                       setDropDown(false);
@@ -992,6 +1090,7 @@ export default function AdminProductDetail() {
                                     Edit compare at price
                                   </button>
                                   <button
+                                    disabled={variantChosen.length == 0}
                                     onClick={() => {
                                       setEditAmount(true);
                                       setDropDown(false);
@@ -1006,40 +1105,56 @@ export default function AdminProductDetail() {
                           <hr />
                           {state.variant_detail.map((item, key) => {
                             return (
-                              <VariantDetail
-                                key={key}
-                                onClick={(ev) => {
-                                  ev.stopPropagation();
-                                  setChosenVariantDetail(item);
-                                  setVariantDetailPopUp(true);
-                                }}
-                              >
+                              <VariantDetailGrid key={key}>
                                 <div>
-                                  {item.variantImage !== null ? (
-                                    <VariantImage
-                                      onClick={(ev) => {
-                                        ev.stopPropagation();
-                                        setChosenImageState(item);
-                                        setImagePopUp(true);
-                                      }}
-                                      src={import.meta.env.VITE_API_IMAGE_PATH + item.variantImage}
-                                    />
-                                  ) : (
-                                    <CiImageOn
-                                      onClick={(ev) => {
-                                        ev.stopPropagation();
-                                        setChosenImageState(item);
-                                        setImagePopUp(true);
-                                      }}
-                                    />
-                                  )}
-                                  {item.variant.join("/")}
+                                  <InputCheckBox
+                                    onChange={() =>
+                                      setVariantChosen((prev) => {
+                                        if (prev.includes(item)) {
+                                          return prev.filter((i) => i != item);
+                                        }
+                                        return [...prev, item];
+                                      })
+                                    }
+                                    checked={variantChosen.includes(item)}
+                                  />
                                 </div>
-                                <div>
-                                  <p>{item.price} $ </p>
-                                  <p>{item.availableQuanity} sellable in inventory</p>
-                                </div>
-                              </VariantDetail>
+                                <VariantDetail
+                                  onClick={(ev) => {
+                                    ev.stopPropagation();
+                                    setChosenVariantDetail(item);
+                                    setVariantDetailPopUp(true);
+                                  }}
+                                >
+                                  <div>
+                                    {item.variantImage !== null ? (
+                                      <VariantImage
+                                        onClick={(ev) => {
+                                          ev.stopPropagation();
+                                          setChosenImageState(item);
+                                          setImagePopUp(true);
+                                        }}
+                                        src={
+                                          import.meta.env.VITE_API_IMAGE_PATH + item.variantImage
+                                        }
+                                      />
+                                    ) : (
+                                      <CiImageOn
+                                        onClick={(ev) => {
+                                          ev.stopPropagation();
+                                          setChosenImageState(item);
+                                          setImagePopUp(true);
+                                        }}
+                                      />
+                                    )}
+                                    {item.variant.join("/")}
+                                  </div>
+                                  <div>
+                                    <p>{formatDollar(item.price)} $ </p>
+                                    <p>{item.availableQuanity} sellable in inventory</p>
+                                  </div>
+                                </VariantDetail>
+                              </VariantDetailGrid>
                             );
                           })}
                         </VariantDetailContainer>
@@ -1100,7 +1215,7 @@ export default function AdminProductDetail() {
       {editPrice && (
         <SalePricePopUp
           action={() => setEditPrice(false)}
-          state={state.variant_detail}
+          state={variantChosen}
           setState={() => {
             dispatch({ type: ACTIONS.CHANGE_VARIANT_DETAIL, next: state.variant_detail });
           }}
@@ -1109,7 +1224,7 @@ export default function AdminProductDetail() {
       {editComparePrice && (
         <ComparePricePopUp
           action={() => setEditComparePrice(false)}
-          state={state.variant_detail}
+          state={variantChosen}
           setState={() => {
             dispatch({ type: ACTIONS.CHANGE_VARIANT_DETAIL, next: state.variant_detail });
           }}
@@ -1120,7 +1235,7 @@ export default function AdminProductDetail() {
           setState={() => {
             dispatch({ type: ACTIONS.CHANGE_VARIANT_DETAIL, next: state.variant_detail });
           }}
-          state={state.variant_detail}
+          state={variantChosen}
           action={() => setEditAmount(false)}
         />
       )}

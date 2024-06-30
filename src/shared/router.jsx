@@ -10,19 +10,28 @@ import Employee from "@/features/employee/Index";
 import ListingPage from "@/features/listing-page/ListingPage";
 import AdminProductDetail from "@/features/admin-product-detail/Index";
 import Cart from "@/features/customer-cart/Index";
-
 import ProductDetail from "@/features/ProductDetail/Index";
 import Account from "@/features/account/Index";
 import AccountInformation from "@/features/account-information/Index";
 import AccountAddress from "@/features/account-address/AccountAddress";
 import CustomerPayment from "@/features/customer-payment/Index";
 import AdminOrder from "@/features/admin-order/Index";
+import AdminOrderDetail from "@/features/admin-order-detail/Index";
+import AccountOrder from "@/features/account-order/Index";
+import AccountOrderDetail from "@/features/account-order-detail/Index";
+import AccountExchangeRequest from "@/features/account-exchange-request/Index";
+import AccountManageExchange from "@/features/account-manage-exchange/Index";
+import Homepage from "@/features/homepage/Index";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <UserLayout />,
     children: [
+      {
+        path: "",
+        element: <Homepage />,
+      },
       {
         path: "test",
         element: <Test />,
@@ -42,6 +51,22 @@ const router = createBrowserRouter([
           {
             path: "address",
             element: <AccountAddress />,
+          },
+          {
+            path: "order",
+            element: <AccountOrder />,
+          },
+          {
+            path: "order-detail",
+            element: <AccountOrderDetail />,
+          },
+          {
+            path: "exchange-request",
+            element: <AccountExchangeRequest />,
+          },
+          {
+            path: "manage-exchange",
+            element: <AccountManageExchange />,
           },
         ],
       },
@@ -87,6 +112,7 @@ const router = createBrowserRouter([
         path: "order",
         element: <AdminOrder />,
       },
+      { path: "order-detail", element: <AdminOrderDetail /> },
     ],
   },
   {

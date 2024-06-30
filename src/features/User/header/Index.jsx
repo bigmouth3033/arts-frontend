@@ -258,7 +258,7 @@ export default function UserNavbar() {
                 {customerRequest.isSuccess && (
                   <UserDropDown>
                     <Link to={"/account/account-information"}>Account detail</Link>
-                    <Link>My order</Link>
+                    <Link to={"/account/order"}>My order</Link>
                     <Link
                       onClick={() => {
                         localStorage.removeItem("ACCESS_TOKEN");

@@ -7,6 +7,7 @@ import AccountDetailSideBar from "./components/AccountDetailSideBar";
 import { CustomerRequest } from "@/shared/api/customerApi";
 import { useNavigate } from "react-router-dom";
 import WaitingPopUp from "@/shared/components/PopUp/WaitingPopUp";
+import { useLocation } from "react-router-dom";
 
 const Container = styled.div`
   max-width: 1230px;
@@ -36,10 +37,15 @@ const Content = styled.div`
   margin: 1rem 0;
 `;
 
+const StyledLink = styled(Link)`
+  color: #551a99;
+`;
+
 const OutletContainter = styled.div``;
 
 export default function Account() {
   const customerRequest = CustomerRequest();
+  const location = useLocation();
 
   const navigate = useNavigate();
 
@@ -55,8 +61,28 @@ export default function Account() {
   return (
     <Container>
       <BreadCrumb>
-        <Link>Home</Link> <FaAngleRight />
-        <Link>Account</Link>
+        <StyledLink>Home</StyledLink> <FaAngleRight />
+        {location.pathname.includes("account-information") && (
+          <StyledLink to={"/account/account-information"}>Account</StyledLink>
+        )}
+        {(location.pathname.includes("order") || location.pathname.includes("exchange")) && (
+          <StyledLink to={"/account/order"}>Order Management</StyledLink>
+        )}
+        {location.pathname.includes("address") && (
+          <StyledLink to={"/account/address"}>Address</StyledLink>
+        )}
+        {location.pathname.includes("order-detail") && (
+          <>
+            <FaAngleRight />
+            <StyledLink onClick={(ev) => ev.preventDefault()}>My Order</StyledLink>
+          </>
+        )}
+        {location.pathname.includes("exchange-request") && (
+          <>
+            <FaAngleRight />
+            <StyledLink onClick={(ev) => ev.preventDefault()}>Exchage Request</StyledLink>
+          </>
+        )}
       </BreadCrumb>
       <Content>
         <AccountDetailSideBar data={customerRequest.data.data} />

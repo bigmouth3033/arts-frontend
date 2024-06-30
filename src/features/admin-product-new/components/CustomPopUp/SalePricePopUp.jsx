@@ -95,7 +95,7 @@ const ContentBody = styled.div`
   }
 `;
 
-const regex = /^-?\d+(\.\d+)?$/;
+const regex = /^(?=.*\d)\d*(?:\.\d*)?$/;
 
 export default function SalePricePopUp({ action, state, setState }) {
   const [allPrice, setAllPrice] = useState("");

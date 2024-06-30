@@ -33,20 +33,8 @@ const MenuBar = styled.div`
 `;
 
 const ToolBar = ({ editor }) => {
-  const addImage = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-
-    input.click();
-
-    if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
-    }
-  };
-
   return (
     <MenuBar>
-      <FaImages onClick={addImage} />
       <FaAlignLeft
         onClick={() => editor.chain().focus().setTextAlign("left").run()}
         className={editor.isActive({ textAlign: "left" }) ? "is-active" : ""}

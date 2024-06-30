@@ -202,6 +202,10 @@ const FilterDropDown = styled.div`
   z-index: 1;
 `;
 
+const StyledLink = styled(Link)`
+  text-decoration: none;
+`;
+
 const pageOptions = [
   { value: 5, label: "5 items" },
   { value: 10, label: "10 items" },
@@ -222,6 +226,7 @@ export default function AdminProductList() {
       ? pageOptions.find((item) => item.value == searchParams.get("pagesize"))
       : null
   );
+
   const [showMore, setShowMore] = useState([]);
   const [inputs, setInputs] = useState({});
   const [search, setSearch] = useState(searchParams.get("search") || "");
@@ -363,7 +368,7 @@ export default function AdminProductList() {
                             />
                           </div>
                           <div>
-                            <Link to={`/admin/product?id=${item.id}`}>{item.name}</Link>{" "}
+                            <StyledLink to={`/admin/product?id=${item.id}`}>{item.name}</StyledLink>{" "}
                             <span>{item.variants.length} variants</span>
                           </div>
                         </DisplayName>

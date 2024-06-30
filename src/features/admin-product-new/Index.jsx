@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import TextEditor from "./components/TextEditor/TextEditor";
 import CustomInput from "./components/Input/CustomInput";
 import SelectInput from "@/shared/components/Input/SelectInput";
@@ -33,6 +33,8 @@ import Switch from "@/shared/components/Input/Switch";
 import { Tooltip } from "react-tooltip";
 import { FaRegQuestionCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import InputCheckBox from "@/shared/components/Input/InputCheckBox";
+import formatDollar from "@/shared/utils/FormatDollar";
 
 const StyledFaRegQuestionCircle = styled(FaRegQuestionCircle)`
   cursor: pointer;
@@ -300,11 +302,28 @@ const UnitContainer = styled.div`
 
 const VariantDetailContainer = styled.div``;
 
+const VariantDetailGrid = styled.div`
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  align-items: center;
+
+  > div:nth-of-type(1) {
+    display: flex;
+    justify-content: center;
+    padding-left: 3px;
+  }
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+`;
+
 const VariantDetail = styled.div`
   display: flex;
   justify-content: space-between;
+
   padding: 1rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+
   align-items: center;
 
   > div:nth-of-type(1) {
@@ -343,9 +362,6 @@ const VariantDetail = styled.div`
   }
 
   cursor: pointer;
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-  }
 `;
 
 const DoneContainer = styled.div`
@@ -396,7 +412,7 @@ const ImageLayout = styled.div`
   background: rgba(0, 0, 0, 0);
   cursor: pointer;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding: 5px;
 
   > svg {
@@ -408,9 +424,8 @@ const ImageLayout = styled.div`
   }
 
   > svg:nth-of-type(1) {
-    align-self: center;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2rem;
+    height: 2rem;
     margin-left: 30px;
     background-color: rgba(0, 0, 0, 0);
     color: white;
@@ -437,8 +452,11 @@ const VariantImage = styled.img`
 `;
 
 const VariantDetailHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
+  /* display: flex;
+  justify-content: space-between; */
+
+  display: grid;
+  grid-template-columns: 3rem 1fr auto;
   padding: 1rem;
   align-items: center;
 
@@ -532,6 +550,8 @@ const DiscardButton = styled.button`
 
 const regex = /^-?\d+(\.\d+)?$/;
 
+const moneyRegex = /^(?=.*\d)\d*(?:\.\d*)?$/;
+
 export default function AdminProductNew() {
   const navigate = useNavigate();
   const readCategoryRequest = ReadCategoryRequest();
@@ -551,11 +571,18 @@ export default function AdminProductNew() {
   const [showWarranty, setShowWarranty] = useState(false);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [variantChosen, setVariantChosen] = useState([]);
 
   const [state, dispatch, ACTIONS] = useCreateProductReducer();
   const inputRef = useRef();
 
   const createProductRequest = CreateProductRequest();
+
+  useEffect(() => {
+    if (variantChosen.length != 0) {
+      setVariantChosen([]);
+    }
+  }, [state.variants, state.variant_detail]);
 
   const updateVariant = (value, index) => {
     state.variants[index].option = value;
@@ -758,7 +785,7 @@ export default function AdminProductNew() {
     formData.append("Amount", state.amount);
     formData.append("Unit", state.unit);
     formData.append("Active", state.active);
-    formData.append("Warranty", state.warrantyTime);
+    formData.append("Warranty", state.warrantyTime ? state.warrantyTime : 0);
 
     state.images.forEach((item) => formData.append("Images", item));
     state.variants.forEach((item) => {
@@ -832,8 +859,6 @@ export default function AdminProductNew() {
                       return (
                         <ImageItem key={index}>
                           <ImageLayout>
-                            <span></span>
-                            <CiImageOn data-tooltip-id="change_image" />
                             <AiOutlineClose
                               onClick={() => {
                                 dispatch({
@@ -882,7 +907,7 @@ export default function AdminProductNew() {
                       <TextInput
                         state={state.price}
                         setState={(value) => {
-                          if (regex.test(value) || value == "") {
+                          if (moneyRegex.test(value) || value == "") {
                             dispatch({ type: ACTIONS.CHANGE_PRICE, next: value });
                           }
                         }}
@@ -894,7 +919,7 @@ export default function AdminProductNew() {
                       <TextInput
                         state={state.salePrice}
                         setState={(value) => {
-                          if (regex.test(value) || value == "") {
+                          if (moneyRegex.test(value) || value == "") {
                             dispatch({ type: ACTIONS.CHANGE_SALE_PRICE, next: value });
                           }
                         }}
@@ -922,7 +947,7 @@ export default function AdminProductNew() {
               <hr />
               <ContentItem>
                 <InputCheckContainer>
-                  <input
+                  <InputCheckBox
                     checked={showUnit}
                     onChange={() => {
                       setShowUnit((prev) => {
@@ -933,7 +958,6 @@ export default function AdminProductNew() {
                         return !prev;
                       });
                     }}
-                    type="checkbox"
                   />
                   <span>
                     Variants with multiple units of measurement (e.g., cans, packs, cases...).
@@ -959,7 +983,7 @@ export default function AdminProductNew() {
               <hr />
               <ContentItem>
                 <InputCheckContainer>
-                  <input
+                  <InputCheckBox
                     onChange={() => {
                       setShowWarranty((prev) => {
                         if (prev) {
@@ -969,7 +993,6 @@ export default function AdminProductNew() {
                         return !prev;
                       });
                     }}
-                    type="checkbox"
                   />
                   <span>Include a warranty with this product</span>
                 </InputCheckContainer>
@@ -998,7 +1021,7 @@ export default function AdminProductNew() {
               <hr />
               <ContentItem>
                 <InputCheckContainer>
-                  <input
+                  <InputCheckBox
                     onChange={() => {
                       if (showVariant == false) {
                         dispatch({
@@ -1014,7 +1037,6 @@ export default function AdminProductNew() {
 
                       setShowVariant((prev) => !prev);
                     }}
-                    type="checkbox"
                   />
                   <span>This product has many variants, such as different in size and color</span>
                 </InputCheckContainer>
@@ -1197,6 +1219,20 @@ export default function AdminProductNew() {
                       <VariantDetailContainer>
                         <hr />
                         <VariantDetailHeader>
+                          <div>
+                            <InputCheckBox
+                              checked={
+                                variantChosen.length == state.variant_detail.length ? true : false
+                              }
+                              onChange={() => {
+                                if (variantChosen.length == state.variant_detail.length) {
+                                  setVariantChosen([]);
+                                } else {
+                                  setVariantChosen(state.variant_detail);
+                                }
+                              }}
+                            />
+                          </div>
                           <div>{state.variant_detail.length} Variants</div>
                           <div>
                             <EditButton onClick={() => setDropDown((prev) => !prev)}>
@@ -1206,6 +1242,7 @@ export default function AdminProductNew() {
                             {dropDown && (
                               <DropDown>
                                 <button
+                                  disabled={variantChosen.length == 0}
                                   onClick={() => {
                                     setDropDown(false);
                                     setEditPrice(true);
@@ -1214,6 +1251,7 @@ export default function AdminProductNew() {
                                   Edit price
                                 </button>
                                 <button
+                                  disabled={variantChosen.length == 0}
                                   onClick={() => {
                                     setEditComparePrice(true);
                                     setDropDown(false);
@@ -1222,6 +1260,7 @@ export default function AdminProductNew() {
                                   Edit compare at price
                                 </button>
                                 <button
+                                  disabled={variantChosen.length == 0}
                                   onClick={() => {
                                     setEditAmount(true);
                                     setDropDown(false);
@@ -1236,40 +1275,53 @@ export default function AdminProductNew() {
                         <hr />
                         {state.variant_detail.map((item, key) => {
                           return (
-                            <VariantDetail
-                              key={key}
-                              onClick={(ev) => {
-                                ev.stopPropagation();
-                                setChosenVariantDetail(item);
-                                setVariantDetailPopUp(true);
-                              }}
-                            >
+                            <VariantDetailGrid key={key}>
                               <div>
-                                {item.image !== null ? (
-                                  <VariantImage
-                                    onClick={(ev) => {
-                                      ev.stopPropagation();
-                                      setChosenImageState(item);
-                                      setImagePopUp(true);
-                                    }}
-                                    src={URL.createObjectURL(state.images[item.image])}
-                                  />
-                                ) : (
-                                  <CiImageOn
-                                    onClick={(ev) => {
-                                      ev.stopPropagation();
-                                      setChosenImageState(item);
-                                      setImagePopUp(true);
-                                    }}
-                                  />
-                                )}
-                                {item.variant.join("/")}
+                                <InputCheckBox
+                                  onChange={() =>
+                                    setVariantChosen((prev) => {
+                                      if (prev.includes(item)) {
+                                        return prev.filter((i) => i != item);
+                                      }
+                                      return [...prev, item];
+                                    })
+                                  }
+                                  checked={variantChosen.includes(item)}
+                                />
                               </div>
-                              <div>
-                                <p>{item.sellPrice} $ </p>
-                                <p>{item.inventory} sellable in inventory</p>
-                              </div>
-                            </VariantDetail>
+                              <VariantDetail
+                                onClick={() => {
+                                  setChosenVariantDetail(item);
+                                  setVariantDetailPopUp(true);
+                                }}
+                              >
+                                <div>
+                                  {item.image !== null ? (
+                                    <VariantImage
+                                      onClick={(ev) => {
+                                        ev.stopPropagation();
+                                        setChosenImageState(item);
+                                        setImagePopUp(true);
+                                      }}
+                                      src={URL.createObjectURL(state.images[item.image])}
+                                    />
+                                  ) : (
+                                    <CiImageOn
+                                      onClick={(ev) => {
+                                        ev.stopPropagation();
+                                        setChosenImageState(item);
+                                        setImagePopUp(true);
+                                      }}
+                                    />
+                                  )}
+                                  {item.variant.join("/")}
+                                </div>
+                                <div>
+                                  <p>{formatDollar(item.sellPrice)} $ </p>
+                                  <p>{item.inventory} sellable in inventory</p>
+                                </div>
+                              </VariantDetail>
+                            </VariantDetailGrid>
                           );
                         })}
                       </VariantDetailContainer>
@@ -1329,7 +1381,7 @@ export default function AdminProductNew() {
       {editPrice && (
         <SalePricePopUp
           action={() => setEditPrice(false)}
-          state={state.variant_detail}
+          state={variantChosen}
           setState={() => {
             dispatch({ type: ACTIONS.CHANGE_VARIANT_DETAIL, next: state.variant_detail });
           }}
@@ -1338,7 +1390,7 @@ export default function AdminProductNew() {
       {editComparePrice && (
         <ComparePricePopUp
           action={() => setEditComparePrice(false)}
-          state={state.variant_detail}
+          state={variantChosen}
           setState={() => {
             dispatch({ type: ACTIONS.CHANGE_VARIANT_DETAIL, next: state.variant_detail });
           }}
@@ -1349,7 +1401,7 @@ export default function AdminProductNew() {
           setState={() => {
             dispatch({ type: ACTIONS.CHANGE_VARIANT_DETAIL, next: state.variant_detail });
           }}
-          state={state.variant_detail}
+          state={variantChosen}
           action={() => setEditAmount(false)}
         />
       )}
