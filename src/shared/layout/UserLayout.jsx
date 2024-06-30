@@ -9,6 +9,7 @@ import { ReadCategoryRequest } from "../api/categoryApi";
 import { ReadTypeRequest } from "../api/typeApi";
 import CustomerChatBox from "@/features/CustomerChatBox/Index";
 import ProductRelated from "@/features/ProductDetail/components/ProductRelated";
+import Homepage from "@/features/homePage/Index";
 
 const Container = styled.div`
   font-size: 14px;
@@ -56,6 +57,7 @@ export default function UserLayout() {
     <Container>
       <UserNavbar />
       <OutletContainer>
+        <Homepage />
         <Outlet />
       </OutletContainer>
       <Footer />
