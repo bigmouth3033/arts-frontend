@@ -17,6 +17,7 @@ import arts from "@/shared/assets/images/ArTS.svg";
 import { GetCartQuantityRequest } from "./api/cartQuantityApi";
 import { Link } from "react-router-dom";
 import Avatar from "react-avatar";
+import { SearchProductRequest } from "./api/searchApi";
 
 const StyledContainer = styled.div`
   background-color: #0272c0;
@@ -54,7 +55,6 @@ const StyledSearchBar = styled.div`
   width: 100%;
   margin: auto;
   position: relative;
-  font-style: italic;
 `;
 
 const StyledInputSearch = styled.input`
@@ -200,9 +200,15 @@ const CartQuantity = styled.span`
   transform: translate(15px, -15px);
 `;
 
+const SearchContainer = styled.div`
+  position: absolute;
+`;
+
 export default function UserNavbar() {
   const readCategoryRequest = ReadCategoryRequest();
   const getCartQuantityRequest = GetCartQuantityRequest();
+  const [searchValue, setSearchValue] = useState("");
+  const searchProductRequest = SearchProductRequest(searchValue);
 
   const customerRequest = CustomerRequest();
   const [isPopUpVisible, setIsPopUpVisible] = useState(false);
@@ -226,7 +232,13 @@ export default function UserNavbar() {
           </StyledContainerLogo>
           <Main>
             <StyledSearchBar>
-              <StyledInputSearch type="text" placeholder="Search desired products, categories..." />
+              <StyledInputSearch
+                value={searchValue}
+                onChange={(ev) => setSearchValue(ev.target.value)}
+                type="text"
+                placeholder="Search desired products"
+              />
+              <SearchContainer></SearchContainer>
             </StyledSearchBar>
             <StyledHeaderCustomer>
               <FaHome
@@ -246,7 +258,7 @@ export default function UserNavbar() {
                   ) : (
                     <FaUser
                       onClick={() => {
-                        if (customerRequest.isError) {
+                        if (customerRequest.isError || customerRequest.data == null) {
                           setIsPopUpVisible(true);
                           setIsLoginForm(true);
                         }

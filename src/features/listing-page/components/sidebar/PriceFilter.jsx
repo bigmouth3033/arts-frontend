@@ -40,16 +40,16 @@ const StylePriceContent = styled.div`
   }
 
   .apply-button {
-    padding: 0.5rem 0.5rem;
-    background-color: #5dc4ff;
+    padding: 0.4rem 0.4rem;
+    background-color: #8aaae5;
     color: #fff;
     border: none;
     border-radius: 4px;
-    font-size: 1rem;
+    font-size: 0.8rem;
     cursor: pointer;
 
     &:hover {
-      background-color: #d48fff;
+      background-color: #bb5af7;
     }
   }
 `;
@@ -79,9 +79,17 @@ const PriceFilter = ({ handlePriceRadioChange, priceMin, priceMax }) => {
       <StylePriceContent>
         <div className="price-input-row">
           $
-          <NumberInput placeholder="From" state={localPriceMin} setState={handleMinPriceChange} />
+          <NumberInput
+            placeholder="From"
+            state={localPriceMin}
+            setState={handleMinPriceChange}
+          />
           -
-          <NumberInput placeholder="To" state={localPriceMax} setState={handleMaxPriceChange} />
+          <NumberInput
+            placeholder="To"
+            state={localPriceMax}
+            setState={handleMaxPriceChange}
+          />
         </div>
 
         <button className="apply-button" onClick={handleApplyFilter}>

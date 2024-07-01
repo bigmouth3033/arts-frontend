@@ -10,6 +10,7 @@ import { ReadCategoryRequest } from "@/shared/api/categoryApi";
 import WaitingPopUp from "@/shared/components/PopUp/WaitingPopUp";
 import { ReadCustomerProductsRequest } from "./api/productApi";
 import productList from "@/features/listing-page/data/product.json";
+import { useSearchParams } from "react-router-dom";
 
 const StyleListingPage = styled.div`
   display: grid;
@@ -47,10 +48,19 @@ const StyleRight = styled.div`
 `;
 
 const ListingPage = () => {
-  const [selectedCategory, setSelectedCategory] = useState(0);
-  const [priceMin, setPriceMin] = useState(null);
-  const [priceMax, setPriceMax] = useState(null);
-  const [searchValue, setSearchValue] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedCategory, setSelectedCategory] = useState(
+    searchParams.get("categoryId") || 0
+  );
+  const [priceMin, setPriceMin] = useState(
+    searchParams.get("minPrice") || null
+  );
+  const [priceMax, setPriceMax] = useState(
+    searchParams.get("maxPrice") || null
+  );
+  const [searchValue, setSearchValue] = useState(
+    searchParams.get("search") || ""
+  );
   const [sort, setSort] = useState();
   const pageSize = 2;
 
@@ -66,19 +76,36 @@ const ListingPage = () => {
   ); //category ID, pageSize
 
   //------------Radio Price Filter---------------
-  const handlePriceRadioChange = (priceMin, priceMax) => {
-    setPriceMin(priceMin);
-    setPriceMax(priceMax);
+  const handlePriceRadioChange = (priceRangeMin, priceRangeMax) => {
+    setPriceMin(priceRangeMin);
+    setPriceMax(priceRangeMax);
+    setSearchParams({
+      categoryId: selectedCategory,
+      search: searchValue,
+      minPrice: priceRangeMin,
+      maxPrice: priceRangeMax,
+    });
   };
 
   //------------Radio Cate Filter---------------
   const handleChange = (categoryId) => {
     setSelectedCategory(categoryId);
+    setSearchParams({
+      categoryId: categoryId,
+      search: searchValue,
+      minPrice: priceMin,
+      maxPrice: priceMax,
+    });
   };
   //------------SEARCH---------------------------
-  const handleSearchChange = (searchValue) => {
-    setSearchValue(searchValue);
-    console.log(searchValue);
+  const handleSearchChange = (value) => {
+    setSearchParams({
+      categoryId: selectedCategory,
+      search: value,
+      minPrice: priceMin,
+      maxPrice: priceMax,
+    });
+    setSearchValue(value);
   };
   if (readCategories.isLoading || products.isLoading) {
     return <WaitingPopUp />;
@@ -86,7 +113,10 @@ const ListingPage = () => {
 
   return (
     <>
-      <Search searchValueSaved={searchValue} handleSearchChange={handleSearchChange} />
+      <Search
+        searchValueSaved={searchValue}
+        handleSearchChange={handleSearchChange}
+      />
       <StyleListingPage>
         <ProductFilter
           selectedCategory={selectedCategory}

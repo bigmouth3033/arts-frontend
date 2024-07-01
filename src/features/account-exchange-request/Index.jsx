@@ -10,6 +10,7 @@ import emptyImage from "./assets/images/empty-order.png";
 import { SendRefundRequest } from "./api/refundApi";
 import SuccessPopUp from "@/shared/components/PopUp/SuccessPopUp";
 import { useNavigate } from "react-router-dom";
+import { SendExchangeRequest } from "./api/refundApi";
 
 const Container = styled.div`
   display: flex;
@@ -143,6 +144,7 @@ export default function AccountExchangeRequest() {
   const sendRefundRequest = SendRefundRequest();
   const [success, setSuccess] = useState(false);
 
+  const sendExchangeRequest = SendExchangeRequest();
   const getOrderDetailRequest = GetOrderDetailRequest(searchParams.get("id"));
 
   if (getOrderDetailRequest.isLoading) {
@@ -169,6 +171,20 @@ export default function AccountExchangeRequest() {
       formData.append("ReasonRefund", exchangeReason.value);
 
       sendRefundRequest.mutate(formData, {
+        onSuccess: (response) => {
+          if (response.status == 200) {
+            setSuccess(true);
+          }
+        },
+      });
+    }
+
+    if (exchangeChoice.value == "exchange") {
+      const formData = new FormData();
+      formData.append("OriginalOrderId", getOrderDetailRequest.data.data.id);
+      formData.append("ReasonExchange", exchangeReason.value);
+
+      sendExchangeRequest.mutate(formData, {
         onSuccess: (response) => {
           if (response.status == 200) {
             setSuccess(true);

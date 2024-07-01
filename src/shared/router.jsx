@@ -23,6 +23,13 @@ import AccountExchangeRequest from "@/features/account-exchange-request/Index";
 import AccountManageExchange from "@/features/account-manage-exchange/Index";
 import Homepage from "@/features/homepage/Index";
 
+import AboutUs from "@/features/aboutUs-FAQ/AboutUs";
+import FAQ from "@/features/aboutUs-FAQ/FAQ";
+import PurchasePay from "@/features/aboutUs-FAQ/PurchasePay";
+import Warranty from "@/features/aboutUs-FAQ/Warranty";
+import InforPrivacy from "@/features/aboutUs-FAQ/InforPrivacy";
+import Return from "@/features/aboutUs-FAQ/Return";
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -39,6 +46,30 @@ const router = createBrowserRouter([
       {
         path: "productdetail",
         element: <ProductDetail />,
+      },
+      {
+        path: "about-us",
+        element: <AboutUs />,
+      },
+      {
+        path: "FAQ",
+        element: <FAQ />,
+      },
+      {
+        path: "purchase-payment",
+        element: <PurchasePay />,
+      },
+      {
+        path: "warranty",
+        element: <Warranty />,
+      },
+      {
+        path: "return",
+        element: <Return />,
+      },
+      {
+        path: "privacy",
+        element: <InforPrivacy />,
       },
       {
         path: "account",

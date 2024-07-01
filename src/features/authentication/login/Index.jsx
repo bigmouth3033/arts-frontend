@@ -167,15 +167,11 @@ export default function Login({ switchToRegister, action }) {
           type="password"
         ></TextInput>
         <p>{errors.passwordError}</p>
-        <StyledWrapForgorPass>
+        {/* <StyledWrapForgorPass>
           <StyledForgotPass>Get your password back</StyledForgotPass>
-        </StyledWrapForgorPass>
+        </StyledWrapForgorPass> */}
         <ButtonContainer>
           <StyledButtonSubmit onClick={onLogin}>LOGIN</StyledButtonSubmit>
-          <StyledOrLine>
-            <span>or</span>
-          </StyledOrLine>
-          <StyledButtonSubmitWithFacebook>Login with facebook</StyledButtonSubmitWithFacebook>
         </ButtonContainer>
         <StyledLinkRegister>
           Don't have an Account yet? Please register for a new Account

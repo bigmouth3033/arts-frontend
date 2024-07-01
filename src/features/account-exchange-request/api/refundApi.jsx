@@ -11,3 +11,14 @@ export const SendRefundRequest = () => {
     mutationFn: sendRefund,
   });
 };
+
+const sendExchange = async (payload) => {
+  const response = await axiosClient.post("exchange", payload);
+  return response.data;
+};
+
+export const SendExchangeRequest = () => {
+  return useMutation({
+    mutationFn: sendExchange,
+  });
+};

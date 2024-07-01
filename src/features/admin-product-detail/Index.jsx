@@ -36,6 +36,9 @@ import { DeleteImageRequest, UploadImageRequest } from "./api/editProductApi";
 import { Link } from "react-router-dom";
 import InputCheckBox from "@/shared/components/Input/InputCheckBox";
 import formatDollar from "@/shared/utils/FormatDollar";
+import { EditProductRequest } from "./api/editProductApi";
+import SuccessPopUp from "@/shared/components/PopUp/SuccessPopUp";
+import { useNavigate } from "react-router-dom";
 
 const StyledFaRegQuestionCircle = styled(FaRegQuestionCircle)`
   cursor: pointer;
@@ -557,6 +560,7 @@ const regex = /^-?\d+(\.\d+)?$/;
 const moneyRegex = /^(?=.*\d)\d*(?:\.\d*)?$/;
 
 export default function AdminProductDetail() {
+  const editProductRequest = EditProductRequest();
   const readCategoryRequest = ReadCategoryRequest();
   const readTypeRequest = ReadTypeRequest();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -564,6 +568,7 @@ export default function AdminProductDetail() {
   const getProductAdminDetailRequest = GetProductAdminDetailRequest(searchParams.get("id"));
   const uploadImageRequest = UploadImageRequest();
   const deleteImageRequest = DeleteImageRequest();
+  const [updateSuccess, setUpdateSuccess] = useState(false);
 
   const categoryRef = useRef(null);
 
@@ -580,6 +585,7 @@ export default function AdminProductDetail() {
   const [editAmount, setEditAmount] = useState(false);
   const [showWarranty, setShowWarranty] = useState(false);
   const [variantChosen, setVariantChosen] = useState([]);
+  const navigate = useNavigate();
 
   const [state, dispatch, ACTIONS] = useCreateProductReducer();
   const inputRef = useRef();
@@ -682,73 +688,74 @@ export default function AdminProductDetail() {
   };
 
   const onCreateProduct = () => {
-    console.log(state.variant_detail);
-    // if (state.productName.length == 0) {
-    //   setErrorMessage("Product need to have a name");
-    //   setError(true);
-    //   return;
-    // }
+    if (state.productName.length == 0) {
+      setErrorMessage("Product need to have a name");
+      setError(true);
+      return;
+    }
 
-    // if (state.images.length == 0) {
-    //   setErrorMessage("Product need atlest one image");
-    //   setError(true);
-    //   return;
-    // }
+    if (state.images.length == 0) {
+      setErrorMessage("Product need atlest one image");
+      setError(true);
+      return;
+    }
 
-    // if (state.variants.length != 0 && state.variant_detail.length == 0) {
-    //   setErrorMessage("You need to add variant or turn off variants");
-    //   setError(true);
+    if (state.variants.length != 0 && state.variant_detail.length == 0) {
+      setErrorMessage("You need to add variant or turn off variants");
+      setError(true);
 
-    //   return;
-    // }
+      return;
+    }
 
-    // if (state.variants.length == 0 && state.variant_detail.length == 0 && state.price == 0) {
-    //   setErrorMessage("Product need to be priced");
-    //   setError(true);
-    //   return;
-    // }
+    if (state.variants.length == 0 && state.variant_detail.length == 0 && state.price == 0) {
+      setErrorMessage("Product need to be priced");
+      setError(true);
+      return;
+    }
 
-    // const variantWithOutPrice = state.variant_detail.find((item) => {
-    //   return item.sellPrice == 0;
-    // });
+    const variantWithOutPrice = state.variant_detail.find((item) => {
+      return item.sellPrice == 0;
+    });
 
-    // if (variantWithOutPrice) {
-    //   setErrorMessage(`Every variant need to have a price`);
-    //   setError(true);
-    //   return;
-    // }
+    if (variantWithOutPrice) {
+      setErrorMessage(`Every variant need to have a price`);
+      setError(true);
+      return;
+    }
 
-    // const formData = new FormData();
-    // formData.append("ProductName", state.productName);
-    // formData.append("Category", state.category.value);
-    // formData.append("Description", state.description);
-    // formData.append("Price", state.price);
-    // formData.append("SalePrice", state.salePrice);
-    // formData.append("Amount", state.amount);
-    // formData.append("Unit", state.unit);
-    // formData.append("Active", state.active);
-    // formData.append("Warranty", state.warrantyTime ? state.warrantyTime : 0);
+    const formData = new FormData();
+    formData.append("ProductId", searchParams.get("id"));
+    formData.append("ProductName", state.productName);
+    formData.append("Category", state.category.value);
+    formData.append("Description", state.description);
+    formData.append("Price", state.price);
+    formData.append("SalePrice", state.salePrice);
+    formData.append("Amount", state.amount);
+    formData.append("Unit", state.unit ? state.unit : "");
+    formData.append("Active", state.active);
+    formData.append("Warranty", state.warrantyTime ? state.warrantyTime : 0);
 
-    // state.images.forEach((item) => formData.append("Images", item));
-    // state.variants.forEach((item) => {
-    //   var copy = item;
-    //   copy.id = item.option.value;
-    //   formData.append("variantsJSON[]", JSON.stringify(copy));
-    // });
-    // state.variant_detail.forEach((item) => {
-    //   formData.append("VariantDetailsJSON[]", JSON.stringify(item));
-    // });
+    state.images.forEach((item) => formData.append("Images", item));
+    state.variants.forEach((item) => {
+      var copy = item;
+      copy.id = item.option.value;
+      formData.append("variantsJSON[]", JSON.stringify(copy));
+    });
+    state.variant_detail.forEach((item) => {
+      formData.append("VariantDetailsJSON[]", JSON.stringify(item));
+    });
 
-    // createProductRequest.mutate(formData, {
-    //   onSuccess: (response) => {
-    //     if (response.status == 200) {
-    //       navigate(`/admin/product?id=${response.data.id}`);
-    //     }
-    //   },
-    //   onError: (response) => {
-    //     console.log(response);
-    //   },
-    // });
+    editProductRequest.mutate(formData, {
+      onSuccess: (response) => {
+        if (response.status == 200) {
+          setUpdateSuccess(true);
+          getProductAdminDetailRequest.refetch();
+        }
+      },
+      onError: (response) => {
+        console.log(response);
+      },
+    });
   };
 
   useEffect(() => {
@@ -926,9 +933,9 @@ export default function AdminProductDetail() {
                     <div>
                       <h5>Compare price</h5>
                       <TextInput
-                        state={moneyRegex.salePrice}
+                        state={state.salePrice}
                         setState={(value) => {
-                          if (regex.test(value) || value == "") {
+                          if (moneyRegex.test(value) || value == "") {
                             dispatch({ type: ACTIONS.CHANGE_SALE_PRICE, next: value });
                           }
                         }}
@@ -936,7 +943,7 @@ export default function AdminProductDetail() {
                       />
                     </div>
                     <div>
-                      <h5>Compare price</h5>
+                      <h5>Amount</h5>
                       <TextInput
                         state={state.amount}
                         setState={(value) => {
@@ -959,7 +966,13 @@ export default function AdminProductDetail() {
                   <InputCheckBox
                     checked={showUnit}
                     onChange={() => {
-                      setShowUnit((prev) => !prev);
+                      setShowUnit((prev) => {
+                        if (prev) {
+                          dispatch({ type: ACTIONS.CHANGE_UNIT, next: "" });
+                        }
+
+                        return !prev;
+                      });
                     }}
                     type="checkbox"
                   />
@@ -1180,9 +1193,18 @@ export default function AdminProductDetail() {
                   Product Active
                 </ActionContainer>
                 <hr />
+
                 <ButtonContainer>
                   <ConfirmButton onClick={() => onCreateProduct()}>Save</ConfirmButton>
-                  <DiscardButton onClick={() => window.location.reload()}>Discard</DiscardButton>
+                  {getProductAdminDetailRequest.data.data.isActive && (
+                    <DiscardButton
+                      onClick={() =>
+                        navigate(`/productdetail?id=${getProductAdminDetailRequest.data.data.id}`)
+                      }
+                    >
+                      View on website
+                    </DiscardButton>
+                  )}
                 </ButtonContainer>
               </ContentItem>
             </ShowInfo>
@@ -1256,6 +1278,9 @@ export default function AdminProductDetail() {
           message={"Invalid file type! Please select a valid image file"}
           action={() => setImageError(false)}
         />
+      )}
+      {updateSuccess && (
+        <SuccessPopUp action={() => setUpdateSuccess(false)} message={"Update product success"} />
       )}
     </>
   );

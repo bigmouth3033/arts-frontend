@@ -1,56 +1,41 @@
-import styled from "styled-components";
 import { useState } from "react";
-import { GetOrderByIdRequest } from "./api/adminOrderDetailApi";
+import styled from "styled-components";
+import { useSearchParams } from "react-router-dom";
+import { GetOrderDetailRequest } from "../account-order-detail/api/orderDetailApi";
 import WaitingPopUp from "@/shared/components/PopUp/WaitingPopUp";
-import Avatar from "react-avatar";
-import dchc from "@/shared/data/dchc";
 import convertToLetterString from "../ProductDetail/utils/convertIdToStr";
+import { GetOrderByIdRequest } from "./api/adminOrderDetailApi";
 import formatDollar from "@/shared/utils/FormatDollar";
+import { ProgressBar } from "react-step-progress-bar";
+import { Step } from "react-step-progress-bar";
+import "../account-order-detail/assets/css/progress.css";
+import { CiDeliveryTruck } from "react-icons/ci";
+import { GoThumbsup } from "react-icons/go";
+import { CiTimer } from "react-icons/ci";
+import { FaCheck } from "react-icons/fa";
+import dchc from "@/shared/data/dchc";
 import { Link } from "react-router-dom";
+import React from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { RiExchangeDollarFill } from "react-icons/ri";
+import { AcceptOrderRequest } from "../admin-order/api/adminOrdersApi";
+import { DenyOrderRequest } from "../admin-order/api/adminOrdersApi";
+import { DeliveryOrderRequest } from "../admin-order/api/adminOrdersApi";
+import { FinishOrderRequest } from "../admin-order/api/adminOrdersApi";
+import SuccessPopUp from "@/shared/components/PopUp/SuccessPopUp";
+import ErrorPopUp from "@/shared/components/PopUp/ErrorPopUp";
 
 const Container = styled.div`
-  max-width: 75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 65rem;
   margin: auto;
   padding: 3rem 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  font-size: 14px;
 
-  > h4 {
-    font-size: 1.4rem;
-    font-weight: 400;
-  }
-
-  * hr {
-    border: none;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
-  }
-
-  & h5,
-  h4 {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-`;
-
-const Content = styled.div`
-  display: grid;
-  grid-template-columns: 3fr 1fr;
-  gap: 3rem;
-`;
-
-const Left = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-`;
-
-const Right = styled.div`
-  > div {
-    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-    background-color: white;
+  > h3 {
+    font-size: 20px;
+    font-weight: 100;
   }
 `;
 
@@ -132,10 +117,70 @@ const TableContent = styled.table`
       color: rgba(0, 0, 0, 0.4);
     }
   }
+
+  & .exchange {
+    display: flex;
+    background-color: #ffe880;
+    width: fit-content;
+    align-items: center;
+    gap: 3px;
+    color: #0a68ff;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 25px;
+    font-size: 12px;
+  }
+`;
+
+const Content = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+`;
+
+const Progress = styled.div`
+  background-color: white;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 1rem;
+`;
+
+const Info = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  column-gap: 1rem;
+  row-gap: 1rem;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    > h4 {
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.5);
+    }
+
+    > div {
+      background-color: white;
+      padding: 10px;
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.7);
+      min-height: 9rem;
+
+      & h4 {
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: #000;
+      }
+    }
+  }
 `;
 
 const Image = styled.div`
-  width: 5rem;
+  width: 10rem !important;
   height: 5rem;
 
   > img {
@@ -155,36 +200,135 @@ const StyledLink = styled(Link)`
   font-size: 14px;
 `;
 
-const CustomerInfo = styled.div`
+const ProgressDetail = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  column-gap: 2rem;
-
-  padding: 10px 0;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
 
   > div {
     display: flex;
-    flex-direction: column;
-    gap: 5px;
-    padding: 1rem;
-    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-    background-color: white;
-    border-radius: 5px;
-  }
-
-  & p {
-    color: rgba(0, 0, 0, 0.8);
-
-    > span {
-      font-weight: 600;
-      font-size: 13px;
-      color: rgba(0, 0, 0, 0.7);
-    }
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: rgba(0, 0, 0, 0.6);
   }
 `;
 
+const Buttons = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px;
+  gap: 10px;
+  > button {
+    background-color: white;
+    color: #0b74e5;
+    border-radius: 5px;
+    border: 1px solid #0b74e5;
+    padding: 8px 8px;
+    cursor: pointer;
+  }
+`;
+
+const Product = styled.div``;
+
 export default function AdminOrderDetail() {
-  const getOrderByIdRequest = GetOrderByIdRequest(13);
+  let [searchParams, setSearchParams] = useSearchParams();
+  const acceptOrderRequest = AcceptOrderRequest();
+  const denyOrderRequest = DenyOrderRequest();
+  const deliveryOrderRequest = DeliveryOrderRequest();
+  const finishOrderRequest = FinishOrderRequest();
+
+  const getOrderByIdRequest = GetOrderByIdRequest(searchParams.get("id"));
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(false);
+
+  const onAccept = (id) => {
+    const formData = new FormData();
+
+    id.forEach((item) => formData.append("orderId", item));
+
+    acceptOrderRequest.mutate(formData, {
+      onSuccess: (response) => {
+        if (response.status == 200) {
+          getAdminOrdersetAdminOrderRequest.refetch();
+          setSuccess(true);
+          getOrderDetailRequest.refetch();
+          return;
+        }
+
+        if (response.status == 400) {
+          getAdminOrdersetAdminOrderRequest.refetch();
+          setError(true);
+          return;
+        }
+      },
+    });
+  };
+
+  const onDeny = (id) => {
+    const formData = new FormData();
+    id.forEach((item) => formData.append("orderId", item));
+
+    denyOrderRequest.mutate(formData, {
+      onSuccess: (response) => {
+        if (response.status == 200) {
+          getAdminOrdersetAdminOrderRequest.refetch();
+          setSuccess(true);
+          setCheckBox((prev) => prev.filter((item) => !id.includes(item)));
+          return;
+        }
+
+        if (response.status == 400) {
+          getAdminOrdersetAdminOrderRequest.refetch();
+          setError(true);
+          return;
+        }
+      },
+    });
+  };
+
+  const onDelivery = (id) => {
+    const formData = new FormData();
+    id.forEach((item) => formData.append("orderId", item));
+
+    deliveryOrderRequest.mutate(formData, {
+      onSuccess: (response) => {
+        if (response.status == 200) {
+          getAdminOrdersetAdminOrderRequest.refetch();
+          setSuccess(true);
+          setCheckBox((prev) => prev.filter((item) => !id.includes(item)));
+          return;
+        }
+
+        if (response.status == 400) {
+          getAdminOrdersetAdminOrderRequest.refetch();
+          setError(true);
+          return;
+        }
+      },
+    });
+  };
+
+  const onSuccess = (id) => {
+    const formData = new FormData();
+    id.forEach((item) => formData.append("orderId", item));
+
+    finishOrderRequest.mutate(formData, {
+      onSuccess: (response) => {
+        if (response.status == 200) {
+          getAdminOrdersetAdminOrderRequest.refetch();
+          setSuccess(true);
+          setCheckBox((prev) => prev.filter((item) => !id.includes(item)));
+          return;
+        }
+
+        if (response.status == 400) {
+          getAdminOrdersetAdminOrderRequest.refetch();
+          setError(true);
+          return;
+        }
+      },
+    });
+  };
 
   if (getOrderByIdRequest.isLoading) {
     return <WaitingPopUp />;
@@ -198,123 +342,212 @@ export default function AdminOrderDetail() {
     return `${province.name}, ${district.name}, ${ward.name}, ${address.addressDetail}`;
   };
 
+  const percent = (status) => {
+    if (status == "Pending") {
+      return 0;
+    }
+
+    if (status == "Accepted") {
+      return 34;
+    }
+
+    if (status == "Delivery") {
+      return 67;
+    }
+
+    if (status == "Success") {
+      return 100;
+    }
+  };
+
+  const checkValidExchange = (date) => {
+    const successDate = new Date(date);
+
+    const timeSpan = successDate - Date.now();
+
+    if (timeSpan <= 604800000) {
+      return true;
+    }
+    return false;
+  };
+
   return (
     <Container>
+      <h3>
+        Order Detail #
+        {convertToLetterString(getOrderByIdRequest.data.data.payment.deliveryType.id, 1) +
+          convertToLetterString(getOrderByIdRequest.data.data.variant.product.categoryId, 2) +
+          convertToLetterString(getOrderByIdRequest.data.data.variant.id, 5) +
+          convertToLetterString(getOrderByIdRequest.data.data.id, 8)}
+        -{" "}
+        {getOrderByIdRequest.data.data.isCancel
+          ? "Order Cancel"
+          : getOrderByIdRequest.data.data.refund == null
+          ? getOrderByIdRequest.data.data.orderStatusType.name
+          : getOrderByIdRequest.data.data.refund.status + " refund"}
+      </h3>
       <Content>
-        <Left>
-          <CustomerInfo>
-            <div>
-              <h4>Customer Information</h4>
-              <div>
-                <p>
-                  <span>Name</span>: {getOrderByIdRequest.data.data.user.fullname}
-                </p>
-                <p>
-                  <span>Email</span>: {getOrderByIdRequest.data.data.user.email}
-                </p>
-                <p>
-                  <span>Phone number</span>: {getOrderByIdRequest.data.data.user.phoneNumber}
-                </p>
-              </div>
-            </div>
-            <div>
-              <h4>Delivery Address</h4>
-              <div>
-                <p>
-                  <span>Name</span>: {getOrderByIdRequest.data.data.payment.address.fullName}
-                </p>
-                <p>
-                  <span>Phone number</span>:{" "}
-                  {getOrderByIdRequest.data.data.payment.address.phoneNumber}
-                </p>
-                <p>
-                  <span>Address</span>: {getAddress(getOrderByIdRequest.data.data.payment.address)}
-                </p>
-              </div>
-            </div>
-          </CustomerInfo>
-          <div>
-            <TableContent>
-              <thead>
-                <tr>
-                  <th>CODE</th>
-                  <th>PRODUCT</th>
-                  <th>DELIVERY</th>
-                  <th>PAYMENT TYPE</th>
-                  <th>PRICE</th>
-                  <th>QUANTIY</th>
-                  <th>TOTAL</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    {convertToLetterString(
-                      getOrderByIdRequest.data.data.payment.deliveryType.id,
-                      1
-                    ) +
-                      convertToLetterString(
-                        getOrderByIdRequest.data.data.variant.product.categoryId,
-                        2
-                      ) +
-                      convertToLetterString(getOrderByIdRequest.data.data.variant.id, 5) +
-                      convertToLetterString(getOrderByIdRequest.data.data.id, 8)}
-                  </td>
-                  <td className="product-detail">
-                    <Image>
-                      <img
-                        src={
-                          import.meta.env.VITE_API_IMAGE_PATH +
-                          (getOrderByIdRequest.data.data.variant.variantImage
-                            ? getOrderByIdRequest.data.data.variant.variantImage
-                            : getOrderByIdRequest.data.data.variant.product.productImages[0]
-                                .imageName)
-                        }
-                      />
-                    </Image>
-
-                    <div>
-                      <StyledLink
-                        to={`/productdetail?id=${getOrderByIdRequest.data.data.variant.product.id}`}
-                      >
-                        {getOrderByIdRequest.data.data.variant.product.name}
-                      </StyledLink>
-                      <p className="variant-text">
-                        {getOrderByIdRequest.data.data.variant.variantAttributes.map(
-                          (item, index) => {
-                            return (
-                              <>
-                                {index != 0 && <span>/</span>}
-                                <span>{item.attributeValue}</span>
-                              </>
-                            );
-                          }
-                        )}
-                      </p>
+        {getOrderByIdRequest.data.data.orderStatusType.name != "Denied" &&
+          getOrderByIdRequest.data.data.isCancel == false && (
+            <Progress>
+              <ProgressBar percent={percent(getOrderByIdRequest.data.data.orderStatusType.name)}>
+                <Step>
+                  {({ accomplished, index }) => (
+                    <div className={`indexedStep ${accomplished ? "accomplished" : null}`}>
+                      <CiTimer key={index} size={"1.3rem"} />
                     </div>
-                  </td>
-                  <td>{getOrderByIdRequest.data.data.payment.deliveryType.name}</td>
-                  <td>{getOrderByIdRequest.data.data.payment.paymentType.name}</td>
-                  <td>
-                    $
-                    {formatDollar(
-                      getOrderByIdRequest.data.data.totalPrice /
-                        getOrderByIdRequest.data.data.quanity
-                    )}
-                  </td>
-                  <td>{getOrderByIdRequest.data.data.quanity}</td>
-                  <td>${formatDollar(getOrderByIdRequest.data.data.totalPrice)}</td>
-                </tr>
-              </tbody>
-            </TableContent>
-          </div>
-        </Left>
-        <Right>
+                  )}
+                </Step>
+                <Step>
+                  {({ accomplished, index }) => (
+                    <div className={`indexedStep ${accomplished ? "accomplished" : null}`}>
+                      <FaCheck key={index} />
+                    </div>
+                  )}
+                </Step>
+                <Step>
+                  {({ accomplished, index }) => (
+                    <div className={`indexedStep ${accomplished ? "accomplished" : null}`}>
+                      <CiDeliveryTruck key={index} size={"1.3rem"} />
+                    </div>
+                  )}
+                </Step>
+                <Step>
+                  {({ accomplished, index }) => (
+                    <div className={`indexedStep ${accomplished ? "accomplished" : null}`}>
+                      <GoThumbsup key={index} size={"1.3rem"} />
+                    </div>
+                  )}
+                </Step>
+              </ProgressBar>
+              <ProgressDetail>
+                <div>
+                  <p>Order Pending</p>
+                </div>
+                <div>
+                  <p>Order Accepted</p>
+                </div>
+                <div>
+                  <p>Order Delivery</p>
+                </div>
+                <div>
+                  <p>Order Success</p>
+                </div>
+              </ProgressDetail>
+            </Progress>
+          )}
+        <Info>
           <div>
-            <h4>Order Progress</h4>
+            <h4>Customer Information</h4>
+            <div>
+              <h4>{getOrderByIdRequest.data.data.user.fullname}</h4>
+              <p>Email: {getOrderByIdRequest.data.data.user.email}</p>
+              <p>Phone number: {getOrderByIdRequest.data.data.user.phoneNumber}</p>
+            </div>
           </div>
-        </Right>
+          <div>
+            <h4>Delivery Address</h4>
+            <div>
+              <h4>{getOrderByIdRequest.data.data.payment.address.fullName}</h4>
+              <p>Address: {getAddress(getOrderByIdRequest.data.data.payment.address)}</p>
+              <p>Phone number: {getOrderByIdRequest.data.data.payment.address.phoneNumber}</p>
+            </div>
+          </div>
+          <div>
+            <h4>Payment type</h4>
+            <div>
+              <p>Pay by {getOrderByIdRequest.data.data.payment.paymentType.name}</p>
+            </div>
+          </div>
+          {getOrderByIdRequest.data.data.isCancel && (
+            <div>
+              <h4>Cancel Reason</h4>
+              <div>{getOrderByIdRequest.data.data.cancelReason}</div>
+            </div>
+          )}
+          {getOrderByIdRequest.data.data.refund != null && (
+            <div>
+              <h4>Refund Request</h4>
+              <div>Request: {getOrderByIdRequest.data.data.refund.reasonRefund}</div>
+            </div>
+          )}
+        </Info>
+        <Product>
+          <TableContent>
+            <thead>
+              <tr>
+                <th>PRODUCT</th>
+                <th>DELIVERY</th>
+                <th>PRICE</th>
+                <th>QUANTIY</th>
+                <th>TOTAL</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="product-detail">
+                  <Image>
+                    <img
+                      src={
+                        import.meta.env.VITE_API_IMAGE_PATH +
+                        (getOrderByIdRequest.data.data.variant.variantImage
+                          ? getOrderByIdRequest.data.data.variant.variantImage
+                          : getOrderByIdRequest.data.data.variant.product.productImages[0]
+                              .imageName)
+                      }
+                    />
+                  </Image>
+
+                  <div>
+                    <StyledLink
+                      to={`/admin/product?id=${getOrderByIdRequest.data.data.variant.product.id}`}
+                    >
+                      {getOrderByIdRequest.data.data.variant.product.name}
+                    </StyledLink>
+                    <p className="variant-text">
+                      {getOrderByIdRequest.data.data.variant.variantAttributes.map(
+                        (item, index) => {
+                          return (
+                            <React.Fragment key={index}>
+                              {index != 0 && <span>/</span>}
+                              <span>{item.attributeValue}</span>
+                            </React.Fragment>
+                          );
+                        }
+                      )}
+                    </p>
+                  </div>
+                </td>
+                <td>{getOrderByIdRequest.data.data.payment.deliveryType.name}</td>
+                <td>
+                  $
+                  {formatDollar(
+                    getOrderByIdRequest.data.data.totalPrice / getOrderByIdRequest.data.data.quanity
+                  )}
+                </td>
+                <td>{getOrderByIdRequest.data.data.quanity}</td>
+                <td>${formatDollar(getOrderByIdRequest.data.data.totalPrice)}</td>
+              </tr>
+            </tbody>
+          </TableContent>
+          <Buttons>
+            {getOrderByIdRequest.isCancel == false &&
+              getOrderByIdRequest.data.data.orderStatusType.id == 13 && (
+                <button>Accept order</button>
+              )}
+            {getOrderByIdRequest.isCancel == false &&
+              getOrderByIdRequest.data.data.orderStatusType.id == 13 && <button>Deny order</button>}
+            {getOrderByIdRequest.data.data.orderStatusType.id == 14 && (
+              <button>Delivery order</button>
+            )}
+            {getOrderByIdRequest.data.data.orderStatusType.id == 17 && (
+              <button>Finish order</button>
+            )}
+          </Buttons>
+        </Product>
       </Content>
+      {success && <SuccessPopUp action={() => setSuccess(false)} message={"Success"} />}
+      {error && <ErrorPopUp action={() => setError(false)} message={"Error"} />}
     </Container>
   );
 }

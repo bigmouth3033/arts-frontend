@@ -1,4 +1,5 @@
 import axiosAdmin from "@/shared/api/axiosAdmin";
+
 import { useMutation } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
 
@@ -46,4 +47,15 @@ export const GetProductAdminDetailRequest = (id) => {
   });
 
   return query;
+};
+
+const editProduct = async (payload) => {
+  const response = await axiosAdmin.put("product/update-product", payload);
+  return response;
+};
+
+export const EditProductRequest = () => {
+  return useMutation({
+    mutationFn: editProduct,
+  });
 };

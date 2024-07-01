@@ -20,6 +20,8 @@ import NumberInput from "@/shared/components/Input/NumberInput";
 import SelectMultiple from "../admin-product-list/components/inputs/SelectMultiple";
 import TextInput from "@/shared/components/Input/TextInput";
 import { CiCircleRemove } from "react-icons/ci";
+import { useNavigate } from "react-router-dom";
+
 const Container = styled.div`
   margin: auto;
   max-width: 75rem;
@@ -313,6 +315,7 @@ const categoryOption = [
 ];
 
 export default function AdminOrder() {
+  const navigate = useNavigate();
   const acceptOrderRequest = AcceptOrderRequest();
   const denyOrderRequest = DenyOrderRequest();
   const deliveryOrderRequest = DeliveryOrderRequest();
@@ -853,9 +856,11 @@ export default function AdminOrder() {
                       </td>
                       <td>{item.payment.deliveryType.name}</td>
                       <td>${formatDollar(item.totalPrice)}</td>
-                      <td>{item.orderStatusType.name}</td>
+                      <td>{!item.isCancel ? item.orderStatusType.name : "Cancel"}</td>
                       <td className="detail">
-                        <button>See Detail</button>
+                        <button onClick={() => navigate(`/admin/order-detail?id=${item.id}`)}>
+                          See Detail
+                        </button>
                         {active == "Pending" && (
                           <>
                             <button onClick={() => onAccept([item.id])}>ACCEPT</button>
@@ -870,6 +875,22 @@ export default function AdminOrder() {
                         {active == "Delivery" && (
                           <>
                             <button onClick={() => onSuccess([item.id])}>FINISH</button>
+                          </>
+                        )}
+                        {active == "All" && (
+                          <>
+                            {item.orderStatusType.id == 13 && item.isCancel == false && (
+                              <>
+                                <button onClick={() => onAccept([item.id])}>ACCEPT</button>
+                                <button onClick={() => onDeny([item.id])}>DENY</button>{" "}
+                              </>
+                            )}
+                            {item.orderStatusType.id == 14 && (
+                              <button onClick={() => onDelivery([item.id])}>DELIVERY</button>
+                            )}
+                            {item.orderStatusType.id == 17 && (
+                              <button onClick={() => onSuccess([item.id])}>FINISH</button>
+                            )}
                           </>
                         )}
                       </td>

@@ -86,10 +86,19 @@ const ProductCard = ({ product, index }) => {
   }, product.variants[0]);
   return (
     <StyleProductCard key={index}>
-      <img src={import.meta.env.VITE_API_IMAGE_PATH + product.productImages[0].imageName} />
+      <img
+        src={
+          import.meta.env.VITE_API_IMAGE_PATH +
+          product.productImages[0].imageName
+        }
+      />
       <p className="product-name">{product.name}</p>
       <StylePriceBlock>
-        {minVariant.salePrice != 0 ? <p className="sale-price">{minVariant.salePrice}</p> : <></>}
+        {minVariant.salePrice != 0 ? (
+          <p className="sale-price">{minVariant.salePrice}</p>
+        ) : (
+          <></>
+        )}
         <p className="original-price">
           {minVariant.price}
           <sup className="currency-symbol">$</sup>

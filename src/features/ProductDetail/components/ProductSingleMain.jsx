@@ -26,6 +26,9 @@ import SuccessPopUp from "@/shared/components/PopUp/SuccessPopUp";
 import ErrorPopUp from "@/shared/components/PopUp/ErrorPopUp";
 import { useQueryClient } from "@tanstack/react-query";
 import formatDollar from "@/shared/utils/FormatDollar";
+import { SiExpress } from "react-icons/si";
+import { CiDeliveryTruck } from "react-icons/ci";
+import { FaBox } from "react-icons/fa";
 
 const Container = styled.div`
   margin: 1rem 0;
@@ -125,6 +128,16 @@ const LeftDetail = styled.div`
 
 const ShipmentDetail = styled.div`
   background-color: white;
+
+  & li > span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    > svg {
+      font-size: 2rem;
+    }
+  }
 `;
 
 const StyledShippingBoxWrap = styled.div`
@@ -474,30 +487,33 @@ export default function ProductSingleMain({ data, variant, request }) {
       return;
     }
 
-    if (variant.length > 0) {
-      const variant = onGetVariant();
-      const formData = new FormData();
-      formData.append("VariantId", variant.id);
-      formData.append("Quantity", quantity);
-      createCartItemRequest.mutate(formData, {
-        onSuccess: (response) => {
-          if (response.status == 201) {
-            setCartSuccess(true);
-            queryClient.invalidateQueries({ queryKey: ["cart-quantity"] });
-            return;
-          }
+    let variant = data.variants[0];
 
-          if (response.status == 405) {
-            setErrorMessage(`The remaining quantity of this product is ${response.data.quanity}.`);
-            setCartError(true);
-            request.refetch();
-          }
-        },
-        onError: (response) => {
-          console.log(response);
-        },
-      });
+    if (variant.length > 0) {
+      variant = onGetVariant();
     }
+
+    const formData = new FormData();
+    formData.append("VariantId", variant.id);
+    formData.append("Quantity", quantity);
+    createCartItemRequest.mutate(formData, {
+      onSuccess: (response) => {
+        if (response.status == 201) {
+          setCartSuccess(true);
+          queryClient.invalidateQueries({ queryKey: ["cart-quantity"] });
+          return;
+        }
+
+        if (response.status == 405) {
+          setErrorMessage(`The remaining quantity of this product is ${response.data.quanity}.`);
+          setCartError(true);
+          request.refetch();
+        }
+      },
+      onError: (response) => {
+        console.log(response);
+      },
+    });
   };
 
   useEffect(() => {
@@ -572,12 +588,21 @@ export default function ProductSingleMain({ data, variant, request }) {
             </Prices>
           )}
           <ProductDetail>
+            {data.unit && (
+              <div>
+                <h4>
+                  <FaBox /> Unit
+                </h4>
+                <p>{data.unit}</p>
+              </div>
+            )}
             <div>
               <h4>
                 <IoIosReturnLeft /> Return Policy
               </h4>
               <p>7-day return policy, Free change of mind returns</p>
             </div>
+
             {data.warrantyDuration > 0 && (
               <div>
                 <h4>
@@ -712,8 +737,12 @@ export default function ProductSingleMain({ data, variant, request }) {
             <div>
               <h4>Shipping Fee</h4>
               <ul>
-                <li>Ha Noi city - 20.000 USD</li>
-                <li>The remaining provinces - 25,000 USD</li>
+                <li>
+                  <span>Normal ship - 3 USD</span>
+                </li>
+                <li>
+                  <span>Express ship - 5 USD </span>
+                </li>
               </ul>
             </div>
             <div>
