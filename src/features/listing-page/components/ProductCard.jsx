@@ -1,14 +1,16 @@
 import React from "react";
 import image from "@/features/listing-page/assets/image.png";
 import styled from "styled-components";
+import { Link } from "react-router-dom";
 
-const StyleProductCard = styled.div`
+const StyleProductCard = styled(Link)`
   display: block;
   width: 100%;
   height: 100%;
   min-height: 100%;
   border: 0.01rem solid #cee1fcb3;
   border-radius: 0.7rem;
+  text-decoration: none;
 
   & p {
     font-weight: 600;
@@ -81,11 +83,12 @@ const StylePriceBlock = styled.div`
 
 //Product Card items in Product Listing Page
 const ProductCard = ({ product, index }) => {
+  //hien thi gia nho
   const minVariant = product.variants.reduce((min, variant) => {
     return variant.price < min.price ? variant : min;
   }, product.variants[0]);
   return (
-    <StyleProductCard key={index}>
+    <StyleProductCard to={`/productdetail?id=${product.id}`} key={index}>
       <img
         src={
           import.meta.env.VITE_API_IMAGE_PATH +

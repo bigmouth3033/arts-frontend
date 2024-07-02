@@ -17,6 +17,7 @@ const Sort = ({ switched, setSwitched }) => {
     { value: 1, label: "Newest" },
     { value: 2, label: "Low to High Price" },
     { value: 3, label: "High to Low Price" },
+    { value: 4, label: "Best Seller" },
   ];
 
   console.log(switched?.label);

@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import CategoryFilter from "./CategoryFilter";
 import PriceFilter from "./PriceFilter";
+import ReviewFilter from "./ReviewFilter";
 
 //CSS
 const StyleProductFilter = styled.div`
@@ -30,6 +31,8 @@ const ProductFilter = ({
   selectedCategory,
   priceMin,
   priceMax,
+  starValue,
+  handleStarChange,
 }) => {
   return (
     <StyleProductFilter>
@@ -43,6 +46,7 @@ const ProductFilter = ({
         priceMax={priceMax}
         handlePriceRadioChange={handlePriceRadioChange}
       />
+      <ReviewFilter starValue={starValue} handleStarChange={handleStarChange} />
     </StyleProductFilter>
   );
 };

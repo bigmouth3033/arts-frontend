@@ -116,7 +116,9 @@ const AddressContainer = styled.div`
 
 export default function PaymentComponent(props) {
   const navigate = useNavigate();
-  const [address, setAddress] = useState(props.address.find((item) => item.isDefault == true));
+  const [address, setAddress] = useState(
+    props.address.find((item) => item.isDefault == true)
+  );
   const [province, setProvince] = useState();
   const [district, setDistrict] = useState();
   const [ward, setWard] = useState();
@@ -125,11 +127,17 @@ export default function PaymentComponent(props) {
   const [changeAddress, setChangeAddress] = useState(false);
 
   useEffect(() => {
-    const province = dchc.data.find((item) => item.level1_id == address.province);
+    const province = dchc.data.find(
+      (item) => item.level1_id == address.province
+    );
     setProvince(province.name);
-    const district = province.level2s.find((item) => item.level2_id == address.district);
+    const district = province.level2s.find(
+      (item) => item.level2_id == address.district
+    );
     setDistrict(district.name);
-    const ward = district.level3s.find((item) => item.level3_id == address.ward);
+    const ward = district.level3s.find(
+      (item) => item.level3_id == address.ward
+    );
     setWard(ward.name);
   }, [address]);
 
@@ -169,7 +177,8 @@ export default function PaymentComponent(props) {
           </div>
         </div>
         <button onClick={onMakePayment} className="btn-order">
-          Make Payment ({props.data.filter((item) => item.isChecked == true).length})
+          Make Payment (
+          {props.data.filter((item) => item.isChecked == true).length})
         </button>
       </PaymentComponentStyle>
       {changeAddress && (

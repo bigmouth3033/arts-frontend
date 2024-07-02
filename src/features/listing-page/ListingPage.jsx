@@ -61,8 +61,10 @@ const ListingPage = () => {
   const [searchValue, setSearchValue] = useState(
     searchParams.get("search") || ""
   );
+  const [starValue, setStarValue] = useState(searchParams.get("star") || 0);
   const [sort, setSort] = useState();
-  const pageSize = 2;
+
+  const pageSize = 4;
 
   //call APIs
   const readCategories = ReadCategoryRequest();
@@ -72,7 +74,8 @@ const ListingPage = () => {
     sort?.value,
     searchValue,
     priceMin,
-    priceMax
+    priceMax,
+    starValue
   ); //category ID, pageSize
 
   //------------Radio Price Filter---------------
@@ -84,9 +87,21 @@ const ListingPage = () => {
       search: searchValue,
       minPrice: priceRangeMin,
       maxPrice: priceRangeMax,
+      star: starValue,
     });
   };
-
+  //------------Radio Star Filter---------------
+  const handleStarChange = (value) => {
+    setStarValue(value);
+    console.log(value);
+    setSearchParams({
+      categoryId: selectedCategory,
+      search: searchValue,
+      minPrice: priceMin,
+      maxPrice: priceMax,
+      star: value,
+    });
+  };
   //------------Radio Cate Filter---------------
   const handleChange = (categoryId) => {
     setSelectedCategory(categoryId);
@@ -95,6 +110,7 @@ const ListingPage = () => {
       search: searchValue,
       minPrice: priceMin,
       maxPrice: priceMax,
+      star: starValue,
     });
   };
   //------------SEARCH---------------------------
@@ -104,6 +120,7 @@ const ListingPage = () => {
       search: value,
       minPrice: priceMin,
       maxPrice: priceMax,
+      star: starValue,
     });
     setSearchValue(value);
   };
@@ -125,6 +142,8 @@ const ListingPage = () => {
           handleChange={handleChange}
           handlePriceRadioChange={handlePriceRadioChange}
           categoryData={readCategories.data.data}
+          starValue={starValue}
+          handleStarChange={handleStarChange}
         />
         <StyleRight>
           <Sort switched={sort} setSwitched={setSort} />
