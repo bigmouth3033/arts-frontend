@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import { FaUser, FaHeart, FaShoppingCart, FaSearch } from "react-icons/fa";
 import Login from "@/features/authentication/login/Index";
@@ -18,6 +18,11 @@ import { GetCartQuantityRequest } from "./api/cartQuantityApi";
 import { Link } from "react-router-dom";
 import Avatar from "react-avatar";
 import { SearchProductRequest } from "./api/searchApi";
+import WaitingIcon from "@/shared/components/AnimationIcon/WaitingIcon";
+import { AiOutlineImport } from "react-icons/ai";
+import formatDollar from "@/shared/utils/FormatDollar";
+import calculatePercentDifference from "@/shared/utils/calculatePercentDifference";
+import { FaCheck, FaStar } from "react-icons/fa";
 
 const StyledContainer = styled.div`
   background-color: #0272c0;
@@ -204,13 +209,90 @@ const CartQuantity = styled.span`
 
 const SearchContainer = styled.div`
   position: absolute;
+  background-color: white;
+  min-height: 200px;
+  width: 100%;
+  top: 0;
+  transform: translateY(40px);
+  z-index: 1;
+  border-radius: 25px;
+  box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+  padding: 1rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  z-index: 3;
 `;
 
+const Item = styled.div`
+  display: grid;
+  grid-template-columns: 5rem 1fr;
+  gap: 1rem;
+`;
+
+const Image = styled.div`
+  width: 5rem;
+  height: 5rem;
+
+  > img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+`;
+
+const ItemContent = styled.div``;
+
+const StyledNameLink = styled(Link)`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  font-size: 14px;
+  text-decoration: none;
+  word-break: break-word;
+  max-width: 100%;
+  color: #561c8c;
+
+  &:hover {
+    color: red;
+  }
+`;
+
+const Price = styled.div`
+  > span:nth-of-type(1) {
+    color: #965f58;
+    font-size: 16px;
+  }
+
+  > span:nth-of-type(2) {
+    color: #878787;
+    text-decoration: line-through;
+    font-weight: 300;
+    font-size: 14px;
+  }
+`;
+
+const StarCount = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  > span {
+    font-size: 12px;
+  }
+`;
+
+const SalePercent = styled.span``;
+
 export default function UserNavbar() {
+  const searchRef = useRef();
+  const searchContainerRef = useRef();
   const readCategoryRequest = ReadCategoryRequest();
   const getCartQuantityRequest = GetCartQuantityRequest();
   const [searchValue, setSearchValue] = useState("");
   const searchProductRequest = SearchProductRequest(searchValue);
+  const [onSearchActive, setOnSearchActive] = useState(false);
 
   const customerRequest = CustomerRequest();
   const [isPopUpVisible, setIsPopUpVisible] = useState(false);
@@ -225,6 +307,32 @@ export default function UserNavbar() {
     setIsLoginForm(true);
   };
 
+  useEffect(() => {
+    const onMouseDownEvent = (ev) => {
+      if (
+        searchContainerRef &&
+        !searchContainerRef.current.contains(ev.target) &&
+        !searchRef.current.contains(ev.target)
+      ) {
+        setOnSearchActive(false);
+      }
+    };
+
+    document.addEventListener("mousedown", onMouseDownEvent);
+
+    return () => {
+      document.removeEventListener("mousedown", onMouseDownEvent);
+    };
+  }, []);
+
+  const getMinVariant = (product) => {
+    const minVariant = product.variants.reduce((min, variant) => {
+      return variant.price < min.price ? variant : min;
+    }, product.variants[0]);
+
+    return minVariant;
+  };
+
   return (
     <>
       <StyledContainer>
@@ -235,12 +343,61 @@ export default function UserNavbar() {
           <Main>
             <StyledSearchBar>
               <StyledInputSearch
+                ref={searchRef}
                 value={searchValue}
+                onFocus={() => setOnSearchActive(true)}
                 onChange={(ev) => setSearchValue(ev.target.value)}
                 type="text"
                 placeholder="Search desired products"
               />
-              <SearchContainer></SearchContainer>
+              {searchValue != "" && onSearchActive && (
+                <SearchContainer ref={searchContainerRef}>
+                  {searchProductRequest.isLoading && <WaitingIcon />}
+                  {searchProductRequest.isSuccess &&
+                    searchProductRequest.data.data.map((item, index) => {
+                      const minVariant = getMinVariant(item.product);
+                      return (
+                        <Item key={index}>
+                          <Image>
+                            <img
+                              src={
+                                import.meta.env.VITE_API_IMAGE_PATH +
+                                item.product.productImages[0].imageName
+                              }
+                            />
+                          </Image>
+                          <div>
+                            <StyledNameLink to={`/productdetail?id=${item.product.id}`}>
+                              {item.product.name}
+                            </StyledNameLink>
+                            <Price>
+                              <span>${formatDollar(minVariant.price)}</span>{" "}
+                              <span>
+                                {minVariant.salePrice != 0 && (
+                                  <span>${formatDollar(minVariant.salePrice)}</span>
+                                )}
+                              </span>{" "}
+                              {minVariant.salePrice != 0 && (
+                                <SalePercent>
+                                  -{""}
+                                  {calculatePercentDifference(
+                                    minVariant.salePrice,
+                                    minVariant.price
+                                  )}
+                                  {""}%
+                                </SalePercent>
+                              )}
+                            </Price>
+                            <StarCount>
+                              <ReadStar star={item.averageRating} />
+                              <span> ({item.ratingCount})</span>
+                            </StarCount>
+                          </div>
+                        </Item>
+                      );
+                    })}
+                </SearchContainer>
+              )}
             </StyledSearchBar>
             <StyledHeaderCustomer>
               <FaHome
@@ -303,8 +460,8 @@ export default function UserNavbar() {
             </div>
           </Main>
         </StyledHeader>
-        <Exchange onClick={() => navigate("return")}>
-          <h4>
+        <Exchange>
+          <h4 onClick={() => navigate("return")}>
             <span>
               <MdCurrencyExchange />7 Days
             </span>
@@ -325,5 +482,27 @@ export default function UserNavbar() {
         </StyedPopUp>
       )}
     </>
+  );
+}
+
+const Star = styled.p`
+  color: ${({ $active }) => ($active ? "#FFC400" : "grey")};
+  margin: 0 auto;
+`;
+
+const StyledWrapReadStar = styled.span`
+  display: inline-flex;
+  font-size: 1.2rem;
+`;
+
+function ReadStar({ star }) {
+  return (
+    <StyledWrapReadStar>
+      {[...Array(5)].map((_, index) => (
+        <Star key={index} $active={index < star}>
+          <FaStar size="15px" />
+        </Star>
+      ))}
+    </StyledWrapReadStar>
   );
 }

@@ -4,11 +4,14 @@ import Autoplay from "embla-carousel-autoplay";
 import useEmblaCarousel from "embla-carousel-react";
 import styled from "styled-components";
 import "../assets/css/homepage-embla.css";
+import { useNavigate } from "react-router-dom";
 const OPTIONS = { align: "start", dragFree: false, loop: true };
 const SLIDE_COUNT = 5;
 const SLIDES = Array.from(Array(SLIDE_COUNT).keys());
 
 const Image = styled.div`
+  cursor: pointer;
+
   > img {
     width: 100%;
     height: 100%;
@@ -105,6 +108,7 @@ const BannerHomePage = (props) => {
   const options = OPTIONS;
   const slides = SLIDES;
   const [emblaRef, emblaApi] = useEmblaCarousel(options, [Autoplay()]);
+  const navigate = useNavigate();
 
   const onNavButtonClick = useCallback((emblaApi) => {
     const autoplay = emblaApi?.plugins()?.autoplay;
@@ -134,7 +138,14 @@ const BannerHomePage = (props) => {
               <div className="embla__slide_banner" key={index}>
                 <div className="embla__slide__number_banner">
                   <Image>
-                    <img src={image} />
+                    <img
+                      onClick={() => {
+                        if (index == 0) {
+                          navigate("/listing-page");
+                        }
+                      }}
+                      src={image}
+                    />
                   </Image>
                 </div>
               </div>

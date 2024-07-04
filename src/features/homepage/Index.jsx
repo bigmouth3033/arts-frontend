@@ -13,6 +13,7 @@ import styled from "styled-components";
 import newbanner from "./assets/images/NewArrival.png";
 import bag from "./assets/images/bag.png";
 import ship from "./assets/images/ship.png";
+import homebanner from "./assets/images/homebanner.jpg";
 import { ReadCategoryRequest } from "@/shared/api/categoryApi";
 import { readCategoriesData } from "@/shared/utils/readCategoriesData";
 import { Link } from "react-router-dom";
@@ -214,6 +215,12 @@ const StyledNameLink = styled(Link)`
   text-decoration: none;
   word-break: break-word;
   max-width: 100%;
+
+  color: #561c8c;
+
+  &:hover {
+    color: red;
+  }
 `;
 
 const Price = styled.div`
@@ -253,7 +260,7 @@ const ShowMoreButton = styled.div`
     cursor: pointer;
     color: #0a68ff;
     &:hover {
-      background-color: #c7d7e2;
+      background-color: #d7e3fb;
     }
   }
 `;
@@ -319,7 +326,7 @@ export default function Homepage() {
             })}
           </Category>
           <div>
-            <BannerHomePage data={[bag, ship]} />
+            <BannerHomePage data={[homebanner, bag, ship]} />
           </div>
         </HomeBanner>
         <BestSeller>

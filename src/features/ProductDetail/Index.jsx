@@ -57,6 +57,24 @@ const NoProduct = styled.div`
   }
 `;
 
+const StyledNameLink = styled(Link)`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  font-size: 14px;
+  text-decoration: none;
+  word-break: break-word;
+  max-width: 50%;
+
+  color: #561c8c;
+
+  &:hover {
+    color: red;
+  }
+`;
+
 export default function ProductDetail() {
   let [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -93,7 +111,7 @@ export default function ProductDetail() {
           {getProductDetailRequest.data.data.category.name}
         </Link>{" "}
         <FaAngleRight />
-        <Link>{getProductDetailRequest.data.data.name}</Link>
+        <StyledNameLink>{getProductDetailRequest.data.data.name}</StyledNameLink>
       </BreadCrumb>
       <ProductSingleMain
         star={requestStar}

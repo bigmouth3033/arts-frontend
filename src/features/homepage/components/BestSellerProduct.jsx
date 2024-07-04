@@ -140,6 +140,12 @@ const StyledLink = styled(Link)`
   text-decoration: none;
   word-break: break-word;
   max-width: 100%;
+
+  color: #561c8c;
+
+  &:hover {
+    color: red;
+  }
 `;
 
 const Price = styled.div`

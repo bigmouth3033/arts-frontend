@@ -18,5 +18,6 @@ export const SearchProductRequest = (searchValue) => {
       return searchProduct(searchValue);
     },
     retry: 0,
+    enabled: searchValue != "",
   });
 };

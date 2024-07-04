@@ -628,7 +628,7 @@ export default function ProductSingleMain({ data, variant, request, star }) {
             </Prices>
           )}
           <ProductDetail>
-            {data.unit && (
+            {data.unit && data.unit != 0 && (
               <div>
                 <h4>
                   <FaBox /> Unit

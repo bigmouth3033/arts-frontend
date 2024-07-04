@@ -7,6 +7,8 @@ import formatDollar from "@/shared/utils/FormatDollar";
 import { Link } from "react-router-dom";
 import AlertPopUp from "@/shared/components/PopUp/AlertPopUp";
 import { useNavigate } from "react-router-dom";
+import ErrorPopUp from "@/shared/components/PopUp/ErrorPopUp";
+import AddressPopUp from "@/features/account-address/components/AddressPopUp";
 
 const PaymentComponentStyle = styled.div`
   padding-top: 20px;
@@ -121,6 +123,7 @@ export default function PaymentComponent(props) {
   const [district, setDistrict] = useState();
   const [ward, setWard] = useState();
   const [paymentError, setPaymentError] = useState(false);
+  const [addressError, setAddressError] = useState(false);
 
   const [changeAddress, setChangeAddress] = useState(false);
 
@@ -137,6 +140,11 @@ export default function PaymentComponent(props) {
 
   const onMakePayment = () => {
     if (props.data.filter((item) => item.isChecked == true).length == 0) {
+      if (address == null) {
+        setAddressError(true);
+        return;
+      }
+
       setPaymentError(true);
     } else {
       navigate("/payment");
@@ -165,6 +173,15 @@ export default function PaymentComponent(props) {
           </AddressContainer>
         )}
 
+        {!address && (
+          <AddressContainer>
+            <div>
+              <span>Delivery to</span>
+              <span onClick={() => setChangeAddress(true)}>Add new</span>
+            </div>
+          </AddressContainer>
+        )}
+
         <div className="price-summary">
           <div className="price-total">
             <span>Total price</span>
@@ -189,6 +206,9 @@ export default function PaymentComponent(props) {
           message={"You did not select any product"}
           action={() => setPaymentError(false)}
         />
+      )}
+      {addressError && (
+        <ErrorPopUp action={() => setAddressError(false)} message={"You dont have any address"} />
       )}
     </>
   );

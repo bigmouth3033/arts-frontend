@@ -11,6 +11,7 @@ export const GetNewestProductRequest = () => {
   return useQuery({
     queryKey: ["newest"],
     queryFn: getNewstProduct,
+    retry: 0,
   });
 };
 
@@ -23,6 +24,7 @@ export const GetBestSellerRequest = () => {
   return useQuery({
     queryKey: ["best-seller"],
     queryFn: getBestSeller,
+    retry: 0,
   });
 };
 
@@ -50,5 +52,6 @@ export const GetProductSuggestionRequest = (pageSize) => {
         return null;
       }
     },
+    retry: 0,
   });
 };
