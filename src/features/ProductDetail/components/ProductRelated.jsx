@@ -1,156 +1,223 @@
 import React from "react";
+import { GetRelatedProductRequest } from "../api/productDetailApi";
 import styled from "styled-components";
-const StyledContainerProductRelated = styled.div``;
-const StyledProductTitle = styled.div`
-  color: #4c503d;
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 28px;
-  margin-bottom: 20px;
-  padding: 15px 10px 0 0;
+import formatDollar from "@/shared/utils/FormatDollar";
+import calculatePercentDifference from "@/shared/utils/calculatePercentDifference";
+import { Link } from "react-router-dom";
+import WaitingIcon from "@/shared/components/AnimationIcon/WaitingIcon";
+import { FaCheck, FaStar } from "react-icons/fa";
+
+const Suggestion = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: white;
+
+  > h4 {
+    font-size: 20px;
+    font-weight: 800;
+    color: #0057a0;
+    width: 100%;
+    border-bottom: 6px solid #0272c0;
+    text-align: center;
+    padding: 8px;
+  }
+
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 `;
 
-const StyledContainerProductList = styled.div`
-  padding: 0 5%;
+const ItemContainer = styled.div`
+  padding: 2rem;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  justify-content: center;
-  gap: 20px;
+  gap: 1rem;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  font-size: 14px;
 `;
 
-export default function ProductRelated() {
+const Item = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: fit-content;
+  box-sizing: border-box;
+`;
+
+const Image = styled.div`
+  width: 100%;
+  height: 10rem;
+
+  > img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+`;
+
+const Name = styled.div`
+  font-size: 15px;
+`;
+
+const StyledNameLink = styled(Link)`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  font-size: 14px;
+  text-decoration: none;
+  word-break: break-word;
+  max-width: 100%;
+
+  color: #561c8c;
+
+  &:hover {
+    color: red;
+  }
+`;
+
+const Price = styled.div`
+  > span:nth-of-type(1) {
+    color: #965f58;
+    font-size: 16px;
+  }
+
+  > span:nth-of-type(2) {
+    color: #878787;
+    text-decoration: line-through;
+    font-weight: 300;
+    font-size: 14px;
+  }
+`;
+
+const StarCount = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  > span {
+    font-size: 12px;
+  }
+`;
+
+const ShowMoreButton = styled.div`
+  margin: 1rem 0;
+  width: 100%;
+
+  display: flex;
+  justify-content: center;
+  > button {
+    padding: 0.8rem 5rem;
+    border-radius: 5px;
+    border: 1px solid #0a68ff;
+    background-color: white;
+    cursor: pointer;
+    color: #0a68ff;
+    &:hover {
+      background-color: #d7e3fb;
+    }
+  }
+`;
+
+const SalePercent = styled.span``;
+
+export default function ProductRelated({ data }) {
+  const getMinVariant = (product) => {
+    const minVariant = product.variants.reduce((min, variant) => {
+      return variant.price < min.price ? variant : min;
+    }, product.variants[0]);
+
+    return minVariant;
+  };
+
+  const getRelatedProductRequest = GetRelatedProductRequest(data.categoryId, data.id, 20);
+
   return (
-    <StyledContainerProductRelated>
-      <StyledProductTitle>RELATED PRODUCT</StyledProductTitle>
-      <StyledContainerProductList>
-        <Product />
-        <Product />
-        <Product />
-        <Product />
-        <Product />
-      </StyledContainerProductList>
-    </StyledContainerProductRelated>
+    <Suggestion>
+      <h4>YOUR SUGGESTION</h4>
+      <ItemContainer>
+        {getRelatedProductRequest.isLoading && <WaitingIcon />}
+        {getRelatedProductRequest.isSuccess &&
+          getRelatedProductRequest.data.pages.map((page, pageIndex) =>
+            page.data.map((product, productIndex) => {
+              const minVariant = getMinVariant(product.product);
+              return (
+                <Item key={productIndex}>
+                  <Image>
+                    <img
+                      src={
+                        import.meta.env.VITE_API_IMAGE_PATH +
+                        product.product.productImages[0].imageName
+                      }
+                    />
+                  </Image>
+                  <Name>
+                    <StyledNameLink to={`/productdetail?id=${product.product.id}`}>
+                      {product.product.name}
+                    </StyledNameLink>
+                  </Name>
+                  <Price>
+                    <span>${formatDollar(minVariant.price)}</span>{" "}
+                    <span>
+                      {minVariant.salePrice != 0 && (
+                        <span>${formatDollar(minVariant.salePrice)}</span>
+                      )}
+                    </span>{" "}
+                    {minVariant.salePrice != 0 && (
+                      <SalePercent>
+                        -{""}
+                        {calculatePercentDifference(minVariant.salePrice, minVariant.price)}
+                        {""}%
+                      </SalePercent>
+                    )}
+                  </Price>
+                  <StarCount>
+                    <ReadStar star={product.averageRating} />
+                    <span> ({product.ratingCount})</span>
+                  </StarCount>
+                </Item>
+              );
+            })
+          )}
+      </ItemContainer>
+      {getRelatedProductRequest.isSuccess &&
+        getRelatedProductRequest.data.pageParams.length <
+          getRelatedProductRequest.data.pages[0].totalPages && (
+          <ShowMoreButton>
+            <button
+              onClick={() => {
+                getRelatedProductRequest.fetchNextPage();
+              }}
+            >
+              Show More
+            </button>
+          </ShowMoreButton>
+        )}
+    </Suggestion>
   );
 }
 
-const StyledProductBox = styled.div`
-  border-radius: 10px;
-  padding: 15px;
+const Star = styled.p`
+  color: ${({ $active }) => ($active ? "#FFC400" : "grey")};
+  margin: 0 auto;
 `;
 
-const StyledProductImage = styled.img`
-  display: block;
-  border-radius: 10px;
-  object-fit: cover;
-  height: 180px;
-  width: 100%;
-`;
-const StyledNameProduct = styled.div`
-  font-size: 15px;
-  line-height: 1.4;
-  font-family: SVN-Gilroy Bold, Verdana, Roboto, Tahoma, sans-serif;
-  max-height: 3em; /* Chiều cao tối đa tương đương 2 dòng */
-  overflow: hidden;
-  text-overflow: ellipsis; /* Hiển thị dấu chấm (...) nếu văn bản bị cắt bớt */
-  display: -webkit-box;
-  -webkit-line-clamp: 2; /* Số dòng hiển thị tối đa */
-  -webkit-box-orient: vertical;
-  margin: 0.4rem 0;
-`;
-const StyledContainerPrice = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  columns: 0.2rem;
-  align-items: center;
-`;
-const StyledProductPrice = styled.div`
-  color: red;
-  font-size: 15px;
-`;
-const StyledProductPriceOrigin = styled.div`
-  color: gray;
-  font-size: 12px;
-  text-decoration: line-through;
-`;
-const StyledContainerStar = styled.div`
-  display: flex;
-  padding: 2px 0;
-  justify-content: baseline;
-  align-items: center;
-`;
-const StyledGoldStar = styled.div`
-  position: relative;
-  width: 20px;
-  height: 20px;
-  background-color: gold;
-  clip-path: polygon(
-    50% 0%,
-    61% 35%,
-    98% 35%,
-    68% 57%,
-    79% 91%,
-    50% 70%,
-    21% 91%,
-    32% 57%,
-    2% 35%,
-    39% 35%
-  );
-
-  ::before,
-  ::after {
-    content: "";
-    position: absolute;
-    width: 0;
-    height: 0;
-    border-style: solid;
-  }
-
-  ::before {
-    top: -5px;
-    left: calc(50% - 5px);
-    border-width: 0 5px 8px 5px;
-    border-color: transparent transparent gold transparent;
-  }
-
-  ::after {
-    bottom: -5px;
-    left: calc(50% - 5px);
-    border-width: 8px 5px 0 5px;
-    border-color: gold transparent transparent transparent;
-  }
+const StyledWrapReadStar = styled.span`
+  display: inline-flex;
+  font-size: 1.2rem;
 `;
 
-const StyledReviews = styled.div`
-  font-size: 12px;
-  color: gray;
-  margin: 0.5rem 0 0 0;
-`;
-function Product() {
+function ReadStar({ star }) {
   return (
-    <StyledProductBox>
-      <div>
-        <StyledProductImage
-          src="src/features/ProductDetail/data/images/e.jpg"
-          alt=""
-        />
-      </div>
-      <div>
-        <StyledNameProduct>
-          Smooth avocado shampoo recovers recovers recovers
-        </StyledNameProduct>
-        <StyledContainerPrice>
-          <StyledProductPrice>25.00 USD</StyledProductPrice>
-          <StyledProductPriceOrigin>30.00</StyledProductPriceOrigin>
-        </StyledContainerPrice>
-        <StyledContainerStar>
-          <StyledGoldStar />
-          <StyledGoldStar />
-          <StyledGoldStar />
-          <StyledGoldStar />
-          <StyledGoldStar />
-        </StyledContainerStar>
-        <StyledReviews>5.0/281 reviews</StyledReviews>
-      </div>
-    </StyledProductBox>
+    <StyledWrapReadStar>
+      {[...Array(5)].map((_, index) => (
+        <Star key={index} $active={index < star}>
+          <FaStar size="15px" />
+        </Star>
+      ))}
+    </StyledWrapReadStar>
   );
 }

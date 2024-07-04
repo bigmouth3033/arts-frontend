@@ -120,7 +120,7 @@ export default function ProductDetail() {
         request={getProductDetailRequest}
       />
       <ProductReview data={getProductDetailRequest.data.data} star={requestStar} />
-      <ProductRelated />
+      <ProductRelated data={getProductDetailRequest.data.data} />
     </ProductSingleContainer>
   );
 }
