@@ -150,6 +150,8 @@ const Buttons = styled.div`
 export default function ChangeAddressPopUp({ action, state, setState }) {
   const getUserAddressRequest = GetUserAddressRequest();
 
+  console.log(getUserAddressRequest);
+
   return (
     <StyledPopUp action={() => {}}>
       <Header>

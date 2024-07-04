@@ -249,15 +249,14 @@ export default function AdminOrderDetail() {
     acceptOrderRequest.mutate(formData, {
       onSuccess: (response) => {
         if (response.status == 200) {
-          getAdminOrdersetAdminOrderRequest.refetch();
           setSuccess(true);
-          getOrderDetailRequest.refetch();
+          getOrderByIdRequest.refetch();
           return;
         }
 
         if (response.status == 400) {
-          getAdminOrdersetAdminOrderRequest.refetch();
           setError(true);
+          getOrderByIdRequest.refetch();
           return;
         }
       },
@@ -271,15 +270,14 @@ export default function AdminOrderDetail() {
     denyOrderRequest.mutate(formData, {
       onSuccess: (response) => {
         if (response.status == 200) {
-          getAdminOrdersetAdminOrderRequest.refetch();
           setSuccess(true);
-          setCheckBox((prev) => prev.filter((item) => !id.includes(item)));
+          getOrderByIdRequest.refetch();
           return;
         }
 
         if (response.status == 400) {
-          getAdminOrdersetAdminOrderRequest.refetch();
           setError(true);
+          getOrderByIdRequest.refetch();
           return;
         }
       },
@@ -293,15 +291,14 @@ export default function AdminOrderDetail() {
     deliveryOrderRequest.mutate(formData, {
       onSuccess: (response) => {
         if (response.status == 200) {
-          getAdminOrdersetAdminOrderRequest.refetch();
           setSuccess(true);
-          setCheckBox((prev) => prev.filter((item) => !id.includes(item)));
+          getOrderByIdRequest.refetch();
           return;
         }
 
         if (response.status == 400) {
-          getAdminOrdersetAdminOrderRequest.refetch();
           setError(true);
+          getOrderByIdRequest.refetch();
           return;
         }
       },
@@ -315,15 +312,14 @@ export default function AdminOrderDetail() {
     finishOrderRequest.mutate(formData, {
       onSuccess: (response) => {
         if (response.status == 200) {
-          getAdminOrdersetAdminOrderRequest.refetch();
           setSuccess(true);
-          setCheckBox((prev) => prev.filter((item) => !id.includes(item)));
+          getOrderByIdRequest.refetch();
           return;
         }
 
         if (response.status == 400) {
-          getAdminOrdersetAdminOrderRequest.refetch();
           setError(true);
+          getOrderByIdRequest.refetch();
           return;
         }
       },
@@ -531,17 +527,27 @@ export default function AdminOrderDetail() {
             </tbody>
           </TableContent>
           <Buttons>
-            {getOrderByIdRequest.isCancel == false &&
-              getOrderByIdRequest.data.data.orderStatusType.id == 13 && (
-                <button>Accept order</button>
+            {getOrderByIdRequest.data.data.isCancel == false &&
+              getOrderByIdRequest.data.data.orderStatusId == 13 && (
+                <>
+                  <button onClick={() => onAccept([getOrderByIdRequest.data.data.id])}>
+                    Accept order
+                  </button>
+                  <button onClick={() => onDeny([getOrderByIdRequest.data.data.id])}>
+                    Deny order
+                  </button>
+                </>
               )}
-            {getOrderByIdRequest.isCancel == false &&
-              getOrderByIdRequest.data.data.orderStatusType.id == 13 && <button>Deny order</button>}
-            {getOrderByIdRequest.data.data.orderStatusType.id == 14 && (
-              <button>Delivery order</button>
+
+            {getOrderByIdRequest.data.data.orderStatusId == 14 && (
+              <button onClick={() => onDelivery([getOrderByIdRequest.data.data.id])}>
+                Delivery order
+              </button>
             )}
-            {getOrderByIdRequest.data.data.orderStatusType.id == 17 && (
-              <button>Finish order</button>
+            {getOrderByIdRequest.data.data.orderStatusId == 17 && (
+              <button onClick={() => onSuccess([getOrderByIdRequest.data.data.id])}>
+                Finish order
+              </button>
             )}
           </Buttons>
         </Product>

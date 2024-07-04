@@ -14,7 +14,9 @@ const getAdminOrders = async (
   paymentCode,
   delivery,
   from,
-  to
+  to,
+  fromDate,
+  toDate
 ) => {
   const response = await axiosAdmin.get("order/admin-orders", {
     params: {
@@ -30,6 +32,8 @@ const getAdminOrders = async (
       delivery,
       from,
       to,
+      fromDate,
+      toDate,
     },
     paramsSerializer: (params) => qs.stringify(params, { arrayFormat: "repeat" }),
   });
@@ -48,7 +52,9 @@ export const GetAdminOrderRequest = (
   paymentCode,
   delivery,
   from,
-  to
+  to,
+  fromDate,
+  toDate
 ) => {
   return useQuery({
     queryKey: [
@@ -65,6 +71,8 @@ export const GetAdminOrderRequest = (
       delivery,
       from,
       to,
+      fromDate,
+      toDate,
     ],
     queryFn: () => {
       return getAdminOrders(
@@ -79,7 +87,9 @@ export const GetAdminOrderRequest = (
         paymentCode,
         delivery,
         from,
-        to
+        to,
+        fromDate,
+        toDate
       );
     },
     retry: 0,

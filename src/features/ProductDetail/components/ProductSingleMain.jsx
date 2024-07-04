@@ -11,7 +11,7 @@ import { FaDollarSign } from "react-icons/fa6";
 import convertToLetterString from "../utils/convertIdToStr";
 import { getSalePrices } from "../utils/getVariantPrices";
 import { getPrices } from "../utils/getVariantPrices";
-import { FaCheck } from "react-icons/fa";
+import { FaCheck, FaStar } from "react-icons/fa";
 import NumberInput from "@/shared/components/Input/NumberInput";
 import { CiSquarePlus } from "react-icons/ci";
 import { CiSquareMinus } from "react-icons/ci";
@@ -29,6 +29,7 @@ import formatDollar from "@/shared/utils/FormatDollar";
 import { SiExpress } from "react-icons/si";
 import { CiDeliveryTruck } from "react-icons/ci";
 import { FaBox } from "react-icons/fa";
+import calculatePercentDifference from "@/shared/utils/calculatePercentDifference";
 
 const Container = styled.div`
   margin: 1rem 0;
@@ -385,7 +386,20 @@ const ProductDetail = styled.div`
   }
 `;
 
-export default function ProductSingleMain({ data, variant, request }) {
+const StyledTitle = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  column-gap: 0.5rem;
+  > div {
+    font-size: 1rem;
+  }
+  > p {
+    font-size: 0.8rem;
+  }
+`;
+
+export default function ProductSingleMain({ data, variant, request, star }) {
   const createCartItemRequest = CreateCartItemRequest();
   const OPTIONS = {};
   const SLIDES = data.productImages;
@@ -451,6 +465,25 @@ export default function ProductSingleMain({ data, variant, request }) {
     }
   };
 
+  const totalStar = (data) => {
+    let tongSao = 0;
+
+    let person = 0;
+    data.forEach((item) => {
+      tongSao += item.star * item.amount;
+      person += item.amount;
+    });
+    return (tongSao / person).toFixed(1);
+  };
+
+  const totalAmount = (data) => {
+    let ratingAmount = 0;
+    data.forEach((item) => {
+      ratingAmount += item.amount;
+    });
+    return ratingAmount;
+  };
+
   const onClickSubQuantity = () => {
     setQuantity((prev) => {
       if (prev > 1) {
@@ -487,14 +520,14 @@ export default function ProductSingleMain({ data, variant, request }) {
       return;
     }
 
-    let variant = data.variants[0];
+    let variantDetail = data.variants[0];
 
     if (variant.length > 0) {
-      variant = onGetVariant();
+      variantDetail = onGetVariant();
     }
 
     const formData = new FormData();
-    formData.append("VariantId", variant.id);
+    formData.append("VariantId", variantDetail.id);
     formData.append("Quantity", quantity);
     createCartItemRequest.mutate(formData, {
       onSuccess: (response) => {
@@ -546,6 +579,13 @@ export default function ProductSingleMain({ data, variant, request }) {
             </ID>
           </div>
           <h2>{data.name}</h2>
+          {star.data.data.length > 0 && (
+            <StyledTitle>
+              <div>{star.data.data && totalStar(star.data.data)}</div>
+              <ReadStar star={totalStar(star.data.data)} />
+              <p>({totalAmount(star.data.data)}) </p>
+            </StyledTitle>
+          )}
           {variantAttributes.includes(null) ? (
             <InitialPrice>
               <div>
@@ -754,7 +794,7 @@ export default function ProductSingleMain({ data, variant, request }) {
             </div>
           </StyledShippingBoxWrap>
         </ShipmentDetail>
-        <ProductSingleInformation data={data} />
+        {data.description && <ProductSingleInformation data={data} />}
       </Detail>
       {variantError && (
         <AlertPopUp
@@ -863,5 +903,26 @@ function Thumb(props) {
         <Image src={import.meta.env.VITE_API_IMAGE_PATH + item.imageName} />
       </button>
     </div>
+  );
+}
+
+const Star = styled.p`
+  color: ${({ active }) => (active ? "#FFC400" : "grey")};
+  margin: 0 auto;
+`;
+const StyledWrapReadStar = styled.span`
+  display: inline-flex;
+  font-size: 1.2rem;
+`;
+
+function ReadStar({ star }) {
+  return (
+    <StyledWrapReadStar>
+      {[...Array(5)].map((_, index) => (
+        <Star key={index} active={index < star}>
+          <FaStar size="15px" />
+        </Star>
+      ))}
+    </StyledWrapReadStar>
   );
 }

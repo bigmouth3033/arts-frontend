@@ -45,6 +45,9 @@ const fadeDownAnimation = keyframes`
 const StyleAboutUs = styled.div`
   margin: 1rem 3rem;
   text-align: justify;
+  max-width: 1280px;
+  padding: 15px;
+  margin: 1rem auto;
 `;
 const StyleMission = styled.div`
   display: grid;
@@ -162,18 +165,14 @@ export default function AboutUs() {
       <StyleMission>
         <div className="mission-content">
           <h2>Our Mission</h2>
-          Arts is a charming stationery shop committed to providing exceptional
-          quality and personalized customer service. The knowledgeable team
-          ensures each visitor leaves with the perfect item to suit their unique
-          style and occasion. By curating a diverse collection of handcrafted
-          products, Arts aspires to inspire creativity, ignite the imagination,
-          and foster a sense of community.
+          Arts is a charming stationery shop committed to providing exceptional quality and
+          personalized customer service. The knowledgeable team ensures each visitor leaves with the
+          perfect item to suit their unique style and occasion. By curating a diverse collection of
+          handcrafted products, Arts aspires to inspire creativity, ignite the imagination, and
+          foster a sense of community.
         </div>
         <div className="mission-img">
-          <img
-            src="src/features/aboutUs-FAQ/assets/Mission.png"
-            alt="mission-img"
-          />
+          <img src="src/features/aboutUs-FAQ/assets/Mission.png" alt="mission-img" />
         </div>
       </StyleMission>
       <div>
@@ -182,34 +181,22 @@ export default function AboutUs() {
           <div>
             <img src="src/features/aboutUs-FAQ/assets/Cat1.jpg" alt="Nhan" />
             <p>Nhan Nguyen</p>
-            <img
-              className="underline"
-              src="src/features/aboutUs-FAQ/assets/underline.jpg"
-            />
+            <img className="underline" src="src/features/aboutUs-FAQ/assets/underline.jpg" />
           </div>
           <div>
             <img src="src/features/aboutUs-FAQ/assets/Mai.jpg" alt="Mai" />
             <p>Khloe Nguyen</p>
-            <img
-              className="underline"
-              src="src/features/aboutUs-FAQ/assets/underline.jpg"
-            />
+            <img className="underline" src="src/features/aboutUs-FAQ/assets/underline.jpg" />
           </div>
           <div>
             <img src="src/features/aboutUs-FAQ/assets/Giu.jpg" alt="Giu" />
             <p>Giu Phan</p>
-            <img
-              className="underline"
-              src="src/features/aboutUs-FAQ/assets/underline.jpg"
-            />
+            <img className="underline" src="src/features/aboutUs-FAQ/assets/underline.jpg" />
           </div>
           <div>
             <img src="src/features/aboutUs-FAQ/assets/Tan.jpg" alt="Tan" />
             <p>Tan Ngo</p>
-            <img
-              className="underline"
-              src="src/features/aboutUs-FAQ/assets/underline.jpg"
-            />
+            <img className="underline" src="src/features/aboutUs-FAQ/assets/underline.jpg" />
           </div>
         </StyleFounder>
       </div>
@@ -217,30 +204,27 @@ export default function AboutUs() {
       <StyleStory>
         <h2>Our Story</h2>
         <div>
-          The story of Arts began with the dream of its founding team - four
-          creative visionaries who recognized the growing demand for stylish,
-          affordable stationery and gifts in an increasingly digital world.
-          Determined to build a space that would delight and inspire, the team
-          poured their hearts and souls into curating a collection that
-          celebrates the timeless art of self-expression.
+          The story of Arts began with the dream of its founding team - four creative visionaries
+          who recognized the growing demand for stylish, affordable stationery and gifts in an
+          increasingly digital world. Determined to build a space that would delight and inspire,
+          the team poured their hearts and souls into curating a collection that celebrates the
+          timeless art of self-expression.
         </div>
         <br />
         <div>
           <img src="src/features/aboutUs-FAQ/assets/story.jpg" alt="" />
         </div>
         <div>
-          The true essence of Arts lies in its ability to connect people through
-          creativity. The vibrant displays and carefully curated collections
-          invite visitors to explore their artistic side, sparking ideas and
-          igniting the imagination. Each item at Arts tells a story, inviting
-          customers to share their own stories and create lasting memories.
+          The true essence of Arts lies in its ability to connect people through creativity. The
+          vibrant displays and carefully curated collections invite visitors to explore their
+          artistic side, sparking ideas and igniting the imagination. Each item at Arts tells a
+          story, inviting customers to share their own stories and create lasting memories.
         </div>
         <br />
         <div>
-          As the city continues to evolve, Arts remains a steadfast sanctuary,
-          where the art of handcrafted stationery and gifts endures, fostering a
-          sense of community that transcends the boundaries of time and
-          technology.
+          As the city continues to evolve, Arts remains a steadfast sanctuary, where the art of
+          handcrafted stationery and gifts endures, fostering a sense of community that transcends
+          the boundaries of time and technology.
         </div>
       </StyleStory>
     </StyleAboutUs>

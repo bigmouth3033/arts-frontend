@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import SelectInput from "@/shared/components/Input/SelectInput";
 import { BiLabel } from "react-icons/bi";
 import { GetOrderDetailRequest } from "../account-order-detail/api/orderDetailApi";
@@ -11,6 +11,8 @@ import { SendRefundRequest } from "./api/refundApi";
 import SuccessPopUp from "@/shared/components/PopUp/SuccessPopUp";
 import { useNavigate } from "react-router-dom";
 import { SendExchangeRequest } from "./api/refundApi";
+import { BiImageAdd } from "react-icons/bi";
+import { AiOutlineClose } from "react-icons/ai";
 
 const Container = styled.div`
   display: flex;
@@ -116,6 +118,101 @@ const NoOrder = styled.div`
   }
 `;
 
+const ImageContainer = styled.div`
+  > input {
+    display: none;
+  }
+`;
+
+const AddImageButton = styled.button`
+  background-color: white;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  gap: 10px;
+  padding: 3rem 2rem;
+  border: 1px dotted rgba(0, 0, 0, 0.2);
+
+  > span {
+    color: rgba(0, 0, 255, 0.5);
+    font-size: 16px;
+  }
+
+  > svg {
+    font-size: 45px;
+    opacity: 0.3;
+  }
+`;
+
+const ImageItem = styled.div`
+  position: relative;
+`;
+
+const ImageLayout = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0);
+  cursor: pointer;
+  display: flex;
+  justify-content: flex-end;
+  padding: 5px;
+
+  > svg {
+    display: none;
+    font-size: 1.2rem;
+    background-color: white;
+    padding: none;
+    border-radius: 5px;
+  }
+
+  > svg:nth-of-type(1) {
+    width: 2rem;
+    height: 2rem;
+    margin-left: 30px;
+    background-color: rgba(0, 0, 0, 0);
+    color: white;
+    border: 2px dotted rgba(255, 255, 255, 1);
+  }
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  &:hover svg {
+    display: block;
+  }
+`;
+
+const Images = styled.div`
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-auto-rows: 9rem;
+  gap: 10px;
+
+  > div:nth-of-type(1) {
+    grid-column: 1/3;
+    grid-row: 1/3;
+  }
+
+  > div {
+    border: 1px dotted rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  & img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+`;
+
 const exchangeOptions = [
   { value: "exchange", label: "Exchage product" },
   { value: "refund", label: "Return the product" },
@@ -137,6 +234,8 @@ const reasonOptions = [
 ];
 
 export default function AccountExchangeRequest() {
+  const inputRef = useRef();
+  const [images, setImages] = useState([]);
   const navigtate = useNavigate();
   const [exchangeChoice, setExchangeChoice] = useState(exchangeOptions[0]);
   const [exchangeReason, setExchangeReason] = useState(reasonOptions[0]);
@@ -151,10 +250,24 @@ export default function AccountExchangeRequest() {
     return <WaitingPopUp />;
   }
 
+  const checkValidExchange = (date) => {
+    const successDate = new Date(date);
+
+    const timeSpan = Date.now() - successDate;
+
+    if (timeSpan <= 604800000) {
+      return true;
+    }
+    return false;
+  };
+
   if (
     getOrderDetailRequest.data.data == null ||
     getOrderDetailRequest.data.data.refund != null ||
-    getOrderDetailRequest.data.data.orderStatusId != 16
+    getOrderDetailRequest.data.data.orderStatusId != 16 ||
+    getOrderDetailRequest.data.data.exchange != null ||
+    getOrderDetailRequest.data.data.newOrderExchange != null ||
+    checkValidExchange(getOrderDetailRequest.data.data.updatedAt) == false
   ) {
     return (
       <NoOrder>
@@ -169,6 +282,7 @@ export default function AccountExchangeRequest() {
       const formData = new FormData();
       formData.append("OrderId", getOrderDetailRequest.data.data.id);
       formData.append("ReasonRefund", exchangeReason.value);
+      images.forEach((item) => formData.append("Images", item));
 
       sendRefundRequest.mutate(formData, {
         onSuccess: (response) => {
@@ -184,6 +298,8 @@ export default function AccountExchangeRequest() {
       formData.append("OriginalOrderId", getOrderDetailRequest.data.data.id);
       formData.append("ReasonExchange", exchangeReason.value);
 
+      images.forEach((item) => formData.append("Images", item));
+
       sendExchangeRequest.mutate(formData, {
         onSuccess: (response) => {
           if (response.status == 200) {
@@ -191,6 +307,29 @@ export default function AccountExchangeRequest() {
           }
         },
       });
+    }
+  };
+
+  const onClickAddImage = () => {
+    inputRef.current.click();
+  };
+
+  const handleImageChange = (ev) => {
+    const allowedFileTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+
+    if (ev.target.files.length > 0) {
+      const isValidFileType = Array.from(ev.target.files).every((file) =>
+        allowedFileTypes.includes(file.type)
+      );
+
+      if (!isValidFileType) {
+        setImageError(true);
+
+        return;
+      }
+
+      setImages((prev) => [...prev, ...ev.target.files]);
+      ev.target.files = null;
     }
   };
 
@@ -231,6 +370,34 @@ export default function AccountExchangeRequest() {
             </div>
           </ProductDetail>
         </div>
+
+        <ImageContainer>
+          {images.length > 0 && (
+            <Images>
+              {images.map((item, index) => {
+                return (
+                  <ImageItem key={index}>
+                    <ImageLayout>
+                      <AiOutlineClose />
+                    </ImageLayout>
+                    <img src={URL.createObjectURL(item)} />
+                  </ImageItem>
+                );
+              })}
+              <AddImageButton onClick={onClickAddImage}>
+                <BiImageAdd />
+              </AddImageButton>
+            </Images>
+          )}
+
+          {images.length == 0 && (
+            <AddImageButton onClick={onClickAddImage}>
+              <BiImageAdd />
+              <span>Add Image</span>
+            </AddImageButton>
+          )}
+          <input ref={inputRef} onChange={handleImageChange} type="file" multiple />
+        </ImageContainer>
         <div>
           <h4>Select the return reason</h4>
           <SelectInput

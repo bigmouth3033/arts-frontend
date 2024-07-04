@@ -41,6 +41,7 @@ const StyledHeader = styled.div`
 const StyledContainerLogo = styled.div`
   width: 7.5rem;
   height: 5rem;
+  cursor: pointer;
 `;
 
 const StyledLogo = styled.img`
@@ -181,6 +182,7 @@ const Button = styled.button`
   background-color: inherit;
   border: none;
   color: white;
+  cursor: pointer;
 `;
 
 const Cart = styled(Link)`
@@ -227,7 +229,7 @@ export default function UserNavbar() {
     <>
       <StyledContainer>
         <StyledHeader>
-          <StyledContainerLogo>
+          <StyledContainerLogo onClick={() => navigate("/")}>
             <StyledLogo src={arts} alt="Logo" />
           </StyledContainerLogo>
           <Main>
@@ -292,12 +294,16 @@ export default function UserNavbar() {
             </StyledHeaderCustomer>
             <div>
               {readCategoriesData(readCategoryRequest).map((item, key) => {
-                return <Button key={key}>{item.name}</Button>;
+                return (
+                  <Button onClick={() => navigate(`/listing-page?categoryId=${item.id}`)} key={key}>
+                    {item.name}
+                  </Button>
+                );
               })}
             </div>
           </Main>
         </StyledHeader>
-        <Exchange>
+        <Exchange onClick={() => navigate("return")}>
           <h4>
             <span>
               <MdCurrencyExchange />7 Days

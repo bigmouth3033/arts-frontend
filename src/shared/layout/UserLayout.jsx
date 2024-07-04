@@ -7,7 +7,7 @@ import UserNavbar from "@/features/User/header/Index";
 import Footer from "@/features/User/footer/Index";
 import { ReadCategoryRequest } from "../api/categoryApi";
 import { ReadTypeRequest } from "../api/typeApi";
-import CustomerChatBox from "@/features/CustomerChatBox/Index";
+import { FaRegArrowAltCircleUp } from "react-icons/fa";
 
 const Container = styled.div`
   font-size: 14px;
@@ -17,13 +17,6 @@ const Container = styled.div`
   min-height: 100vh;
   justify-content: space-between;
   background-color: rgb(245, 245, 250);
-`;
-
-const CustomerChatBoxStyled = styled(CustomerChatBox)`
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  transform: translate(-10px, -10px);
 `;
 
 const OutletContainer = styled.div``;
@@ -54,8 +47,63 @@ export default function UserLayout() {
       <OutletContainer>
         <Outlet />
       </OutletContainer>
+      <BackToTopButton />
       <Footer />
-      <CustomerChatBoxStyled />
     </Container>
+  );
+}
+
+const TopButton = styled.button`
+  position: fixed;
+  bottom: 50px;
+  right: 50px;
+
+  color: white;
+  border: none;
+  background-color: rgba(0, 0, 0, 0);
+  cursor: pointer;
+  z-index: 1000;
+
+  & svg {
+    font-size: 2.3rem;
+    color: #0057a0;
+  }
+`;
+
+function BackToTopButton() {
+  const [isVisible, setIsVisible] = useState(false);
+
+  // Show button when page is scrolled down
+  const toggleVisibility = () => {
+    if (window.scrollY > 300) {
+      setIsVisible(true);
+    } else {
+      setIsVisible(false);
+    }
+  };
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  useEffect(() => {
+    window.addEventListener("scroll", toggleVisibility);
+    return () => {
+      window.removeEventListener("scroll", toggleVisibility);
+    };
+  }, []);
+
+  return (
+    <div>
+      {isVisible && (
+        <TopButton onClick={scrollToTop}>
+          <FaRegArrowAltCircleUp />
+        </TopButton>
+      )}
+    </div>
   );
 }

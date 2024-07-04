@@ -22,13 +22,16 @@ import AccountOrderDetail from "@/features/account-order-detail/Index";
 import AccountExchangeRequest from "@/features/account-exchange-request/Index";
 import AccountManageExchange from "@/features/account-manage-exchange/Index";
 import Homepage from "@/features/homepage/Index";
-
+import AdminExchangeManage from "@/features/admin-exchange-manage/Index";
 import AboutUs from "@/features/aboutUs-FAQ/AboutUs";
 import FAQ from "@/features/aboutUs-FAQ/FAQ";
 import PurchasePay from "@/features/aboutUs-FAQ/PurchasePay";
 import Warranty from "@/features/aboutUs-FAQ/Warranty";
 import InforPrivacy from "@/features/aboutUs-FAQ/InforPrivacy";
 import Return from "@/features/aboutUs-FAQ/Return";
+import AdminRefundDetail from "@/features/admin-refund-detail/Index";
+import AdminExchangeDetail from "@/features/admin-exchange-detail/Index";
+import AccountReview from "@/features/account-review/Index";
 
 const router = createBrowserRouter([
   {
@@ -99,6 +102,10 @@ const router = createBrowserRouter([
             path: "manage-exchange",
             element: <AccountManageExchange />,
           },
+          {
+            path: "account-review",
+            element: <AccountReview />,
+          },
         ],
       },
       {
@@ -144,6 +151,9 @@ const router = createBrowserRouter([
         element: <AdminOrder />,
       },
       { path: "order-detail", element: <AdminOrderDetail /> },
+      { path: "exchange-manage", element: <AdminExchangeManage /> },
+      { path: "refund-detail", element: <AdminRefundDetail /> },
+      { path: "exchange-detail", element: <AdminExchangeDetail /> },
     ],
   },
   {

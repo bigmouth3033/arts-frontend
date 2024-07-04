@@ -49,20 +49,12 @@ const StyleRight = styled.div`
 
 const ListingPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [selectedCategory, setSelectedCategory] = useState(
-    searchParams.get("categoryId") || 0
-  );
-  const [priceMin, setPriceMin] = useState(
-    searchParams.get("minPrice") || null
-  );
-  const [priceMax, setPriceMax] = useState(
-    searchParams.get("maxPrice") || null
-  );
-  const [searchValue, setSearchValue] = useState(
-    searchParams.get("search") || ""
-  );
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get("categoryId") || 0);
+  const [priceMin, setPriceMin] = useState(searchParams.get("minPrice") || null);
+  const [priceMax, setPriceMax] = useState(searchParams.get("maxPrice") || null);
+  const [searchValue, setSearchValue] = useState(searchParams.get("search") || "");
   const [sort, setSort] = useState();
-  const pageSize = 2;
+  const pageSize = 20;
 
   //call APIs
   const readCategories = ReadCategoryRequest();
@@ -113,10 +105,7 @@ const ListingPage = () => {
 
   return (
     <>
-      <Search
-        searchValueSaved={searchValue}
-        handleSearchChange={handleSearchChange}
-      />
+      <Search searchValueSaved={searchValue} handleSearchChange={handleSearchChange} />
       <StyleListingPage>
         <ProductFilter
           selectedCategory={selectedCategory}

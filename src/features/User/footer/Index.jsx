@@ -2,146 +2,221 @@ import React from "react";
 import styled from "styled-components";
 import { FaFacebook, FaYoutube } from "react-icons/fa";
 import { AiFillTikTok } from "react-icons/ai";
+import arts from "@/shared/assets/images/ArTS.svg";
+import { MdLocationPin } from "react-icons/md";
+import { FaPhoneVolume } from "react-icons/fa6";
+import { Link } from "react-router-dom";
+import { IoMdMail } from "react-icons/io";
+import bct from "./assets/logoSaleNoti.png";
+import { FaCcVisa } from "react-icons/fa";
+import { BiLogoMastercard } from "react-icons/bi";
+import { FaCcJcb } from "react-icons/fa6";
 
-const StyledContainerFooter = styled.div`
-  width: 100%;
-  background-color: #8aaae5;
-  color: #ffffff;
+const Container = styled.div`
+  background-color: #0272c0;
 `;
 
-const StyledContainer = styled.div`
-  max-width: 1230px;
+const Content = styled.div`
+  color: white;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 1rem;
+  max-width: 1280px;
+  padding: 2rem 15px;
   margin: 0 auto;
-  padding: 2rem 0 0 0;
 `;
 
-const StyledFooterMain = styled.div`
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  columns: 2rem;
-`;
-const StyledFooterTitle = styled.div`
-  font-size: 18px;
-  font-weight: 500;
-`;
-const StyledFooterMianItem = styled.div``;
-const StyledWrapText = styled.div`
-  padding: 0 1rem 0;
-  line-height: 2.5;
-  font-size: 15px;
-`;
-const StyledContainerBottom = styled(StyledContainer)`
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  column-gap: 2rem;
-  align-items: center;
-  padding: 1rem 0;
-`;
-const StyledWrapEmail = styled.div`
-  width: 80%;
-`;
-const StyledInputEmail = styled.input`
-  width: 80%;
-  border: none;
-  border-radius: 5px 0 0 5px;
-  height: 2.3rem;
-  padding: 0 0 0 1rem;
-  background-color: #8a94e5;
-  color: #ffffff;
+const Img = styled.div`
+  width: 6rem;
 
-  &:focus,
-  :hover {
-    outline: none;
+  > img {
+    width: 100%;
+    height: 100%;
   }
 `;
-const StyledButtonRegister = styled.button`
-  width: 20%;
-  border: none;
-  border-radius: 0 5px 5px 0;
-  height: 2.3rem;
-  cursor: pointer;
+
+const Contact = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+
+  > h4 {
+    font-weight: 600;
+    font-size: 20px;
+  }
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+    text-align: justify;
+    margin-left: 2rem;
+    gap: 5px;
+  }
+
+  & h5 {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  & svg {
+    font-size: 20px;
+  }
+
+  & p {
+    font-size: 14px;
+  }
+`;
+
+const About = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  > h4 {
+    font-weight: 600;
+    font-size: 20px;
+  }
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 13px;
+  }
+`;
+
+const Policy = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  > h4 {
+    font-weight: 600;
+    font-size: 20px;
+  }
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 13px;
+  }
+`;
+
+const Subscribe = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  > h4 {
+    font-weight: 600;
+    font-size: 20px;
+  }
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+`;
+
+const StyledLink = styled(Link)`
+  text-decoration: none;
+  color: white;
+`;
+
+const Input = styled.div`
+  display: flex;
+  flex-direction: row !important;
+  align-items: center;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+
   background-color: #f7d391;
-  color: #ffffff;
-`;
-const StyledNameShop = styled.h1`
-  font-family: "Pacifico", cursive;
-  color: #ffffff;
-  font-size: 3rem;
-  margin: 0;
-`;
-const StyledContactSocial = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  column-gap: 1rem;
-  align-items: center;
-  svg {
-    color: #ffffff; // Màu chủ đạo của footer
+  > input {
+    padding-left: 5px;
+    border: none;
+    outline: none;
+    padding: 6px 5px;
+  }
+
+  label {
+    color: #0057a0;
+    font-size: 600;
   }
 `;
+
+const Payment = styled.div`
+  display: flex;
+  flex-direction: row !important;
+
+  & svg {
+    font-size: 2rem;
+  }
+`;
+
 export default function Footer() {
   return (
-    <StyledContainerFooter>
-      <StyledContainer>
-        <StyledFooterMain>
-          <StyledFooterMianItem>
-            <StyledFooterTitle>ABOUT ARTS</StyledFooterTitle>
-            <StyledWrapText>
-              <div>The Story of Grass</div>
-              <div>About the factory</div>
-            </StyledWrapText>
-          </StyledFooterMianItem>
-          <div>
-            <StyledFooterTitle>COMMUNITY ACTIVITIES</StyledFooterTitle>
-            <StyledWrapText>
-              <div>Building a school for children</div>
-              <div>Fragrant hands</div>
-              <div>Joining hands to prevent COVID</div>
-            </StyledWrapText>
-          </div>
-          <div>
-            <StyledFooterTitle>SHOPPING GUIDE</StyledFooterTitle>
-            <StyledWrapText>
-              <div>Purchase and Payment Policy</div>
-              <div>Warranty</div>
-              <div>Return and Refund Policy</div>
-              <div>Information Privacy Policy</div>
-            </StyledWrapText>
-          </div>
-          <div>
-            <StyledFooterTitle>CONTACT INFO</StyledFooterTitle>
-            <StyledWrapText>
-              <div>cskh.so@comem.vn</div>
-              <div>096.862.2511</div>
-            </StyledWrapText>
-          </div>
-        </StyledFooterMain>
-      </StyledContainer>
-      <StyledContainerBottom>
-        <StyledWrapEmail>
-          <StyledInputEmail />
-          <StyledButtonRegister>Register</StyledButtonRegister>
-        </StyledWrapEmail>
-        <StyledNameShop>Arts</StyledNameShop>
-        <StyledContactSocial>
-          <a href="https://www.facebook.com/sinh.lam.5099" target="_blank">
-            <FaFacebook size="45px" />
-          </a>
+    <Container>
+      <Content>
+        <Contact>
+          <h4>Contact Information</h4>
 
-          <a
-            href="https://www.tiktok.com/@lamsinh?_t=8n8HnrWcJaK&_r=1"
-            target="_blank"
-          >
-            <AiFillTikTok size="55px" />
-          </a>
-
-          <a
-            href="https://www.youtube.com/channel/UCRzBlHTtK8avKuBEoPDW_xQ"
-            target="_blank"
-          >
-            <FaYoutube size="60px" />
-          </a>
-        </StyledContactSocial>
-      </StyledContainerBottom>
-    </StyledContainerFooter>
+          <p>
+            Welcome to Arts, your one-stop shop for a wide range of products including arts, gift
+            articles, greeting cards, dolls, files, handbags, wallets, beauty products.
+          </p>
+          <h5>
+            <MdLocationPin /> Store Locator
+          </h5>
+          <div>
+            <p>590 CMT8, P.11, Q.3</p>
+            <p>391A Nam Kỳ Khởi Nghĩa, P.Võ Thị Sáu, Q.3</p>
+            <p>62 Đường 36, KDC Vạn Phúc, P.Hiệp Bình Phước, Tp.Thủ Đức</p>
+          </div>
+          <h5>
+            <FaPhoneVolume /> 0911 789 450 - 0931313329
+          </h5>
+          <h5>
+            <IoMdMail /> arts@shop.com
+          </h5>
+        </Contact>
+        <About>
+          <h4>About Us</h4>
+          <div>
+            <StyledLink to={"/about-us"}>About us</StyledLink>
+            <StyledLink to={"/FAQ"}>FAQ</StyledLink>
+          </div>
+        </About>
+        <Policy>
+          <h4>Policy</h4>
+          <div>
+            <StyledLink to={"/privacy"}>Info Privacy</StyledLink>
+            <StyledLink to={"/purchase-payment"}>Purchase Pay</StyledLink>
+            <StyledLink to={"/return"}>Return</StyledLink>
+            <StyledLink to={"/warranty"}>Warranty</StyledLink>
+          </div>
+        </Policy>
+        <Subscribe>
+          <h4>Subscribe to Newsletter</h4>
+          <Input>
+            <input placeholder="Input Your Email" />
+            <label>SEND</label>
+          </Input>
+          <h5>Payment Methods</h5>
+          <Payment>
+            <FaCcVisa />
+            <BiLogoMastercard />
+            <FaCcJcb />
+          </Payment>
+          <img src={bct} />
+        </Subscribe>
+      </Content>
+    </Container>
   );
 }

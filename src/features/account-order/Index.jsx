@@ -314,6 +314,9 @@ export default function AccountOrder() {
     let total = 0;
 
     for (let item of payment.orders) {
+      if (item.newOrderExchange != null) {
+        continue;
+      }
       total += item.totalPrice;
     }
 
@@ -348,7 +351,7 @@ export default function AccountOrder() {
   const checkValidExchange = (date) => {
     const successDate = new Date(date);
 
-    const timeSpan = successDate - Date.now();
+    const timeSpan = Date.now() - successDate;
 
     if (timeSpan <= 604800000) {
       return true;
@@ -458,18 +461,21 @@ export default function AccountOrder() {
                     </p>
                     {item.orderStatusId == 16 &&
                       item.refund == null &&
+                      item.exchange == null &&
+                      item.newOrderExchange == null &&
                       checkValidExchange(item.updatedAt) && (
                         <p className="exchange">
                           <RiExchangeDollarFill size={"1rem"} /> Exchangable in 7 days
                         </p>
                       )}
-                    {item.refund != null && <p>{item.refund.status} Refund</p>}
                     {item.orderStatusType.id == 13 && item.isCancel == false && (
                       <p className="exchange">Cancelable</p>
                     )}
                   </div>
                   <div>
-                    <p className="price">${formatDollar(item.totalPrice)}</p>
+                    {item.newOrderExchange == null && (
+                      <p className="price">${formatDollar(item.totalPrice)}</p>
+                    )}
                   </div>
                 </ProductDetail>
                 <Buttons>
@@ -483,11 +489,15 @@ export default function AccountOrder() {
                       Request Cancel
                     </button>
                   )}
-                  {item.orderStatusId == 16 && item.refund == null && (
-                    <button onClick={() => navigtate(`/account/exchange-request?id=${item.id}`)}>
-                      Request Exchange
-                    </button>
-                  )}
+                  {checkValidExchange(item.updatedAt) &&
+                    item.orderStatusId == 16 &&
+                    item.refund == null &&
+                    item.exchange == null &&
+                    item.newOrderExchange == null && (
+                      <button onClick={() => navigtate(`/account/exchange-request?id=${item.id}`)}>
+                        Request Exchange
+                      </button>
+                    )}
                   {item.variant.availableQuanity > 0 && checkValidExchange(item.updatedAt) && (
                     <button onClick={() => onAddToCart(item.variant)}>Re Purchase</button>
                   )}
@@ -513,9 +523,7 @@ export default function AccountOrder() {
             return (
               <PaymentDetail key={index}>
                 <div>
-                  <StyledLinkNoDecoration>
-                    #{convertToLetterString(item.id, 8)}
-                  </StyledLinkNoDecoration>
+                  #{convertToLetterString(item.id, 8)}
                   <p>Pay by {item.paymentType.name}</p>
                 </div>
                 <div>
@@ -545,7 +553,7 @@ export default function AccountOrder() {
                               src={
                                 import.meta.env.VITE_API_IMAGE_PATH +
                                 (order.variant.variantImage
-                                  ? item.variant.variantImage
+                                  ? order.variant.variantImage
                                   : order.variant.product.productImages[0].imageName)
                               }
                             />
@@ -575,7 +583,9 @@ export default function AccountOrder() {
                               })}
                             </p>
                             {order.orderStatusId == 16 &&
-                              order.refund != null &&
+                              order.refund == null &&
+                              order.exchange == null &&
+                              order.newOrderExchange == null &&
                               checkValidExchange(order.updatedAt) && (
                                 <p className="exchange">
                                   <RiExchangeDollarFill size={"1rem"} /> Exchangable in 7 days
@@ -586,7 +596,9 @@ export default function AccountOrder() {
                             )}
                           </div>
                           <div>
-                            <p className="price">${formatDollar(order.totalPrice)}</p>
+                            {order.newOrderExchange == null && (
+                              <p className="price">${formatDollar(order.totalPrice)}</p>
+                            )}
                           </div>
                         </ProductPaymentDetail>
                         <Buttons>
@@ -600,9 +612,18 @@ export default function AccountOrder() {
                               Request Cancel
                             </button>
                           )}
-                          {order.orderStatusId == 16 && order.refund == null && (
-                            <button>Request Exchange</button>
-                          )}
+                          {order.orderStatusId == 16 &&
+                            order.refund == null &&
+                            order.exchange == null &&
+                            order.newOrderExchange == null && (
+                              <button
+                                onClick={() =>
+                                  navigtate(`/account/exchange-request?id=${order.id}`)
+                                }
+                              >
+                                Request Exchange
+                              </button>
+                            )}
                           {order.variant.availableQuanity > 0 &&
                             checkValidExchange(order.updatedAt) && (
                               <button onClick={() => onAddToCart(order.variant)}>

@@ -13,6 +13,7 @@ export const GetCartByUserIdQuery = () => {
     queryFn: () => {
       return GetCartByUserId();
     },
+    retry: 0,
   });
   return query;
 };

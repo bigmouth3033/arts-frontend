@@ -6,6 +6,7 @@ import AddressPopUp from "./components/AddressPopUp";
 import { GetUserAddressRequest } from "./api/addressApi";
 import dchc from "@/shared/data/dchc";
 import { FaRegCircleCheck } from "react-icons/fa6";
+import UpdateAddressPopUp from "./components/UpdateAddressPopUp";
 
 const Container = styled.div`
   display: flex;
@@ -83,6 +84,7 @@ const AddressItem = styled.div`
 const AddressHeader = styled.div`
   display: flex;
   justify-content: space-between;
+  align-items: center;
 
   > p {
     display: flex;
@@ -97,8 +99,19 @@ const AddressHeader = styled.div`
   }
 `;
 
+const EditButton = styled.button`
+  background-color: white;
+  color: #0b74e5;
+  border-radius: 5px;
+  border: 1px solid #0b74e5;
+  padding: 5px 15px;
+  cursor: pointer;
+`;
+
 export default function AccountAddress() {
   const [addressPopUp, setAddressPopUp] = useState(false);
+  const [updateAddressPopUp, setUpdateAddressPopUp] = useState(false);
+  const [addressId, setAddressId] = useState();
   const getUserAddressRequest = GetUserAddressRequest();
 
   return (
@@ -125,7 +138,16 @@ export default function AccountAddress() {
                         </span>
                       )}
                     </p>
-                    <p>Edit</p>
+                    <div>
+                      <EditButton
+                        onClick={() => {
+                          setAddressId(address.id);
+                          setUpdateAddressPopUp(true);
+                        }}
+                      >
+                        Edit
+                      </EditButton>
+                    </div>
                   </AddressHeader>
                   <div>
                     <span>Address:</span>
@@ -143,6 +165,9 @@ export default function AccountAddress() {
         </AddressContainer>
       </Content>
       {addressPopUp && <AddressPopUp action={() => setAddressPopUp(false)} />}
+      {updateAddressPopUp && (
+        <UpdateAddressPopUp addressId={addressId} action={() => setUpdateAddressPopUp(false)} />
+      )}
     </Container>
   );
 }

@@ -11,6 +11,7 @@ import { Link } from "react-router-dom";
 import ProductReview from "./components/ProductReview";
 import image404 from "./assets/404.png";
 import { useNavigate } from "react-router-dom";
+import { RequestStar } from "./api/readStar";
 
 const ProductSingleContainer = styled.div`
   max-width: 1280px;
@@ -63,7 +64,13 @@ export default function ProductDetail() {
   const getProductDetailRequest = GetProductDetailRequest(searchParams.get("id"));
   const getProductVariantDetailRequest = GetProductVariantDetailRequest(searchParams.get("id"));
 
-  if (getProductDetailRequest.isLoading || getProductVariantDetailRequest.isLoading) {
+  const requestStar = RequestStar(searchParams.get("id"));
+
+  if (
+    requestStar.isLoading ||
+    getProductDetailRequest.isLoading ||
+    getProductVariantDetailRequest.isLoading
+  ) {
     return <WaitingPopUp />;
   }
 
@@ -80,16 +87,21 @@ export default function ProductDetail() {
   return (
     <ProductSingleContainer>
       <BreadCrumb>
-        <Link>Home</Link> <FaAngleRight /> <Link>Product list</Link> <FaAngleRight />
-        <Link>{getProductDetailRequest.data.data.category.name}</Link> <FaAngleRight />
+        <Link to={"/"}>Home</Link> <FaAngleRight /> <Link to={"/listing-page"}>Product list</Link>{" "}
+        <FaAngleRight />
+        <Link to={`/listing-page?categoryId=${getProductDetailRequest.data.data.category.id}`}>
+          {getProductDetailRequest.data.data.category.name}
+        </Link>{" "}
+        <FaAngleRight />
         <Link>{getProductDetailRequest.data.data.name}</Link>
       </BreadCrumb>
       <ProductSingleMain
+        star={requestStar}
         data={getProductDetailRequest.data.data}
         variant={getProductVariantDetailRequest.data.data}
         request={getProductDetailRequest}
       />
-      <ProductReview data={getProductDetailRequest.data.data} />
+      <ProductReview data={getProductDetailRequest.data.data} star={requestStar} />
       <ProductRelated />
     </ProductSingleContainer>
   );

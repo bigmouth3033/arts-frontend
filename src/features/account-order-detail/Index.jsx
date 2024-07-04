@@ -21,6 +21,7 @@ import AlertPopUp from "@/shared/components/PopUp/AlertPopUp";
 import { useQueryClient } from "@tanstack/react-query";
 import { RiExchangeDollarFill } from "react-icons/ri";
 import CancelPopUp from "./components/CancelPopUp";
+import { useNavigate } from "react-router-dom";
 
 const Container = styled.div`
   display: flex;
@@ -231,6 +232,7 @@ export default function AccountOrderDetail() {
   const [cartError, setCartError] = useState(false);
   const queryClient = useQueryClient();
   const [cancelPopUp, setCancelPopUp] = useState(false);
+  const navigate = useNavigate();
 
   const getOrderDetailRequest = GetOrderDetailRequest(searchParams.get("id"));
 
@@ -290,7 +292,7 @@ export default function AccountOrderDetail() {
   const checkValidExchange = (date) => {
     const successDate = new Date(date);
 
-    const timeSpan = successDate - Date.now();
+    const timeSpan = Date.now() - successDate;
 
     if (timeSpan <= 604800000) {
       return true;
@@ -445,6 +447,8 @@ export default function AccountOrderDetail() {
                     </p>
                     {getOrderDetailRequest.data.data.orderStatusId == 16 &&
                       getOrderDetailRequest.data.data.refund == null &&
+                      getOrderDetailRequest.data.data.exchange == null &&
+                      getOrderDetailRequest.data.data.newOrderExchange == null &&
                       checkValidExchange(getOrderDetailRequest.data.data.updatedAt) && (
                         <p className="exchange">
                           <RiExchangeDollarFill size={"1rem"} /> Exchangable in 7 days
@@ -477,8 +481,16 @@ export default function AccountOrderDetail() {
               )}
             {getOrderDetailRequest.data.data.orderStatusId == 16 &&
               getOrderDetailRequest.data.data.refund == null &&
+              getOrderDetailRequest.data.data.exchange == null &&
+              getOrderDetailRequest.data.data.newOrderExchange == null &&
               checkValidExchange(getOrderDetailRequest.data.data.updatedAt) && (
-                <button>Request Exchange</button>
+                <button
+                  onClick={() =>
+                    navigate(`/account/exchange-request?id=${getOrderDetailRequest.data.data.id}`)
+                  }
+                >
+                  Request Exchange
+                </button>
               )}
             {getOrderDetailRequest.data.data.variant.availableQuanity > 0 && (
               <button onClick={() => onAddToCart(getOrderDetailRequest.data.data.variant)}>

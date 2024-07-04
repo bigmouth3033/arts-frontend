@@ -102,7 +102,7 @@ const StyledSubmit = styled.button`
   }
 `;
 
-export default function RatingPopup({ action, data }) {
+export default function RatingPopup({ action, data, checkReviewQuery }) {
   const inputRef = useRef();
   const [images, setImages] = useState([]);
   const [imageError, setImageError] = useState(false);
@@ -145,11 +145,15 @@ export default function RatingPopup({ action, data }) {
     formData.append("comment", comment);
     formData.append("productId", data.id);
     formData.append("rating", rating);
+    formData.append("orderId", checkReviewQuery.data.data[0]);
+
     images.forEach((item) => formData.append("images", item));
     createReviewRequest.mutate(formData, {
       onSuccess: (response) => {
         if (response.status == 200) {
           setRatingSuccess(true);
+          checkReviewQuery.refetch();
+          action();
         }
       },
       onError: (response) => {

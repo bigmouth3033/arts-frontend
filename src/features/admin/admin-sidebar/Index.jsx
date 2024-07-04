@@ -96,6 +96,12 @@ export default function AdminSideBar() {
           <StyledLink $active={location.pathname.includes("order")} to={"order"}>
             Order
           </StyledLink>
+          <StyledLink
+            $active={location.pathname.includes("exchange-manage")}
+            to={"exchange-manage"}
+          >
+            Manage Exchange
+          </StyledLink>
         </ButtonGroup>
       </Content>
     </Container>

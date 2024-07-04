@@ -12,6 +12,8 @@ import WaitingPopUp from "@/shared/components/PopUp/WaitingPopUp";
 import InputCheckBox from "@/shared/components/Input/InputCheckBox";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { GetUserAddressRequest } from "@/features/account-address/api/addressApi";
+import { useNavigate } from "react-router-dom";
+import { CustomerRequest } from "@/shared/api/customerApi";
 
 const MainStyleComponent = styled.div`
   max-width: 1280px;
@@ -68,6 +70,8 @@ const CartItemContainer = styled.div`
 `;
 
 export default function Cart() {
+  const customerRequest = CustomerRequest();
+  const navigate = useNavigate();
   const getUserAddressRequest = GetUserAddressRequest();
   const [isCheckedAll, setIsCheckedAll] = useState(false);
   const getCartByUserId = GetCartByUserIdQuery();
@@ -75,18 +79,12 @@ export default function Cart() {
   const getTotalAmountByUserIdQuery = GetTotalAmountByUserIdQuery();
   const queryClient = useQueryClient();
 
-  useEffect(() => {
-    console.log("get api", getCartByUserId?.data?.data);
-    console.log(getTotalAmountByUserIdQuery?.data?.data);
-  }, [getCartByUserId.status, getTotalAmountByUserIdQuery.status]);
-
   const handleIsCheckedAll = (event) => {
     setIsCheckedAll(event.target.checked);
     const formData = new FormData();
     formData.append("isCheckedState", event.target.checked);
     putAllCartCheckedMutate.mutate(formData, {
       onSuccess: (res) => {
-        console.log(res);
         queryClient.invalidateQueries({ queryKey: ["user-cart"] });
         queryClient.invalidateQueries({ queryKey: ["cart-totalAmount"] });
 
@@ -99,6 +97,11 @@ export default function Cart() {
 
   if (getCartByUserId.isLoading || getUserAddressRequest.isLoading) {
     return <WaitingPopUp />;
+  }
+
+  if (customerRequest.isError || customerRequest.data.dat) {
+    navigate("/");
+    return;
   }
 
   return (

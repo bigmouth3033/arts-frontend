@@ -21,6 +21,7 @@ import SelectMultiple from "../admin-product-list/components/inputs/SelectMultip
 import TextInput from "@/shared/components/Input/TextInput";
 import { CiCircleRemove } from "react-icons/ci";
 import { useNavigate } from "react-router-dom";
+import WaitingIcon from "@/shared/components/AnimationIcon/WaitingIcon";
 
 const Container = styled.div`
   margin: auto;
@@ -211,6 +212,15 @@ const ActionButton = styled.div`
 
   > button {
     cursor: pointer;
+    background-color: #2962ff;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: white;
+    border: none;
+    font-size: 15px;
+    padding: 5px;
+    border-radius: 5px;
   }
 `;
 
@@ -399,7 +409,9 @@ export default function AdminOrder() {
     filterValue.paymentCode,
     filterValue.delivery?.map((item) => item.value),
     filterValue.from,
-    filterValue.to
+    filterValue.to,
+    filterValue.fromDate,
+    filterValue.toDate
   );
 
   const onAccept = (id) => {
@@ -503,22 +515,38 @@ export default function AdminOrder() {
     setCheckBox([]);
   }, [active]);
 
-  if (getAdminOrdersetAdminOrderRequest.isLoading) {
-    return <WaitingPopUp />;
-  }
   return (
     <>
       <Container>
         <Header>
-          <h4>Order</h4>
+          <h4>
+            Order {filterValueDisplay.fromDate && <span>from {filterValueDisplay.fromDate}</span>}{" "}
+            {filterValueDisplay.toDate && <span> to {filterValueDisplay.toDate}</span>}
+          </h4>
           <div>
             <button onClick={() => onFocusFilter("date", !filterFocus.date)}>Filter Date</button>
             {filterFocus.date && (
               <FilterDate>
                 <h4>From: </h4>
-                <input type="date" />
+                <input
+                  value={filterValueDisplay.fromDate}
+                  onChange={(ev) =>
+                    setFilterValueDisplay((prev) => {
+                      return { ...prev, fromDate: ev.target.value };
+                    })
+                  }
+                  type="date"
+                />
                 <h4>To: </h4>
-                <input type="date" />
+                <input
+                  value={filterValueDisplay.toDate}
+                  onChange={(ev) =>
+                    setFilterValueDisplay((prev) => {
+                      return { ...prev, toDate: ev.target.value };
+                    })
+                  }
+                  type="date"
+                />
               </FilterDate>
             )}
           </div>
@@ -563,10 +591,11 @@ export default function AdminOrder() {
               </Buttons>
               <Filter>
                 <ActionButton>
-                  <button onClick={() => setIsClickDropDown((prev) => !prev)}>ACTIONS</button>
+                  {active != "All" && (
+                    <button onClick={() => setIsClickDropDown((prev) => !prev)}>ACTIONS</button>
+                  )}
                   {IsClickDropDown && (
                     <DropDown>
-                      <button disabled={checkBox.length == 0}>SEE DETAILS</button>
                       {active == "Pending" && (
                         <>
                           <button
@@ -825,78 +854,81 @@ export default function AdminOrder() {
                 </tr>
               </thead>
               <tbody>
-                {getAdminOrdersetAdminOrderRequest.data.data.map((item, index) => {
-                  return (
-                    <tr key={index}>
-                      <td>
-                        <InputCheckBox
-                          checked={checkBox.includes(item.id)}
-                          onChange={() => {
-                            if (checkBox.includes(item.id)) {
-                              setCheckBox((prev) => prev.filter((i) => i != item.id));
-                            } else {
-                              setCheckBox((prev) => [...prev, item.id]);
-                            }
-                          }}
-                        />
-                      </td>
-                      <td>{convertToLetterString(item.id, 8)}</td>
-                      <td>
-                        <Link>{item.user.fullname}</Link>
-                      </td>
-                      <td>{item.variant.product.category.name}</td>
-                      <td>
-                        <Link to={`/admin/product?id=${item.variant.product.id}`}>
-                          {convertToLetterString(item.variant.id, 5)}
-                        </Link>
-                      </td>
-                      <td>{item.payment.paymentType.name}</td>
-                      <td>
-                        <Link>{convertToLetterString(item.paymentId, 6)}</Link>
-                      </td>
-                      <td>{item.payment.deliveryType.name}</td>
-                      <td>${formatDollar(item.totalPrice)}</td>
-                      <td>{!item.isCancel ? item.orderStatusType.name : "Cancel"}</td>
-                      <td className="detail">
-                        <button onClick={() => navigate(`/admin/order-detail?id=${item.id}`)}>
-                          See Detail
-                        </button>
-                        {active == "Pending" && (
-                          <>
-                            <button onClick={() => onAccept([item.id])}>ACCEPT</button>
-                            <button onClick={() => onDeny([item.id])}>DENY</button>
-                          </>
-                        )}
-                        {active == "Accepted" && (
-                          <>
-                            <button onClick={() => onDelivery([item.id])}>DELIVERY</button>
-                          </>
-                        )}
-                        {active == "Delivery" && (
-                          <>
-                            <button onClick={() => onSuccess([item.id])}>FINISH</button>
-                          </>
-                        )}
-                        {active == "All" && (
-                          <>
-                            {item.orderStatusType.id == 13 && item.isCancel == false && (
-                              <>
-                                <button onClick={() => onAccept([item.id])}>ACCEPT</button>
-                                <button onClick={() => onDeny([item.id])}>DENY</button>{" "}
-                              </>
-                            )}
-                            {item.orderStatusType.id == 14 && (
+                {getAdminOrdersetAdminOrderRequest.isLoading && <WaitingIcon />}
+
+                {getAdminOrdersetAdminOrderRequest.isSuccess &&
+                  getAdminOrdersetAdminOrderRequest.data.data.map((item, index) => {
+                    return (
+                      <tr key={index}>
+                        <td>
+                          <InputCheckBox
+                            checked={checkBox.includes(item.id)}
+                            onChange={() => {
+                              if (checkBox.includes(item.id)) {
+                                setCheckBox((prev) => prev.filter((i) => i != item.id));
+                              } else {
+                                setCheckBox((prev) => [...prev, item.id]);
+                              }
+                            }}
+                          />
+                        </td>
+                        <td>
+                          <Link to={`/admin/order-detail?id=${item.id}`}>
+                            {convertToLetterString(item.id, 8)}
+                          </Link>
+                        </td>
+                        <td>{item.user.fullname}</td>
+                        <td>{item.variant.product.category.name}</td>
+                        <td>
+                          <Link to={`/admin/product?id=${item.variant.product.id}`}>
+                            {convertToLetterString(item.variant.id, 5)}
+                          </Link>
+                        </td>
+                        <td>{item.payment.paymentType.name}</td>
+                        <td>{convertToLetterString(item.paymentId, 6)}</td>
+                        <td>{item.payment.deliveryType.name}</td>
+                        <td>${formatDollar(item.totalPrice)}</td>
+                        <td>{!item.isCancel ? item.orderStatusType.name : "Cancel"}</td>
+                        <td className="detail">
+                          <button onClick={() => navigate(`/admin/order-detail?id=${item.id}`)}>
+                            See Detail
+                          </button>
+                          {active == "Pending" && (
+                            <>
+                              <button onClick={() => onAccept([item.id])}>ACCEPT</button>
+                              <button onClick={() => onDeny([item.id])}>DENY</button>
+                            </>
+                          )}
+                          {active == "Accepted" && (
+                            <>
                               <button onClick={() => onDelivery([item.id])}>DELIVERY</button>
-                            )}
-                            {item.orderStatusType.id == 17 && (
+                            </>
+                          )}
+                          {active == "Delivery" && (
+                            <>
                               <button onClick={() => onSuccess([item.id])}>FINISH</button>
-                            )}
-                          </>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
+                            </>
+                          )}
+                          {active == "All" && (
+                            <>
+                              {item.orderStatusType.id == 13 && item.isCancel == false && (
+                                <>
+                                  <button onClick={() => onAccept([item.id])}>ACCEPT</button>
+                                  <button onClick={() => onDeny([item.id])}>DENY</button>{" "}
+                                </>
+                              )}
+                              {item.orderStatusType.id == 14 && (
+                                <button onClick={() => onDelivery([item.id])}>DELIVERY</button>
+                              )}
+                              {item.orderStatusType.id == 17 && (
+                                <button onClick={() => onSuccess([item.id])}>FINISH</button>
+                              )}
+                            </>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </TableContent>
           </div>

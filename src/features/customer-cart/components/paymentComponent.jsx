@@ -125,12 +125,14 @@ export default function PaymentComponent(props) {
   const [changeAddress, setChangeAddress] = useState(false);
 
   useEffect(() => {
-    const province = dchc.data.find((item) => item.level1_id == address.province);
-    setProvince(province.name);
-    const district = province.level2s.find((item) => item.level2_id == address.district);
-    setDistrict(district.name);
-    const ward = district.level3s.find((item) => item.level3_id == address.ward);
-    setWard(ward.name);
+    if (address) {
+      const province = dchc.data.find((item) => item.level1_id == address.province);
+      setProvince(province.name);
+      const district = province.level2s.find((item) => item.level2_id == address.district);
+      setDistrict(district.name);
+      const ward = district.level3s.find((item) => item.level3_id == address.ward);
+      setWard(ward.name);
+    }
   }, [address]);
 
   const onMakePayment = () => {
@@ -144,22 +146,25 @@ export default function PaymentComponent(props) {
   return (
     <>
       <PaymentComponentStyle>
-        <AddressContainer>
-          <div>
-            <span>Delivery to</span>
-            <span onClick={() => setChangeAddress(true)}>Change</span>
-          </div>
-          <div>
-            <span>{address.fullName} | </span>
-            <span>{address.phoneNumber}</span>
-          </div>
-          <div>
-            <span>Address: </span>
-            <span>
-              {province}, {district}, {ward}, {address.addressDetail}
-            </span>
-          </div>
-        </AddressContainer>
+        {address && (
+          <AddressContainer>
+            <div>
+              <span>Delivery to</span>
+              <span onClick={() => setChangeAddress(true)}>Change</span>
+            </div>
+            <div>
+              <span>{address.fullName} | </span>
+              <span>{address.phoneNumber}</span>
+            </div>
+            <div>
+              <span>Address: </span>
+              <span>
+                {province}, {district}, {ward}, {address.addressDetail}
+              </span>
+            </div>
+          </AddressContainer>
+        )}
+
         <div className="price-summary">
           <div className="price-total">
             <span>Total price</span>

@@ -25,7 +25,9 @@ const fadeInRightAnimation = keyframes`
   }
 `;
 const StyleFAQ = styled.div`
-  margin: 0 10rem;
+  max-width: 1280px;
+  padding: 15px;
+  margin: 1rem auto;
   padding: 3rem;
   text-align: justify;
   h2 {
@@ -36,8 +38,7 @@ const StyleFAQ = styled.div`
 
   & > div {
     padding: 1rem;
-    transition: background 30s ease-in-out, font-size 0.3s ease-in-out,
-      font-weight 0.3s ease-in-out;
+    transition: background 30s ease-in-out, font-size 0.3s ease-in-out, font-weight 0.3s ease-in-out;
     cursor: pointer;
     margin: 2rem;
     /* background-color: #ffefff; */
@@ -72,15 +73,9 @@ const FAQ = () => {
       <StylePurchasePayment onClick={() => navigate("/purchase-payment")}>
         Purchase and Payment Policy
       </StylePurchasePayment>
-      <StyleWarranty onClick={() => navigate("/warranty")}>
-        Warranty
-      </StyleWarranty>
-      <StyleReturn onClick={() => navigate("/return")}>
-        Return and Refund Policy
-      </StyleReturn>
-      <StylePrivacy onClick={() => navigate("/privacy")}>
-        Information Privacy Policy
-      </StylePrivacy>
+      <StyleWarranty onClick={() => navigate("/warranty")}>Warranty</StyleWarranty>
+      <StyleReturn onClick={() => navigate("/return")}>Return and Refund Policy</StyleReturn>
+      <StylePrivacy onClick={() => navigate("/privacy")}>Information Privacy Policy</StylePrivacy>
     </StyleFAQ>
   );
 };
