@@ -16,10 +16,13 @@ import SelectInput from "@/shared/components/Input/SelectInput";
 import { readCategoriesData } from "@/shared/utils/readCategoriesData";
 import SelectMultiple from "./components/inputs/SelectMultiple";
 import { ReadCategoryRequest } from "@/shared/api/categoryApi";
+import ErrorPopUp from "@/shared/components/PopUp/ErrorPopUp";
+import { UpdateVariantRequest } from "./api/productAdminApi";
+import SuccessPopUp from "@/shared/components/PopUp/SuccessPopUp";
 
 const Container = styled.div`
   margin: auto;
-  max-width: 75rem;
+  width: 75rem;
   font-size: 14px;
   padding: 3rem 0;
 
@@ -204,17 +207,25 @@ const FilterDropDown = styled.div`
 
 const StyledLink = styled(Link)`
   text-decoration: none;
+  color: #911a8b;
+
+  &:hover {
+    color: red;
+  }
 `;
 
 const pageOptions = [
-  { value: 5, label: "5 items" },
-  { value: 10, label: "10 items" },
   { value: 20, label: "20 items" },
   { value: 50, label: "50 items" },
   { value: 100, label: "100 items" },
 ];
 
+const moneyRegex = /^(?=.*\d)\d*(?:\.\d*)?$/;
+
 export default function AdminProductList() {
+  const [successUpdate, setSuccessUpdate] = useState(false);
+  const updateVariantRequest = UpdateVariantRequest();
+  const [zeroPriceError, setZeroPriceError] = useState(false);
   const dropDownRef = useRef();
   const buttonRef = useRef();
   const readCategoryRequest = ReadCategoryRequest();
@@ -259,7 +270,34 @@ export default function AdminProductList() {
   };
 
   const onMakeChanges = (product) => {
-    console.log(product);
+    const variants = product.variants;
+    console.log(variants);
+    if (variants.find((item) => !item.price || item.price == 0)) {
+      setZeroPriceError(true);
+      return;
+    }
+
+    updateVariantRequest.mutate(
+      variants.map((item) => {
+        if (!item.availableQuanity) {
+          item.availableQuanity = 0;
+        }
+
+        if (!item.salePrice) {
+          item.salePrice = 0;
+        }
+        return item;
+      }),
+      {
+        onSuccess: (response) => {
+          if (response.status == 200) {
+            getAdminProductRequest.refetch();
+            setSuccessUpdate(true);
+          }
+          console.log(response);
+        },
+      }
+    );
   };
 
   useEffect(() => {
@@ -278,7 +316,7 @@ export default function AdminProductList() {
   useEffect(() => {
     const event = (ev) => {
       if (
-        dropDownRef &&
+        dropDownRef.current &&
         !dropDownRef.current.contains(ev.target) &&
         !buttonRef.current.contains(ev.target)
       ) {
@@ -438,28 +476,32 @@ export default function AdminProductList() {
                               </VariantDetail>
                               {inputs[index].variants.map((item, index) => {
                                 const name = [];
-                                item.variantAttributes.forEach((item, index) =>
+                                item.variantAttributes.forEach((item, i) =>
                                   name.push(item.attributeValue)
                                 );
                                 return (
                                   <VariantDetail key={index}>
                                     <h4>{name.join("/")}</h4>
                                     <div>
-                                      <NumberInput
+                                      <TextInput
                                         state={item.price}
                                         setState={(value) => {
-                                          item.price = value;
-                                          setInputs({ ...inputs });
+                                          if (moneyRegex.test(value) || value == "") {
+                                            item.price = value;
+                                            setInputs({ ...inputs });
+                                          }
                                         }}
                                       />
                                     </div>
 
                                     <div>
-                                      <NumberInput
+                                      <TextInput
                                         state={item.salePrice}
                                         setState={(value) => {
-                                          item.salePrice = value;
-                                          setInputs({ ...inputs });
+                                          if (moneyRegex.test(value) || value == "") {
+                                            item.salePrice = value;
+                                            setInputs({ ...inputs });
+                                          }
                                         }}
                                       />
                                     </div>
@@ -480,7 +522,7 @@ export default function AdminProductList() {
                                 <span></span>
                                 <span></span>
                                 <SaveButton onClick={() => onMakeChanges(inputs[index])}>
-                                  save
+                                  SAVE
                                 </SaveButton>
                               </VariantDetail>
                             </Variants>
@@ -510,6 +552,10 @@ export default function AdminProductList() {
           )}
         </Footer>
       </Content>
+      {zeroPriceError && (
+        <ErrorPopUp message={"Price cannot be zero"} action={() => setZeroPriceError(false)} />
+      )}
+      {successUpdate && <SuccessPopUp action={() => setSuccessUpdate(false)} message={"success"} />}
     </Container>
   );
 }

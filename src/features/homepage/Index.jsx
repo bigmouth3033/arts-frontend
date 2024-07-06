@@ -37,7 +37,7 @@ import calculatePercentDifference from "@/shared/utils/calculatePercentDifferenc
 import { FaCheck, FaStar } from "react-icons/fa";
 
 const Container = styled.div`
-  max-width: 1280px;
+  width: 1230px;
   padding: 15px;
   margin: 1rem auto;
 `;
@@ -102,8 +102,9 @@ const StyledLink = styled(Link)`
   align-items: center;
   gap: 2rem;
   padding-left: 1rem;
-  color: rgb(33, 37, 41);
-  font-size: 15px;
+  color: rgb(33, 37, 41, 0.7);
+  font-size: 16px;
+  font-weight: 600;
 
   &:hover > span {
     color: red;
@@ -123,6 +124,7 @@ const Category = styled.div`
   > * {
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     flex: 1;
+    padding: 10px 0;
   }
 `;
 
@@ -161,7 +163,7 @@ const Suggestion = styled.div`
     font-weight: 800;
     color: #0057a0;
     width: 100%;
-    border-bottom: 6px solid #0272c0;
+    border-bottom: 3px solid #0272c0;
     text-align: center;
     padding: 8px;
   }
@@ -268,7 +270,7 @@ const ShowMoreButton = styled.div`
 const SalePercent = styled.span``;
 
 export default function Homepage() {
-  const getProductSuggestionRequest = GetProductSuggestionRequest(20);
+  const getProductSuggestionRequest = GetProductSuggestionRequest(15);
   const [searchParams, setSearchParams] = useSearchParams();
   const verifyAccountFn = VerifyAccountFn();
   const [successPopUp, setSuccessPopUp] = useState(false);
@@ -353,7 +355,7 @@ export default function Homepage() {
           </div>
         </NewProduct>
         <Suggestion>
-          <h4>YOUR SUGGESTION</h4>
+          <h4>RECOMMENDED</h4>
           <ItemContainer>
             {getProductSuggestionRequest.isLoading && <WaitingIcon />}
             {getProductSuggestionRequest.isSuccess &&
@@ -426,7 +428,7 @@ export default function Homepage() {
               <img src={delivery} />
             </PolicyImage>
             <h4>Nationwide Delivery</h4>
-            <p>Free shipping on orders over 50$</p>
+            <p>Get Your Orders Delivered Nationwide in No Time</p>
           </div>
           <div>
             <PolicyImage>

@@ -2,7 +2,21 @@ import React, { useState } from "react";
 import styled from "styled-components";
 
 const StyleSearchInput = styled.input`
+  padding: 8px;
+  border-radius: 3px;
   width: 20rem;
+
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  outline: none;
+  transition: all 0.3s;
+
+  &:focus {
+    border: 1px solid rgba(0, 0, 255, 0.4);
+  }
+
+  &:active {
+    border: 1px solid rgba(0, 0, 255, 0.4);
+  }
 `;
 //value paramater: which kind of value is going to be specifying inside this search component
 //name: not product name !!!
@@ -26,7 +40,7 @@ const Search = ({ handleSearchChange, searchValueSaved }) => {
         value={searchValue}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
-        placeholder="search here..."
+        placeholder="what are you looking for..."
       />
     </div>
   );

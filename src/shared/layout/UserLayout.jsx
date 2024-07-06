@@ -8,15 +8,21 @@ import Footer from "@/features/User/footer/Index";
 import { ReadCategoryRequest } from "../api/categoryApi";
 import { ReadTypeRequest } from "../api/typeApi";
 import { FaRegArrowAltCircleUp } from "react-icons/fa";
+import { CustomerRequest } from "../api/customerApi";
+import { HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Bounce } from "react-toastify";
+import { FaCircleArrowUp } from "react-icons/fa6";
 
 const Container = styled.div`
   font-size: 14px;
-
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   justify-content: space-between;
   background-color: rgb(245, 245, 250);
+  min-width: 1280px;
 `;
 
 const OutletContainer = styled.div``;
@@ -24,6 +30,21 @@ const OutletContainer = styled.div``;
 export default function UserLayout() {
   const readCategoryRequest = ReadCategoryRequest();
   const readTypeRequest = ReadTypeRequest();
+  const [connection, setConnection] = useState();
+  const customerRequest = CustomerRequest();
+
+  const notify = (message) =>
+    toast.info(message, {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+      transition: Bounce,
+    });
 
   if (readCategoryRequest.isSuccess) {
     localStorage.setItem("categories", JSON.stringify(readCategoryRequest.data.data));
@@ -41,14 +62,62 @@ export default function UserLayout() {
     });
   }, []);
 
+  useEffect(() => {
+    if (customerRequest.isSuccess && customerRequest.data.data != null) {
+      const startConnection = async () => {
+        const conn = new HubConnectionBuilder()
+          .withUrl("https://localhost:7279/notification")
+          .configureLogging(LogLevel.Information)
+          .build();
+
+        try {
+          await conn.start();
+          try {
+            await conn.invoke("UserJoinRoom", { UserId: customerRequest.data.data.id });
+          } catch (e) {
+            console.log(e);
+          }
+
+          conn.on("ReceiveMessageUser", (message) => {
+            notify(message);
+          });
+          setConnection(conn);
+        } catch (error) {
+          console.error("some thing went wrong");
+        }
+      };
+
+      startConnection();
+    }
+
+    return () => {
+      if (connection) {
+        connection.stop();
+      }
+    };
+  }, [customerRequest.status]);
+
   return (
     <Container>
       <UserNavbar />
       <OutletContainer>
-        <Outlet />
+        <Outlet context={connection} />
       </OutletContainer>
       <BackToTopButton />
       <Footer />
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+        transition:Bounce
+      />
     </Container>
   );
 }
@@ -65,7 +134,7 @@ const TopButton = styled.button`
   z-index: 1000;
 
   & svg {
-    font-size: 2.3rem;
+    font-size: 1.8rem;
     color: #0057a0;
   }
 `;
@@ -101,7 +170,7 @@ function BackToTopButton() {
     <div>
       {isVisible && (
         <TopButton onClick={scrollToTop}>
-          <FaRegArrowAltCircleUp />
+          <FaCircleArrowUp />
         </TopButton>
       )}
     </div>

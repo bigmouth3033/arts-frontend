@@ -12,14 +12,14 @@ const Suggestion = styled.div`
   flex-direction: column;
   align-items: center;
   background-color: white;
+  margin-top: 5rem;
 
   > h4 {
     font-size: 20px;
     font-weight: 800;
     color: #0057a0;
     width: 100%;
-    border-bottom: 6px solid #0272c0;
-    text-align: center;
+    border-bottom: 3px solid #0272c0;
     padding: 8px;
   }
 
@@ -137,7 +137,7 @@ export default function ProductRelated({ data }) {
 
   return (
     <Suggestion>
-      <h4>YOUR SUGGESTION</h4>
+      <h4>RELATED PRODUCTS</h4>
       <ItemContainer>
         {getRelatedProductRequest.isLoading && <WaitingIcon />}
         {getRelatedProductRequest.isSuccess &&

@@ -14,6 +14,7 @@ import { FaCcJcb } from "react-icons/fa6";
 
 const Container = styled.div`
   background-color: #0272c0;
+  min-width: 1280px;
 `;
 
 const Content = styled.div`
@@ -21,7 +22,7 @@ const Content = styled.div`
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr;
   gap: 1rem;
-  max-width: 1280px;
+  width: 1280px;
   padding: 2rem 15px;
   margin: 0 auto;
 `;
@@ -133,7 +134,7 @@ const Input = styled.div`
   display: flex;
   flex-direction: row !important;
   align-items: center;
-  border-radius: 10px;
+  border-radius: 5px;
   overflow: hidden;
   box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
 

@@ -8,7 +8,8 @@ const readCustomerProducts = async (
   sort,
   searchValue,
   priceRangeMin,
-  priceRangeMax
+  priceRangeMax,
+  ratingStar
 ) => {
   const paramObject = {
     categoryId: categoryId,
@@ -16,6 +17,7 @@ const readCustomerProducts = async (
     pageNumber: pageNumber,
     sort: sort,
     searchValue: searchValue,
+    ratingStar: ratingStar,
   };
   if (priceRangeMin) {
     paramObject.priceRangeMin = priceRangeMin;
@@ -36,7 +38,8 @@ export const ReadCustomerProductsRequest = (
   sort,
   searchValue,
   priceRangeMin,
-  priceRangeMax
+  priceRangeMax,
+  ratingStar
 ) => {
   const query = useInfiniteQuery({
     queryKey: [
@@ -47,6 +50,7 @@ export const ReadCustomerProductsRequest = (
       searchValue,
       priceRangeMin,
       priceRangeMax,
+      ratingStar,
     ],
     queryFn: ({ pageParam = 1 }) => {
       return readCustomerProducts(
@@ -56,7 +60,8 @@ export const ReadCustomerProductsRequest = (
         sort,
         searchValue,
         priceRangeMin,
-        priceRangeMax
+        priceRangeMax,
+        ratingStar
       );
     },
     intialPageParam: 1,

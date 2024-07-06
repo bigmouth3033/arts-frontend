@@ -26,6 +26,7 @@ import TextInput from "@/shared/components/Input/TextInput";
 import { useEffect } from "react";
 import { MdCancelPresentation } from "react-icons/md";
 import OrderCancel from "./components/OrderCancel";
+import { useOutletContext } from "react-router-dom";
 
 const Container = styled.div`
   display: flex;
@@ -275,6 +276,7 @@ const options = [
 ];
 
 export default function AccountOrder() {
+  const connection = useOutletContext();
   const queryClient = useQueryClient();
   const [optionValue, setOptionValue] = useState(options[0]);
   const [active, setActive] = useState("All Order");

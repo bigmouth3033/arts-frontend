@@ -11,7 +11,8 @@ const SLIDES = Array.from(Array(SLIDE_COUNT).keys());
 
 const Image = styled.div`
   cursor: pointer;
-
+  width: 100%;
+  height: 100%;
   > img {
     width: 100%;
     height: 100%;
@@ -26,7 +27,7 @@ const Container = styled.div`
   .embla_banner {
     width: 100%;
     margin: auto;
-    --slide-height: 19rem;
+    --slide-height: 22rem;
     --slide-spacing: 1rem;
     --slide-size: 100%;
     position: relative;
@@ -55,6 +56,7 @@ const Container = styled.div`
     align-items: center;
     justify-content: center;
     height: var(--slide-height);
+    /* height: 100%; */
   }
   .embla__controls_banner {
     position: absolute;

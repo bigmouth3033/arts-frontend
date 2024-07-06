@@ -5,6 +5,7 @@ import XButton from "@/shared/components/Button/XButton";
 import convertToLetterString from "@/features/ProductDetail/utils/convertIdToStr";
 import SelectInput from "@/shared/components/Input/SelectInput";
 import { CancelOrderRequest } from "../api/orderDetailApi";
+import { useOutletContext } from "react-router-dom";
 
 const StyledPopUp = styled(PopUp)`
   padding: 1rem;
@@ -77,13 +78,13 @@ const options = [
 ];
 
 export default function CancelPopUp({ order, action }) {
+  const connection = useOutletContext();
   const [chosenOption, setChosenOption] = useState(options[0]);
   const [detail, setDetail] = useState("");
   const cancelOrderRequest = CancelOrderRequest();
 
   const onCancel = () => {
     const formData = new FormData();
-
     formData.append("OrderId", order.data.data.id);
     formData.append("Reason", detail ? detail : chosenOption.value);
 
@@ -91,6 +92,17 @@ export default function CancelPopUp({ order, action }) {
       onSuccess: (response) => {
         if (response.status == 200) {
           order.refetch();
+          if (connection) {
+            connection.invoke("SendMessageAdmin", {
+              UserId: order.data.data.userId,
+              Message: `${
+                convertToLetterString(order.data.data.payment.deliveryType.id, 1) +
+                convertToLetterString(order.data.data.variant.product.categoryId, 2) +
+                convertToLetterString(order.data.data.variant.id, 5) +
+                convertToLetterString(order.data.data.id, 8)
+              } order has just been canceled`,
+            });
+          }
           action();
         }
       },

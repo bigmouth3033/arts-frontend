@@ -30,6 +30,7 @@ import { SiExpress } from "react-icons/si";
 import { CiDeliveryTruck } from "react-icons/ci";
 import { FaBox } from "react-icons/fa";
 import calculatePercentDifference from "@/shared/utils/calculatePercentDifference";
+import { useOutletContext } from "react-router-dom";
 
 const Container = styled.div`
   margin: 1rem 0;
@@ -356,14 +357,20 @@ const ProductDetail = styled.div`
   margin-top: 1rem;
   display: flex;
   flex-direction: column;
-  row-gap: 1rem;
 
   > div {
     display: grid;
     grid-template-columns: 2fr 5fr;
     column-gap: 1rem;
+    padding: 10px 0;
+  }
+
+  & .warranty {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  & .unit {
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    padding-bottom: 10px;
   }
 
   & h4 {
@@ -389,10 +396,11 @@ const ProductDetail = styled.div`
 const StyledTitle = styled.div`
   display: flex;
   justify-content: flex-start;
-  align-items: center;
+  align-items: flex-start;
   column-gap: 0.5rem;
+
   > div {
-    font-size: 1rem;
+    font-size: 0.8rem;
   }
   > p {
     font-size: 0.8rem;
@@ -621,15 +629,18 @@ export default function ProductSingleMain({ data, variant, request, star }) {
                 <FaDollarSign />
                 {formatDollar(onGetVariant().price)}
               </h4>
-              <h4>
-                <FaDollarSign />
-                {formatDollar(onGetVariant().salePrice)}
-              </h4>
+              {onGetVariant().salePrice != 0 && (
+                <h4>
+                  <FaDollarSign />
+                  {formatDollar(onGetVariant().salePrice)}
+                </h4>
+              )}
             </Prices>
           )}
+
           <ProductDetail>
             {data.unit && data.unit != 0 && (
-              <div>
+              <div className="unit">
                 <h4>
                   <FaBox /> Unit
                 </h4>
@@ -644,7 +655,7 @@ export default function ProductSingleMain({ data, variant, request, star }) {
             </div>
 
             {data.warrantyDuration > 0 && (
-              <div>
+              <div className="warranty">
                 <h4>
                   <IoShieldCheckmark /> Warranty information
                 </h4>
@@ -653,7 +664,7 @@ export default function ProductSingleMain({ data, variant, request, star }) {
                   <span>Warranty type: Electronics</span>
                   <span>Warranty location: Manufacturer's warranty</span>
                   <span>
-                    Warranty instructions: <Link>See details</Link>
+                    Warranty instructions: <Link to={"/warranty"}>See details</Link>
                   </span>
                 </p>
               </div>
@@ -920,7 +931,7 @@ function ReadStar({ star }) {
     <StyledWrapReadStar>
       {[...Array(5)].map((_, index) => (
         <Star key={index} active={index < star}>
-          <FaStar size="15px" />
+          <FaStar size="14px" />
         </Star>
       ))}
     </StyledWrapReadStar>

@@ -112,7 +112,7 @@ export default function ComparePricePopUp({ action, state, setState }) {
 
   const onConfirm = () => {
     for (let i = 0; i < prices.length; i++) {
-      state[i].comparePrice = prices[i];
+      state[i].comparePrice = prices[i] ? prices[i] : 0;
     }
 
     setState();

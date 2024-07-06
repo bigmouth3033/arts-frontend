@@ -70,8 +70,8 @@ const Container = styled.div`
     padding: 0;
     margin: 0;
     box-shadow: inset 0 0 0 0.2rem var(--detail-medium-contrast);
-    width: 3rem;
-    height: 3rem;
+    width: 2rem;
+    height: 2rem;
     z-index: 1;
     border-radius: 50%;
     color: var(--text-body);
@@ -84,8 +84,8 @@ const Container = styled.div`
 
   .embla__button--next_best {
     background-color: #b7c2cb;
-    width: 3rem;
-    height: 3rem;
+    width: 2rem;
+    height: 2rem;
     color: white;
   }
   .embla__button_best:disabled {

@@ -128,18 +128,11 @@ export default function AccountDetailSideBar({ data }) {
         </div>
         <span>Address book</span>
       </WrapItem>
-      <WrapItem>
+      <WrapItem to="account-review">
         <div>
           <MdReviews />
         </div>
         <span>Product Reviews</span>
-      </WrapItem>
-
-      <WrapItem>
-        <div>
-          <FaHeadphonesAlt />
-        </div>
-        <span>Customer Support</span>
       </WrapItem>
     </Container>
   );

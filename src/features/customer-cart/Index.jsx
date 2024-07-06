@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { CustomerRequest } from "@/shared/api/customerApi";
 
 const MainStyleComponent = styled.div`
-  max-width: 1280px;
+  width: 1280px;
   padding: 15px;
   margin: 0 auto;
   min-height: 50rem;

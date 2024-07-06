@@ -171,7 +171,13 @@ export default function ChangeAddressPopUp({ action, state, setState }) {
         <AddNewAddressPopUp setActiveState={setActiveState} action={action} />
       )}
       {activeState == "UPDATE" && (
-        <UpdateAddressPopUp addressId={addressId} setActiveState={setActiveState} action={action} />
+        <UpdateAddressPopUp
+          state={state}
+          setState={setState}
+          addressId={addressId}
+          setActiveState={setActiveState}
+          action={action}
+        />
       )}
       {activeState == "SELECT" && (
         <>
@@ -525,7 +531,7 @@ const AreaUpdate = styled.textarea`
   }
 `;
 
-function UpdateAddressPopUp({ action, addressId, setActiveState }) {
+function UpdateAddressPopUp({ action, addressId, setActiveState, state, setState }) {
   const queryClient = useQueryClient();
 
   const [start, setStart] = useState(true);
@@ -593,6 +599,18 @@ function UpdateAddressPopUp({ action, addressId, setActiveState }) {
         if (response.status == 200) {
           queryClient.invalidateQueries({ queryKey: ["address"] });
           getUserAddressByIdRequest.refetch();
+          if (state.id == getUserAddressByIdRequest.data.data.id) {
+            setState({
+              phoneNumber,
+              id: getUserAddressByIdRequest.data.data.id,
+              fullName: name,
+              province: province.value,
+              district: district.value,
+              ward: ward.value,
+              addressDetail,
+              isDefault: defaultInput,
+            });
+          }
           setSuccess(true);
           setActiveState("SELECT");
         }

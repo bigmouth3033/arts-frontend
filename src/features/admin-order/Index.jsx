@@ -22,10 +22,11 @@ import TextInput from "@/shared/components/Input/TextInput";
 import { CiCircleRemove } from "react-icons/ci";
 import { useNavigate } from "react-router-dom";
 import WaitingIcon from "@/shared/components/AnimationIcon/WaitingIcon";
+import { useOutletContext } from "react-router-dom";
 
 const Container = styled.div`
   margin: auto;
-  max-width: 75rem;
+  width: 75rem;
   font-size: 14px;
   min-height: 40rem;
   padding: 3rem 0;
@@ -325,6 +326,7 @@ const categoryOption = [
 ];
 
 export default function AdminOrder() {
+  const connection = useOutletContext();
   const navigate = useNavigate();
   const acceptOrderRequest = AcceptOrderRequest();
   const denyOrderRequest = DenyOrderRequest();
@@ -423,6 +425,20 @@ export default function AdminOrder() {
       onSuccess: (response) => {
         if (response.status == 200) {
           getAdminOrdersetAdminOrderRequest.refetch();
+          id.forEach((orderId) => {
+            const order = getOrder(orderId);
+            const orderIdString =
+              convertToLetterString(order.payment.deliveryType.id, 1) +
+              convertToLetterString(order.variant.product.categoryId, 2) +
+              convertToLetterString(order.variant.id, 5) +
+              convertToLetterString(order.id, 8);
+            if (connection) {
+              connection.invoke("SendMessageUser", {
+                UserId: order.userId,
+                Message: `Order ${orderIdString} has been accepted`,
+              });
+            }
+          });
           setSuccess(true);
           setCheckBox((prev) => prev.filter((item) => !id.includes(item)));
           return;
@@ -445,6 +461,20 @@ export default function AdminOrder() {
       onSuccess: (response) => {
         if (response.status == 200) {
           getAdminOrdersetAdminOrderRequest.refetch();
+          id.forEach((orderId) => {
+            const order = getOrder(orderId);
+            const orderIdString =
+              convertToLetterString(order.payment.deliveryType.id, 1) +
+              convertToLetterString(order.variant.product.categoryId, 2) +
+              convertToLetterString(order.variant.id, 5) +
+              convertToLetterString(order.id, 8);
+            if (connection) {
+              connection.invoke("SendMessageUser", {
+                UserId: order.userId,
+                Message: `Order ${orderIdString} has been denied`,
+              });
+            }
+          });
           setSuccess(true);
           setCheckBox((prev) => prev.filter((item) => !id.includes(item)));
           return;
@@ -467,6 +497,20 @@ export default function AdminOrder() {
       onSuccess: (response) => {
         if (response.status == 200) {
           getAdminOrdersetAdminOrderRequest.refetch();
+          id.forEach((orderId) => {
+            const order = getOrder(orderId);
+            const orderIdString =
+              convertToLetterString(order.payment.deliveryType.id, 1) +
+              convertToLetterString(order.variant.product.categoryId, 2) +
+              convertToLetterString(order.variant.id, 5) +
+              convertToLetterString(order.id, 8);
+            if (connection) {
+              connection.invoke("SendMessageUser", {
+                UserId: order.userId,
+                Message: `Order ${orderIdString} has been delivery`,
+              });
+            }
+          });
           setSuccess(true);
           setCheckBox((prev) => prev.filter((item) => !id.includes(item)));
           return;
@@ -489,6 +533,20 @@ export default function AdminOrder() {
       onSuccess: (response) => {
         if (response.status == 200) {
           getAdminOrdersetAdminOrderRequest.refetch();
+          id.forEach((orderId) => {
+            const order = getOrder(orderId);
+            const orderIdString =
+              convertToLetterString(order.payment.deliveryType.id, 1) +
+              convertToLetterString(order.variant.product.categoryId, 2) +
+              convertToLetterString(order.variant.id, 5) +
+              convertToLetterString(order.id, 8);
+            if (connection) {
+              connection.invoke("SendMessageUser", {
+                UserId: order.userId,
+                Message: `Order ${orderIdString} is success`,
+              });
+            }
+          });
           setSuccess(true);
           setCheckBox((prev) => prev.filter((item) => !id.includes(item)));
           return;
@@ -502,6 +560,10 @@ export default function AdminOrder() {
       },
     });
   };
+
+  function getOrder(orderId) {
+    return getAdminOrdersetAdminOrderRequest.data.data.find((item) => item.id == orderId);
+  }
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {

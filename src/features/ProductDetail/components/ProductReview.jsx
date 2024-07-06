@@ -9,6 +9,7 @@ import { RequestReview } from "../api/checkReview";
 import { RequestAllReview } from "../api/readAllReview";
 import Avatar from "react-avatar";
 import { format, parseISO } from "date-fns";
+
 const StyledContainer = styled.div`
   display: grid;
   grid-template-columns: 1fr 4fr;
@@ -163,6 +164,11 @@ const StyledTime = styled.div`
 const StyledCreatedAt = styled.span`
   margin-left: 10px;
 `;
+
+const Container = styled.div`
+  margin-top: 5rem;
+`;
+
 export default function ProductReview({ data, star }) {
   const [showRating, setShowRating] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -198,7 +204,7 @@ export default function ProductReview({ data, star }) {
   }, [currentPage]);
 
   return (
-    <div>
+    <Container>
       <StyledWrapTitle>
         <StyledProductTitle>REVIEW & RATING</StyledProductTitle>
         <StyledGroupButton>
@@ -313,7 +319,7 @@ export default function ProductReview({ data, star }) {
           </div>
         </div>
       </StyledContainer>
-    </div>
+    </Container>
   );
 }
 

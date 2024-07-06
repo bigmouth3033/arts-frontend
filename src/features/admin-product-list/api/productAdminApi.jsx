@@ -1,5 +1,6 @@
 import axiosAdmin from "@/shared/api/axiosAdmin";
-import { useQuery } from "@tanstack/react-query";
+
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
 const onGetAminProducts = async (pageNumber, pageSize, categoryId, searchValue) => {
@@ -22,4 +23,15 @@ export const GetAdminProductRequest = (pageNumber, pageSize, categoryId, searchV
   });
 
   return query;
+};
+
+const updateVariants = async (payload) => {
+  const response = await axiosAdmin.put("product/update-variants", payload);
+  return response.data;
+};
+
+export const UpdateVariantRequest = () => {
+  return useMutation({
+    mutationFn: updateVariants,
+  });
 };

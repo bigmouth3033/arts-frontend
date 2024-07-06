@@ -111,7 +111,7 @@ export default function SalePricePopUp({ action, state, setState }) {
 
   const onConfirm = () => {
     for (let i = 0; i < prices.length; i++) {
-      state[i].sellPrice = prices[i];
+      state[i].sellPrice = prices[i] ? prices[i] : 0;
     }
 
     setState();

@@ -26,7 +26,7 @@ import { useNavigate } from "react-router-dom";
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 2rem;
 
   > h3 {
     font-size: 20px;

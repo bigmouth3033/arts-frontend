@@ -1,15 +1,15 @@
 export const getSalePrices = (product) => {
   const variants = product.variants;
-  let minPrice = parseInt(variants[0].salePrice);
-  let maxPrice = parseInt(variants[0].salePrice);
+  let minPrice = variants[0].salePrice;
+  let maxPrice = variants[0].salePrice;
 
   for (let i = 0; i < variants.length; i++) {
-    if (parseInt(variants[i].salePrice) > parseInt(maxPrice)) {
-      maxPrice = parseInt(variants[i].salePrice);
+    if (variants[i].salePrice > maxPrice) {
+      maxPrice = variants[i].salePrice;
     }
 
-    if (parseInt(variants[i].salePrice) < parseInt(minPrice)) {
-      minPrice = parseInt(variants[i].salePrice);
+    if (variants[i].salePrice < minPrice) {
+      minPrice = variants[i].salePrice;
     }
   }
 
@@ -22,16 +22,16 @@ export const getSalePrices = (product) => {
 
 export const getPrices = (product) => {
   const variants = product.variants;
-  let minPrice = parseInt(variants[0].price);
-  let maxPrice = parseInt(variants[0].price);
+  let minPrice = variants[0].price;
+  let maxPrice = variants[0].price;
 
   for (let i = 0; i < variants.length; i++) {
-    if (parseInt(variants[i].price) > parseInt(maxPrice)) {
-      maxPrice = parseInt(variants[i].price);
+    if (variants[i].price > maxPrice) {
+      maxPrice = variants[i].price;
     }
 
-    if (parseInt(variants[i].price) < parseInt(minPrice)) {
-      minPrice = parseInt(variants[i].price);
+    if (variants[i].price < minPrice) {
+      minPrice = variants[i].price;
     }
   }
 

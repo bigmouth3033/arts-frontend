@@ -29,6 +29,7 @@ const StyledContainer = styled.div`
   transition: all 0.15s;
   display: flex;
   flex-direction: column;
+  min-width: 1280px;
 `;
 
 const StyledHeader = styled.div`
@@ -37,9 +38,8 @@ const StyledHeader = styled.div`
   column-gap: 1rem;
   align-items: center;
 
-  max-width: 1280px;
-
-  padding: 15px;
+  width: 1280px;
+  padding: 15px 0;
   margin: auto;
 `;
 
@@ -310,7 +310,7 @@ export default function UserNavbar() {
   useEffect(() => {
     const onMouseDownEvent = (ev) => {
       if (
-        searchContainerRef &&
+        searchContainerRef.current &&
         !searchContainerRef.current.contains(ev.target) &&
         !searchRef.current.contains(ev.target)
       ) {

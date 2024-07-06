@@ -13,6 +13,8 @@ import { CreatePaymentRequest } from "../api/CustomerPaymentAPI";
 import SuccessPopUp from "@/shared/components/PopUp/SuccessPopUp";
 import ErrorPopUp from "@/shared/components/PopUp/ErrorPopUp";
 import { useQueryClient } from "@tanstack/react-query";
+import { CustomerRequest } from "@/shared/api/customerApi";
+import { useOutletContext } from "react-router-dom";
 
 const Container = styled.div`
   display: flex;
@@ -159,6 +161,8 @@ const StyledLink = styled(Link)`
 `;
 
 export default function CheckOut({ cartData, addressData, total, delivery, payment }) {
+  const customerRequest = CustomerRequest();
+  const connection = useOutletContext();
   const queryClient = useQueryClient();
   const createPaymentRequest = CreatePaymentRequest();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -194,6 +198,12 @@ export default function CheckOut({ cartData, addressData, total, delivery, payme
       onSuccess: (response) => {
         if (response.status == 200) {
           queryClient.invalidateQueries({ queryKey: ["cart-quantity"] });
+          if (connection) {
+            connection.invoke("SendMessageAdmin", {
+              UserId: customerRequest.data.data.id,
+              Message: `New order has just been placed`,
+            });
+          }
           setPaySuccess(true);
           return;
         }

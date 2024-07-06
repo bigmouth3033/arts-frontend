@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { RequestStar } from "./api/readStar";
 
 const ProductSingleContainer = styled.div`
-  max-width: 1280px;
+  width: 1280px;
   padding: 15px;
   margin: 0 auto;
 `;
@@ -105,11 +105,13 @@ export default function ProductDetail() {
   return (
     <ProductSingleContainer>
       <BreadCrumb>
-        <Link to={"/"}>Home</Link> <FaAngleRight /> <Link to={"/listing-page"}>Product list</Link>{" "}
-        <FaAngleRight />
-        <Link to={`/listing-page?categoryId=${getProductDetailRequest.data.data.category.id}`}>
+        <StyledNameLink to={"/"}>Home</StyledNameLink> <FaAngleRight />{" "}
+        <StyledNameLink to={"/listing-page"}>Product list</StyledNameLink> <FaAngleRight />
+        <StyledNameLink
+          to={`/listing-page?categoryId=${getProductDetailRequest.data.data.category.id}`}
+        >
           {getProductDetailRequest.data.data.category.name}
-        </Link>{" "}
+        </StyledNameLink>{" "}
         <FaAngleRight />
         <StyledNameLink>{getProductDetailRequest.data.data.name}</StyledNameLink>
       </BreadCrumb>

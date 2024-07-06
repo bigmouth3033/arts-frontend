@@ -199,7 +199,6 @@ export default function CartItem(props) {
         onSuccess: (res) => {
           queryClient.invalidateQueries({ queryKey: ["user-cart"] });
           queryClient.invalidateQueries({ queryKey: ["cart-totalAmount"] });
-          alert("asdasd");
         },
       }
     );

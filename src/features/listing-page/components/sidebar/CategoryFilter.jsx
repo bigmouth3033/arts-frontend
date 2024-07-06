@@ -21,6 +21,9 @@ const StyleCategoryContent = styled.div`
 
 const StyleCategoryTitle = styled.div`
   display: inline-block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.5);
 `;
 
 const StyleInputRadio = styled.input`

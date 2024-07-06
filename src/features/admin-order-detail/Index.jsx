@@ -24,6 +24,7 @@ import { DeliveryOrderRequest } from "../admin-order/api/adminOrdersApi";
 import { FinishOrderRequest } from "../admin-order/api/adminOrdersApi";
 import SuccessPopUp from "@/shared/components/PopUp/SuccessPopUp";
 import ErrorPopUp from "@/shared/components/PopUp/ErrorPopUp";
+import { useOutletContext } from "react-router-dom";
 
 const Container = styled.div`
   display: flex;
@@ -231,6 +232,7 @@ const Buttons = styled.div`
 const Product = styled.div``;
 
 export default function AdminOrderDetail() {
+  const connection = useOutletContext();
   let [searchParams, setSearchParams] = useSearchParams();
   const acceptOrderRequest = AcceptOrderRequest();
   const denyOrderRequest = DenyOrderRequest();
@@ -249,6 +251,17 @@ export default function AdminOrderDetail() {
     acceptOrderRequest.mutate(formData, {
       onSuccess: (response) => {
         if (response.status == 200) {
+          if (connection) {
+            const orderIdString =
+              convertToLetterString(getOrderByIdRequest.data.data.payment.deliveryType.id, 1) +
+              convertToLetterString(getOrderByIdRequest.data.data.variant.product.categoryId, 2) +
+              convertToLetterString(getOrderByIdRequest.data.data.variant.id, 5) +
+              convertToLetterString(getOrderByIdRequest.data.data.id, 8);
+            connection.invoke("SendMessageUser", {
+              UserId: getOrderByIdRequest.data.data.userId,
+              Message: `Order ${orderIdString} has just been accepted`,
+            });
+          }
           setSuccess(true);
           getOrderByIdRequest.refetch();
           return;
@@ -270,6 +283,17 @@ export default function AdminOrderDetail() {
     denyOrderRequest.mutate(formData, {
       onSuccess: (response) => {
         if (response.status == 200) {
+          if (connection) {
+            const orderIdString =
+              convertToLetterString(getOrderByIdRequest.data.data.payment.deliveryType.id, 1) +
+              convertToLetterString(getOrderByIdRequest.data.data.variant.product.categoryId, 2) +
+              convertToLetterString(getOrderByIdRequest.data.data.variant.id, 5) +
+              convertToLetterString(getOrderByIdRequest.data.data.id, 8);
+            connection.invoke("SendMessageUser", {
+              UserId: getOrderByIdRequest.data.data.userId,
+              Message: `Order ${orderIdString} has just been denied `,
+            });
+          }
           setSuccess(true);
           getOrderByIdRequest.refetch();
           return;
@@ -291,6 +315,17 @@ export default function AdminOrderDetail() {
     deliveryOrderRequest.mutate(formData, {
       onSuccess: (response) => {
         if (response.status == 200) {
+          if (connection) {
+            const orderIdString =
+              convertToLetterString(getOrderByIdRequest.data.data.payment.deliveryType.id, 1) +
+              convertToLetterString(getOrderByIdRequest.data.data.variant.product.categoryId, 2) +
+              convertToLetterString(getOrderByIdRequest.data.data.variant.id, 5) +
+              convertToLetterString(getOrderByIdRequest.data.data.id, 8);
+            connection.invoke("SendMessageUser", {
+              UserId: getOrderByIdRequest.data.data.userId,
+              Message: `Order ${orderIdString} has just been delivery`,
+            });
+          }
           setSuccess(true);
           getOrderByIdRequest.refetch();
           return;
@@ -312,6 +347,17 @@ export default function AdminOrderDetail() {
     finishOrderRequest.mutate(formData, {
       onSuccess: (response) => {
         if (response.status == 200) {
+          if (connection) {
+            const orderIdString =
+              convertToLetterString(getOrderByIdRequest.data.data.payment.deliveryType.id, 1) +
+              convertToLetterString(getOrderByIdRequest.data.data.variant.product.categoryId, 2) +
+              convertToLetterString(getOrderByIdRequest.data.data.variant.id, 5) +
+              convertToLetterString(getOrderByIdRequest.data.data.id, 8);
+            connection.invoke("SendMessageUser", {
+              UserId: getOrderByIdRequest.data.data.userId,
+              Message: `Order ${orderIdString} has just been finished`,
+            });
+          }
           setSuccess(true);
           getOrderByIdRequest.refetch();
           return;

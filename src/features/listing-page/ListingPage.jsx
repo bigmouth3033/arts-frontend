@@ -13,17 +13,13 @@ import productList from "@/features/listing-page/data/product.json";
 import { useSearchParams } from "react-router-dom";
 
 const StyleListingPage = styled.div`
+  background-color: white;
   display: grid;
   grid-template-columns: 1fr 4fr;
-  margin: 0 auto;
-  max-width: 1230px;
-  padding-left: 15px;
-  padding-right: 15px;
+  margin: 2rem auto;
+  max-width: 1280px;
+  padding: 25px 15px;
   width: 100%;
-
-  & * {
-    box-sizing: border-box;
-  }
 
   @media (max-width: 1024px) {
   }
@@ -44,7 +40,12 @@ const StyleListingPage = styled.div`
 const StyleRight = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: end;
+`;
+
+const FilterBar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 `;
 
 const ListingPage = () => {
@@ -53,6 +54,7 @@ const ListingPage = () => {
   const [priceMin, setPriceMin] = useState(searchParams.get("minPrice") || null);
   const [priceMax, setPriceMax] = useState(searchParams.get("maxPrice") || null);
   const [searchValue, setSearchValue] = useState(searchParams.get("search") || "");
+  const [starValue, setStarValue] = useState(searchParams.get("star") || 0);
   const [sort, setSort] = useState();
   const pageSize = 20;
 
@@ -64,7 +66,8 @@ const ListingPage = () => {
     sort?.value,
     searchValue,
     priceMin,
-    priceMax
+    priceMax,
+    starValue
   ); //category ID, pageSize
 
   //------------Radio Price Filter---------------
@@ -74,8 +77,17 @@ const ListingPage = () => {
     setSearchParams({
       categoryId: selectedCategory,
       search: searchValue,
-      minPrice: priceRangeMin,
-      maxPrice: priceRangeMax,
+      star: starValue,
+    });
+  };
+
+  const handleStarChange = (value) => {
+    setStarValue(value);
+    console.log(value);
+    setSearchParams({
+      categoryId: selectedCategory,
+      search: searchValue,
+      star: value,
     });
   };
 
@@ -85,8 +97,7 @@ const ListingPage = () => {
     setSearchParams({
       categoryId: categoryId,
       search: searchValue,
-      minPrice: priceMin,
-      maxPrice: priceMax,
+      star: starValue,
     });
   };
   //------------SEARCH---------------------------
@@ -94,8 +105,7 @@ const ListingPage = () => {
     setSearchParams({
       categoryId: selectedCategory,
       search: value,
-      minPrice: priceMin,
-      maxPrice: priceMax,
+      star: starValue,
     });
     setSearchValue(value);
   };
@@ -105,7 +115,6 @@ const ListingPage = () => {
 
   return (
     <>
-      <Search searchValueSaved={searchValue} handleSearchChange={handleSearchChange} />
       <StyleListingPage>
         <ProductFilter
           selectedCategory={selectedCategory}
@@ -114,14 +123,20 @@ const ListingPage = () => {
           handleChange={handleChange}
           handlePriceRadioChange={handlePriceRadioChange}
           categoryData={readCategories.data.data}
+          starValue={starValue}
+          handleStarChange={handleStarChange}
         />
         <StyleRight>
-          <Sort switched={sort} setSwitched={setSort} />
+          <FilterBar>
+            <Search searchValueSaved={searchValue} handleSearchChange={handleSearchChange} />
+            <Sort switched={sort} setSwitched={setSort} />
+          </FilterBar>
           <ProductListing productList={products} pageSize={pageSize} />
         </StyleRight>
       </StyleListingPage>
     </>
   );
+  f;
 };
 
 export default ListingPage;

@@ -114,10 +114,9 @@ export default function VariantDetailPopUp({ action, state, setState }) {
       <Button>
         <button
           onClick={() => {
-            state.sellPrice = salePrice;
-            state.comparePrice = comparePrice;
-            state.inventory = stock;
-            state.beginFund = costPerItem;
+            state.sellPrice = salePrice ? salePrice : 0;
+            state.comparePrice = comparePrice ? comparePrice : 0;
+            state.inventory = stock ? stock : 0;
             setState();
             action();
           }}

@@ -43,7 +43,7 @@ const StyledFaRegQuestionCircle = styled(FaRegQuestionCircle)`
 `;
 
 const Container = styled.div`
-  max-width: 75rem;
+  width: 75rem;
   margin: auto;
   padding: 3rem 0;
   display: flex;
@@ -637,12 +637,11 @@ export default function AdminProductNew() {
 
       if (!isValidFileType) {
         setImageError(true);
-        // Clear the file input if the file type is invalid
         return;
       }
 
       dispatch({ type: ACTIONS.CHANGE_IMAGES, next: [...state.images, ...ev.target.files] });
-      ev.target.files = null;
+      ev.target.value = null;
     }
   };
 
@@ -780,9 +779,9 @@ export default function AdminProductNew() {
     formData.append("ProductName", state.productName);
     formData.append("Category", state.category.value);
     formData.append("Description", state.description);
-    formData.append("Price", state.price);
-    formData.append("SalePrice", state.salePrice);
-    formData.append("Amount", state.amount);
+    formData.append("Price", state.price ? state.price : 0);
+    formData.append("SalePrice", state.salePrice ? state.salePrice : 0);
+    formData.append("Amount", state.amount ? state.amount : 0);
     formData.append("Unit", state.unit);
     formData.append("Active", state.active);
     formData.append("Warranty", state.warrantyTime ? state.warrantyTime : 0);

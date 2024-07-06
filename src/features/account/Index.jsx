@@ -10,9 +10,9 @@ import WaitingPopUp from "@/shared/components/PopUp/WaitingPopUp";
 import { useLocation } from "react-router-dom";
 
 const Container = styled.div`
-  max-width: 1230px;
+  width: 1280px;
   padding: 15px;
-  margin: 0 auto;
+  margin: 1rem auto;
   min-height: 40rem;
 `;
 

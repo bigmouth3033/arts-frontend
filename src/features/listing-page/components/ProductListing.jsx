@@ -6,12 +6,14 @@ import styled from "styled-components";
 import { formatCreatedAt } from "@/shared/utils/DateTimeHandle";
 
 const StyleProductListing = styled.div`
+  background-color: white;
   display: grid;
   width: 100%;
   max-width: 100%;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 1rem;
   margin: 1rem 0;
+
   box-sizing: border-box;
 
   @media (max-width: 1024px) {
@@ -33,7 +35,13 @@ const StyleNotFound = styled.div`
   font-weight: 300;
   color: lightgray;
   width: 50rem;
-  padding-left: 5rem;
+  text-align: center;
+  margin: auto;
+
+  background-image: linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red);
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text; /* For browser compatibility */
 `;
 
 const StyleViewMore = styled.button`
@@ -58,10 +66,7 @@ const ProductListing = ({ productList, pageSize }) => {
 
   //khi số sp search ra < pageSize (2) || click đến khi k còn page tiếp theo thì ẩn ShowMore (chạy ok)
   useEffect(() => {
-    if (
-      !productList.hasNextPage ||
-      productList.data.pages[0].data.length < pageSize
-    ) {
+    if (!productList.hasNextPage || productList.data.pages[0].data.length < pageSize) {
       setShowMore(false);
     }
   }, [productList.hasNextPage, productList.data.pages[0].data.length]);
@@ -79,13 +84,11 @@ const ProductListing = ({ productList, pageSize }) => {
     <>
       <StyleProductListing>
         {productList.data.pages.map((page, index) =>
-          page.data.map((product, i) => (
-            <ProductCard product={product} index={index} />
-          ))
+          page.data.map((product, i) => <ProductCard product={product} index={index} />)
         )}
       </StyleProductListing>
       {productList.data.pages[0].data.length === 0 ? (
-        <StyleNotFound>No result found</StyleNotFound>
+        <StyleNotFound>Sorry, We Cannot Found Your Desired Product :(</StyleNotFound>
       ) : (
         showMore && (
           <StyleViewMore showMore={showMore} onClick={handleLoadMore}>
@@ -98,4 +101,3 @@ const ProductListing = ({ productList, pageSize }) => {
 };
 
 export default ProductListing;
-

@@ -111,7 +111,7 @@ export default function AmountPopUp({ action, state, setState }) {
 
   const onConfirm = () => {
     for (let i = 0; i < stock.length; i++) {
-      state[i].inventory = stock[i];
+      state[i].inventory = stock[i] ? stock[i] : 0;
     }
 
     setState();

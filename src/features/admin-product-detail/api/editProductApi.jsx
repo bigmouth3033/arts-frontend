@@ -20,6 +20,8 @@ const onDeleteImage = async (payload) => {
       imageId: payload.imageId,
     },
   });
+
+  return response.data;
 };
 
 export const DeleteImageRequest = () => {

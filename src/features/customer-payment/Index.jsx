@@ -10,7 +10,7 @@ import { readTypesData } from "@/shared/utils/readTypesData";
 import { GetTotalAmountByUserIdQuery } from "../customer-cart/api/customerCartApi";
 
 const Container = styled.div`
-  max-width: 1280px;
+  width: 1280px;
   padding: 15px;
   margin: 1rem auto;
 `;
