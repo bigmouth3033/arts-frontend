@@ -127,7 +127,7 @@ export default function CancelPopUp({ order, action }) {
           <SelectInput state={chosenOption} setState={setChosenOption} options={options} />
         </div>
         <div>
-          <h5>Detail: </h5>
+          <h5>Other reason: </h5>
           <Input value={detail} onChange={(ev) => setDetail(ev.target.value)} />
         </div>
         <button onClick={onCancel}>Submit</button>

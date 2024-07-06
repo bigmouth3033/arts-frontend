@@ -13,6 +13,9 @@ import { useNavigate } from "react-router-dom";
 import { SendExchangeRequest } from "./api/refundApi";
 import { BiImageAdd } from "react-icons/bi";
 import { AiOutlineClose } from "react-icons/ai";
+import ErrorPopUp from "@/shared/components/PopUp/ErrorPopUp";
+import { useOutletContext } from "react-router-dom";
+import convertToLetterString from "../ProductDetail/utils/convertIdToStr";
 
 const Container = styled.div`
   display: flex;
@@ -22,6 +25,11 @@ const Container = styled.div`
   > h3 {
     font-size: 20px;
     font-weight: 100;
+  }
+
+  & h4 {
+    display: flex;
+    gap: 5px;
   }
 `;
 
@@ -62,6 +70,11 @@ const StyledLink = styled(Link)`
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   font-size: 14px;
+  color: #551aa9;
+
+  &:active {
+    color: red;
+  }
 `;
 
 const StyledLinkNoDecoration = styled(StyledLink)`
@@ -234,6 +247,9 @@ const reasonOptions = [
 ];
 
 export default function AccountExchangeRequest() {
+  const connection = useOutletContext();
+
+  const [imageError, setImageError] = useState(false);
   const inputRef = useRef();
   const [images, setImages] = useState([]);
   const navigtate = useNavigate();
@@ -287,6 +303,23 @@ export default function AccountExchangeRequest() {
       sendRefundRequest.mutate(formData, {
         onSuccess: (response) => {
           if (response.status == 200) {
+            if (connection) {
+              connection.invoke("SendMessageAdmin", {
+                UserId: getOrderDetailRequest.data.data.userId,
+                Message: `${
+                  convertToLetterString(
+                    getOrderDetailRequest.data.data.payment.deliveryType.id,
+                    1
+                  ) +
+                  convertToLetterString(
+                    getOrderDetailRequest.data.data.variant.product.categoryId,
+                    2
+                  ) +
+                  convertToLetterString(getOrderDetailRequest.data.data.variant.id, 5) +
+                  convertToLetterString(getOrderDetailRequest.data.data.id, 8)
+                } order has just been request to refund`,
+              });
+            }
             setSuccess(true);
           }
         },
@@ -303,6 +336,23 @@ export default function AccountExchangeRequest() {
       sendExchangeRequest.mutate(formData, {
         onSuccess: (response) => {
           if (response.status == 200) {
+            if (connection) {
+              connection.invoke("SendMessageAdmin", {
+                UserId: getOrderDetailRequest.data.data.userId,
+                Message: `${
+                  convertToLetterString(
+                    getOrderDetailRequest.data.data.payment.deliveryType.id,
+                    1
+                  ) +
+                  convertToLetterString(
+                    getOrderDetailRequest.data.data.variant.product.categoryId,
+                    2
+                  ) +
+                  convertToLetterString(getOrderDetailRequest.data.data.variant.id, 5) +
+                  convertToLetterString(getOrderDetailRequest.data.data.id, 8)
+                } order has just been request to exchange`,
+              });
+            }
             setSuccess(true);
           }
         },
@@ -324,7 +374,6 @@ export default function AccountExchangeRequest() {
 
       if (!isValidFileType) {
         setImageError(true);
-
         return;
       }
 
@@ -338,7 +387,21 @@ export default function AccountExchangeRequest() {
       <h3>Exchange</h3>
       <Content>
         <div>
-          <h4>Item return</h4>
+          <h4>
+            Item return{" "}
+            <StyledLinkNoDecoration
+              to={`/account/order-detail?id=${getOrderDetailRequest.data.data.id}`}
+            >
+              #
+              {convertToLetterString(getOrderDetailRequest.data.data.payment.deliveryType.id, 1) +
+                convertToLetterString(
+                  getOrderDetailRequest.data.data.variant.product.categoryId,
+                  2
+                ) +
+                convertToLetterString(getOrderDetailRequest.data.data.variant.id, 5) +
+                convertToLetterString(getOrderDetailRequest.data.data.id, 8)}
+            </StyledLinkNoDecoration>
+          </h4>
           <ProductDetail>
             <Image>
               <img
@@ -371,33 +434,40 @@ export default function AccountExchangeRequest() {
           </ProductDetail>
         </div>
 
-        <ImageContainer>
-          {images.length > 0 && (
-            <Images>
-              {images.map((item, index) => {
-                return (
-                  <ImageItem key={index}>
-                    <ImageLayout>
-                      <AiOutlineClose />
-                    </ImageLayout>
-                    <img src={URL.createObjectURL(item)} />
-                  </ImageItem>
-                );
-              })}
+        <div>
+          <h4>Image detail</h4>
+          <ImageContainer>
+            {images.length > 0 && (
+              <Images>
+                {images.map((item, index) => {
+                  return (
+                    <ImageItem key={index}>
+                      <ImageLayout>
+                        <AiOutlineClose
+                          onClick={() => {
+                            setImages((prev) => [...prev.filter((image) => image != item)]);
+                          }}
+                        />
+                      </ImageLayout>
+                      <img src={URL.createObjectURL(item)} />
+                    </ImageItem>
+                  );
+                })}
+                <AddImageButton onClick={onClickAddImage}>
+                  <BiImageAdd />
+                </AddImageButton>
+              </Images>
+            )}
+
+            {images.length == 0 && (
               <AddImageButton onClick={onClickAddImage}>
                 <BiImageAdd />
+                <span>Add Image</span>
               </AddImageButton>
-            </Images>
-          )}
-
-          {images.length == 0 && (
-            <AddImageButton onClick={onClickAddImage}>
-              <BiImageAdd />
-              <span>Add Image</span>
-            </AddImageButton>
-          )}
-          <input ref={inputRef} onChange={handleImageChange} type="file" multiple />
-        </ImageContainer>
+            )}
+            <input ref={inputRef} onChange={handleImageChange} type="file" multiple />
+          </ImageContainer>
+        </div>
         <div>
           <h4>Select the return reason</h4>
           <SelectInput
@@ -426,6 +496,9 @@ export default function AccountExchangeRequest() {
             navigtate("/account/order");
           }}
         />
+      )}
+      {imageError && (
+        <ErrorPopUp message={"Wrong image type"} action={() => setImageError(false)} />
       )}
     </Container>
   );

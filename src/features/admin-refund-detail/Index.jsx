@@ -227,7 +227,32 @@ const Buttons = styled.div`
   }
 `;
 
-const Images = styled.div``;
+const Images = styled.div`
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-auto-rows: 9rem;
+  gap: 10px;
+  background-color: white;
+  padding: 1rem;
+
+  > div:nth-of-type(1) {
+    grid-column: 1/3;
+    grid-row: 1/3;
+  }
+
+  > div {
+    border: 1px dotted rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  & img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+`;
 
 const Product = styled.div``;
 
@@ -302,11 +327,18 @@ export default function AdminRefundDetail() {
           )}
         </Info>
 
-        <Images>
-          {getRefundByIdRequest.data.data.images.map((item) => {
-            return <img src={import.meta.env.VITE_API_IMAGE_PATH + item.imageName} />;
-          })}
-        </Images>
+        <div>
+          <h4>Refund Image</h4>
+          <Images>
+            {getRefundByIdRequest.data.data.images.map((item) => {
+              return (
+                <div>
+                  <img src={import.meta.env.VITE_API_IMAGE_PATH + item.imageName} />
+                </div>
+              );
+            })}
+          </Images>
+        </div>
         <Product>
           <TableContent>
             <thead>

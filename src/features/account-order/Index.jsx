@@ -685,8 +685,8 @@ export default function AccountOrder() {
         <OrderCancel
           action={() => {
             setCancelPopUp(false);
-            setCancelSuccess(true);
           }}
+          successAction={() => setCancelSuccess(true)}
           order={cancelOrder}
           paymentQuery={getAccountOrderPayment}
           orderQuery={getAccountOrderRequest}

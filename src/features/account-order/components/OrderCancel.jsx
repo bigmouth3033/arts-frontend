@@ -5,6 +5,7 @@ import XButton from "@/shared/components/Button/XButton";
 import convertToLetterString from "@/features/ProductDetail/utils/convertIdToStr";
 import SelectInput from "@/shared/components/Input/SelectInput";
 import { CancelOrderRequest } from "@/features/account-order-detail/api/orderDetailApi";
+import { useOutletContext } from "react-router-dom";
 
 const StyledPopUp = styled(PopUp)`
   padding: 1rem;
@@ -76,7 +77,8 @@ const options = [
   { value: "Other", label: "Other" },
 ];
 
-export default function OrderCancel({ order, action, paymentQuery, orderQuery }) {
+export default function OrderCancel({ order, action, paymentQuery, orderQuery, successAction }) {
+  const connection = useOutletContext();
   const [chosenOption, setChosenOption] = useState(options[0]);
   const [detail, setDetail] = useState("");
   const cancelOrderRequest = CancelOrderRequest();
@@ -92,6 +94,18 @@ export default function OrderCancel({ order, action, paymentQuery, orderQuery })
         if (response.status == 200) {
           paymentQuery.refetch();
           orderQuery.refetch();
+          if (connection) {
+            connection.invoke("SendMessageAdmin", {
+              UserId: order.userId,
+              Message: `${
+                convertToLetterString(order.payment.deliveryType.id, 1) +
+                convertToLetterString(order.variant.product.categoryId, 2) +
+                convertToLetterString(order.variant.id, 5) +
+                convertToLetterString(order.id, 8)
+              } order has just been canceled`,
+            });
+          }
+          successAction();
           action();
         }
       },

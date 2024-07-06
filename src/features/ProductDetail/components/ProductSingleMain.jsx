@@ -396,14 +396,18 @@ const ProductDetail = styled.div`
 const StyledTitle = styled.div`
   display: flex;
   justify-content: flex-start;
-  align-items: flex-start;
+  align-items: center;
   column-gap: 0.5rem;
 
   > div {
     font-size: 0.8rem;
+    border-bottom: 2px solid #ffc400;
+    color: #ffc400;
   }
   > p {
     font-size: 0.8rem;
+    > span {
+    }
   }
 `;
 
@@ -578,20 +582,14 @@ export default function ProductSingleMain({ data, variant, request, star }) {
       </LeftDetail>
       <Detail>
         <Header>
-          <div>
-            <ID>
-              <span> Code:</span>
-              <span>
-                {convertToLetterString(data.categoryId, 2) + convertToLetterString(data.id, 5)}
-              </span>
-            </ID>
-          </div>
           <h2>{data.name}</h2>
           {star.data.data.length > 0 && (
             <StyledTitle>
               <div>{star.data.data && totalStar(star.data.data)}</div>
               <ReadStar star={totalStar(star.data.data)} />
-              <p>({totalAmount(star.data.data)}) </p>
+              <p>
+                <span>({totalAmount(star.data.data)})</span> Review{" "}
+              </p>
             </StyledTitle>
           )}
           {variantAttributes.includes(null) ? (
@@ -927,11 +925,12 @@ const StyledWrapReadStar = styled.span`
 `;
 
 function ReadStar({ star }) {
+  const roundedStars = Math.round(star);
   return (
     <StyledWrapReadStar>
       {[...Array(5)].map((_, index) => (
-        <Star key={index} active={index < star}>
-          <FaStar size="14px" />
+        <Star key={index} active={index < roundedStars}>
+          <FaStar size="15px" />
         </Star>
       ))}
     </StyledWrapReadStar>

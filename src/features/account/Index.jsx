@@ -8,6 +8,7 @@ import { CustomerRequest } from "@/shared/api/customerApi";
 import { useNavigate } from "react-router-dom";
 import WaitingPopUp from "@/shared/components/PopUp/WaitingPopUp";
 import { useLocation } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 
 const Container = styled.div`
   width: 1280px;
@@ -44,6 +45,7 @@ const StyledLink = styled(Link)`
 const OutletContainter = styled.div``;
 
 export default function Account() {
+  const connection = useOutletContext();
   const customerRequest = CustomerRequest();
   const location = useLocation();
 
@@ -87,7 +89,7 @@ export default function Account() {
       <Content>
         <AccountDetailSideBar data={customerRequest.data.data} />
         <OutletContainter>
-          <Outlet />
+          <Outlet context={connection} />
         </OutletContainter>
       </Content>
     </Container>

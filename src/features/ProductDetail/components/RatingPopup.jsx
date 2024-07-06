@@ -102,7 +102,7 @@ const StyledSubmit = styled.button`
   }
 `;
 
-export default function RatingPopup({ action, data, checkReviewQuery }) {
+export default function RatingPopup({ action, data, checkReviewQuery, readAll }) {
   const inputRef = useRef();
   const [images, setImages] = useState([]);
   const [imageError, setImageError] = useState(false);
@@ -152,6 +152,7 @@ export default function RatingPopup({ action, data, checkReviewQuery }) {
       onSuccess: (response) => {
         if (response.status == 200) {
           setRatingSuccess(true);
+          readAll.refetch();
           checkReviewQuery.refetch();
           action();
         }

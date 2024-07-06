@@ -173,11 +173,12 @@ const StyledWrapReadStar = styled.span`
 `;
 
 function ReadStar({ star }) {
+  const roundedStars = Math.round(star);
   return (
     <StyledWrapReadStar>
       {[...Array(5)].map((_, index) => (
-        <Star key={index} $active={index < star}>
-          <FaStar size="11px" />
+        <Star key={index} $active={index < roundedStars}>
+          <FaStar size="15px" />
         </Star>
       ))}
     </StyledWrapReadStar>

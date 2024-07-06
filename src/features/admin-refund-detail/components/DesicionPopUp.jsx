@@ -4,6 +4,7 @@ import PopUp from "@/shared/components/PopUp/PopUp";
 import XButton from "@/shared/components/Button/XButton";
 import convertToLetterString from "@/features/ProductDetail/utils/convertIdToStr";
 import { EditRefundRequest } from "../api/refundDetailApi";
+import { useOutletContext } from "react-router-dom";
 
 const StyledPopUp = styled(PopUp)`
   padding: 1rem;
@@ -77,6 +78,7 @@ const Buttons = styled.div`
 `;
 
 export default function DecisionPopUp({ refund, order, action }) {
+  const connection = useOutletContext();
   const editRefundRequest = EditRefundRequest();
   const [response, setResponse] = useState("");
 
@@ -92,6 +94,17 @@ export default function DecisionPopUp({ refund, order, action }) {
         if (response.status == 200) {
           refund.refetch();
           order.refetch();
+          if (connection) {
+            connection.invoke("SendMessageUser", {
+              UserId: order.data.data.userId,
+              Message: `${
+                convertToLetterString(order.data.data.payment.deliveryType.id, 1) +
+                convertToLetterString(order.data.data.variant.product.categoryId, 2) +
+                convertToLetterString(order.data.data.variant.id, 5) +
+                convertToLetterString(order.data.data.id, 8)
+              } order has just been ${decision} to refund`,
+            });
+          }
           action();
         }
       },

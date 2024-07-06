@@ -31,19 +31,27 @@ const StyledButtonRating = styled.button`
 `;
 
 const StyledratingIconLike = styled(SlLike)`
-  font-size: 30px;
+  font-size: 25px;
   color: #4b91f7;
 `;
 const StyledWrapIconComment = styled.div`
   display: flex;
   align-items: center;
   column-gap: 0.5rem;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
+  border-radius: 5px;
+  padding: 5px 5px;
   > p {
     font-size: 14px;
   }
 `;
-const StyledWrapAllComment = styled.div`
+
+const CommentContainer = styled.div`
   background-color: white;
+`;
+
+const StyledWrapAllComment = styled.div`
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 `;
 const StyledContainerCommentImage = styled.div`
   display: flex;
@@ -52,7 +60,7 @@ const StyledContainerCommentImage = styled.div`
   column-gap: 1rem;
   padding: 20px 20px 0px 20px;
   margin-bottom: 1rem;
-  background-color: white;
+
   border-radius: 10px;
 `;
 const StarContainerItem = styled.div`
@@ -97,9 +105,8 @@ const StyledWrapTitle = styled.div`
 `;
 const StyledGroupButton = styled.div`
   display: flex;
-  justify-content: space-around;
   align-items: center;
-  column-gap: 2rem;
+  column-gap: 1rem;
 `;
 const StyledButtonFilter = styled.button`
   background-color: white;
@@ -169,6 +176,10 @@ const Container = styled.div`
   margin-top: 5rem;
 `;
 
+const PaginationContainer = styled.div`
+  margin-top: 2rem;
+`;
+
 export default function ProductReview({ data, star }) {
   const [showRating, setShowRating] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -234,6 +245,7 @@ export default function ProductReview({ data, star }) {
           </StyledButtonRating>
           {showRating && (
             <RatingPopup
+              readAll={readAllReview}
               action={() => setShowRating(false)}
               data={data}
               checkReviewQuery={requestReview}
@@ -241,7 +253,7 @@ export default function ProductReview({ data, star }) {
           )}
         </div>
         <div>
-          <div>
+          <CommentContainer>
             {readAllReview.isSuccess &&
               readAllReview.data.data.length > 0 &&
               readAllReview.data.data.map((data, index) => {
@@ -299,8 +311,8 @@ export default function ProductReview({ data, star }) {
                   </StyledWrapAllComment>
                 );
               })}
-          </div>
-          <div>
+          </CommentContainer>
+          <PaginationContainer>
             {readAllReview.isSuccess && readAllReview.data.data.length > 0 ? (
               <ProductPagination
                 currentPage={currentPage}
@@ -316,7 +328,7 @@ export default function ProductReview({ data, star }) {
                 )}
               </StyledNotFoundComment>
             )}
-          </div>
+          </PaginationContainer>
         </div>
       </StyledContainer>
     </Container>
