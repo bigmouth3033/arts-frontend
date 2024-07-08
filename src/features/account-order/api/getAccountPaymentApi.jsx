@@ -18,5 +18,6 @@ export const GetAccountOrderPayment = (pageNumber, pageSize) => {
     queryFn: () => {
       return getAccountPayment(pageNumber, pageSize);
     },
+    retry: 0,
   });
 };

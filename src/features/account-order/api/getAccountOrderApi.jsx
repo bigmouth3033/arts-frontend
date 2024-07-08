@@ -20,5 +20,6 @@ export const GetAccountOrderRequest = (pageNumber, pageSize, active, search) => 
     queryFn: () => {
       return getAccountOrder(pageNumber, pageSize, active, search);
     },
+    retry: 0,
   });
 };

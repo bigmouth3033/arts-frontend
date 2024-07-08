@@ -76,7 +76,7 @@ export default function AdminSideBar() {
     <Container ref={containerRef}>
       <Content ref={contentRef}>
         <ButtonGroup
-          link={"dashboard"}
+          link={"dasboard"}
           groupName={"Dashboard"}
           icon={<MdOutlineDashboard />}
         ></ButtonGroup>

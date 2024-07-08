@@ -63,11 +63,11 @@ const StyleMission = styled.div`
   .mission-content {
     line-height: 1.8rem;
     text-align: center;
-    animation: ${fadeInLeftAnimation} 1.5s ease-out;
+    animation: ${fadeInLeftAnimation} 0.1s ease-out;
   }
 
   .mission-img {
-    animation: ${fadeInRightAnimation} 1.5s ease-out;
+    animation: ${fadeInRightAnimation} 0.1s ease-out;
   }
 `;
 const StyleStory = styled.div`
@@ -127,7 +127,7 @@ const StyleFounder = styled.div`
 
   gap: 2rem;
   text-align: center;
-  animation: bounce 1.5s ease-in-out;
+  animation: bounce 0.1s ease-in-out;
   img {
     margin: 0 auto;
     /* border-radius: 50%; */
@@ -156,7 +156,7 @@ const StyleFounderTitle = styled.div`
   /* color: #4767d7; */
   color: #1942d6;
   text-align: center;
-  animation: ${fadeDownAnimation} 1.5s ease-out;
+  animation: ${fadeDownAnimation} 0.1s ease-out;
 `;
 
 export default function AboutUs() {
@@ -179,7 +179,7 @@ export default function AboutUs() {
         <StyleFounderTitle>Founder Team</StyleFounderTitle>
         <StyleFounder>
           <div>
-            <img src="src/features/aboutUs-FAQ/assets/Cat1.jpg" alt="Nhan" />
+            <img src="src/features/aboutUs-FAQ/assets/nhan.jpg" alt="Nhan" />
             <p>Nhan Nguyen</p>
             <img className="underline" src="src/features/aboutUs-FAQ/assets/underline.jpg" />
           </div>

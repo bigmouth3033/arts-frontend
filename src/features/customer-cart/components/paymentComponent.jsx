@@ -139,12 +139,11 @@ export default function PaymentComponent(props) {
   }, [address]);
 
   const onMakePayment = () => {
+    if (address == null) {
+      setAddressError(true);
+      return;
+    }
     if (props.data.filter((item) => item.isChecked == true).length == 0) {
-      if (address == null) {
-        setAddressError(true);
-        return;
-      }
-
       setPaymentError(true);
     } else {
       navigate("/payment");
@@ -172,7 +171,6 @@ export default function PaymentComponent(props) {
             </div>
           </AddressContainer>
         )}
-
         {!address && (
           <AddressContainer>
             <div>
@@ -181,7 +179,6 @@ export default function PaymentComponent(props) {
             </div>
           </AddressContainer>
         )}
-
         <div className="price-summary">
           <div className="price-total">
             <span>Total price</span>

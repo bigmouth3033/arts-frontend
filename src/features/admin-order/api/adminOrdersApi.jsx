@@ -139,3 +139,12 @@ export const FinishOrderRequest = () => {
     mutationFn: finishOrder,
   });
 };
+
+const getReport = async (payload) => {
+  const response = await axiosAdmin.post("order/FileResult", payload);
+  return response.data;
+};
+
+export const GetReportRequest = () => {
+  return useMutation({ mutationFn: getReport });
+};

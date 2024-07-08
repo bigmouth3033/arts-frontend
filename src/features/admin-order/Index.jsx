@@ -24,6 +24,7 @@ import { useNavigate } from "react-router-dom";
 import WaitingIcon from "@/shared/components/AnimationIcon/WaitingIcon";
 import { useOutletContext } from "react-router-dom";
 import ConfirmPopUp from "@/shared/components/PopUp/ConfirmPopUp";
+import ReportPopUp from "./components/ReportPopUp";
 
 const Container = styled.div`
   margin: auto;
@@ -183,7 +184,8 @@ const Buttons = styled.div`
 
 const Filter = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
+  gap: 1rem;
 `;
 
 const DropDown = styled.div`
@@ -336,6 +338,7 @@ const categoryOption = [
 
 export default function AdminOrder() {
   const connection = useOutletContext();
+  const [showReport, setShowReport] = useState();
   const navigate = useNavigate();
   const acceptOrderRequest = AcceptOrderRequest();
   const denyOrderRequest = DenyOrderRequest();
@@ -707,6 +710,7 @@ export default function AdminOrder() {
                   )}
                 </ActionButton>
                 <SelectInput state={totalPage} setState={setTotalPage} options={pageAmount} />
+                <button onClick={() => setShowReport(true)}>Export File</button>
               </Filter>
             </FilterBar>
             <TableContent>
@@ -1072,6 +1076,7 @@ export default function AdminOrder() {
           }}
         />
       )}
+      {showReport && <ReportPopUp action={() => setShowReport(false)} />}
     </>
   );
 }

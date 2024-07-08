@@ -245,20 +245,24 @@ const ExchangeTable = styled(TableContent)``;
 export default function AccountExchangeDetail() {
   let [searchParams, setSearchParams] = useSearchParams();
   const getUserExchangeDetailRequest = GetUserExchangeDetailRequest(searchParams.get("id"));
+
   const getOrderDetailRequest = GetOrderDetailRequest(
     getUserExchangeDetailRequest.isSuccess && getUserExchangeDetailRequest.data.data.originalOrderId
   );
+
   const navigate = useNavigate();
 
   const getNewOrderDetailRequest = GetOrderDetailRequest(
     getUserExchangeDetailRequest.isSuccess && getUserExchangeDetailRequest.data.data.newOrderId
   );
+
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
 
   if (getUserExchangeDetailRequest.isLoading || getOrderDetailRequest.isLoading) {
     return <WaitingPopUp />;
   }
+
   const getAddress = (address) => {
     const province = dchc.data.find((item) => item.level1_id == address.province);
     const district = province.level2s.find((item) => item.level2_id == address.district);
