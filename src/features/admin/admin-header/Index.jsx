@@ -5,6 +5,14 @@ import { AdminRequest } from "@/shared/api/adminApi";
 import { useState } from "react";
 import { useRef } from "react";
 import { useEffect } from "react";
+import PopUp from "@/shared/components/PopUp/PopUp";
+import TextInput from "@/shared/components/Input/TextInput";
+import XButton from "@/shared/components/Button/XButton";
+import { ChangePasswordRequest } from "./api/adminPasswordApi";
+import SuccessPopUp from "@/shared/components/PopUp/SuccessPopUp";
+import ErrorPopUp from "@/shared/components/PopUp/ErrorPopUp";
+import SideBarPopUp from "./components/SideBarPopUp";
+import { BsLayoutSidebarInsetReverse } from "react-icons/bs";
 
 const Container = styled.div`
   height: 3.8rem;
@@ -12,18 +20,23 @@ const Container = styled.div`
   z-index: 1;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 0 2rem;
+  gap: 5rem;
 `;
 
 const ImageContainer = styled.img`
   width: 7.5rem;
 `;
 
-const LeftContent = styled.div``;
+const LeftContent = styled.div`
+  display: flex;
+`;
 
 const RightContent = styled.div`
   position: relative;
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
 `;
 
 const UserButton = styled.button`
@@ -41,7 +54,7 @@ const UserButton = styled.button`
 const DropDown = styled.div`
   position: absolute;
   font-size: 14px;
-  transform: translate(-40%, 5%);
+  transform: translate(0%, 60%);
 
   display: flex;
   flex-direction: column;
@@ -61,10 +74,19 @@ const DropDown = styled.div`
   }
 `;
 
+const ShowSideBarButton = styled.div`
+  display: none;
+  @media (max-width: 1400px) {
+    display: block;
+  }
+  cursor: pointer;
+`;
+
 export default function AdminHeader() {
+  const [showSideBar, setShowSideBar] = useState(false);
   const adminRequest = AdminRequest();
   const [dropDown, setDropDown] = useState(false);
-
+  const [passwordPopUp, setPasswordPopUp] = useState(false);
   const buttonRef = useRef();
   const dropDownRef = useRef();
 
@@ -92,27 +114,196 @@ export default function AdminHeader() {
   };
 
   return (
-    <Container>
-      <LeftContent>
-        <ImageContainer src={logo} />
-      </LeftContent>
-      <RightContent>
-        <UserButton ref={buttonRef} onClick={() => setDropDown((prev) => !prev)}>
-          {adminRequest.data.data.fullname}
-          <Avatar
-            src={import.meta.env.VITE_API_IMAGE_PATH + adminRequest.data.data.avatar}
-            name={adminRequest.data.data.email}
-            size="30"
-            round={true}
+    <>
+      <Container>
+        <LeftContent>
+          <ImageContainer src={logo} />
+        </LeftContent>
+        <ShowSideBarButton>
+          <BsLayoutSidebarInsetReverse onClick={() => setShowSideBar(true)} size={"1.5rem"} />
+        </ShowSideBarButton>
+        <RightContent>
+          <UserButton ref={buttonRef} onClick={() => setDropDown((prev) => !prev)}>
+            {adminRequest.data.data.fullname}
+            <Avatar
+              src={import.meta.env.VITE_API_IMAGE_PATH + adminRequest.data.data.avatar}
+              name={adminRequest.data.data.email}
+              size="30"
+              round={true}
+            />
+          </UserButton>
+          {dropDown && (
+            <DropDown ref={dropDownRef}>
+              <button onClick={() => setPasswordPopUp(true)}>Change password</button>
+              <button onClick={onLogout}>Log out</button>
+            </DropDown>
+          )}
+        </RightContent>
+        {showSideBar && <SideBarPopUp action={() => setShowSideBar(false)} />}
+      </Container>
+      {passwordPopUp && <ChangePasswordPopUp action={() => setPasswordPopUp(false)} />}
+    </>
+  );
+}
+
+const StyledPopUp = styled(PopUp)`
+  padding: 1rem 2rem;
+`;
+
+const Content = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 20rem;
+
+  & h4 {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  & p {
+    color: red;
+  }
+`;
+
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+`;
+
+const Footer = styled.div`
+  margin-top: 2rem;
+
+  > button {
+    cursor: pointer;
+    background-color: #2962ff;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: white;
+    border: none;
+    font-size: 15px;
+    padding: 10px;
+    border-radius: 5px;
+  }
+
+  > button:hover {
+    background-color: #0052cc;
+  }
+`;
+
+const PasswordRegex = /^[A-Za-z0-9]{6,}$/;
+
+function ChangePasswordPopUp({ action }) {
+  const changePasswordRequest = ChangePasswordRequest();
+  const [previousPassword, setPreviousPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [newPasswordConfirm, setNewPasswordConfirm] = useState("");
+  const [errors, setErrors] = useState({});
+  const [successPopUp, setSuccessPopUp] = useState(false);
+  const [errorPopUp, setErrorPopUp] = useState(false);
+
+  const onChangePassword = () => {
+    let isOk = true;
+
+    if (previousPassword == "" || newPassword == "" || newPasswordConfirm == "") {
+      isOk = false;
+      setErrors((prev) => {
+        return { ...prev, emptyError: "Please input all the field" };
+      });
+    } else {
+      setErrors((prev) => {
+        return { ...prev, emptyError: null };
+      });
+    }
+
+    if (!PasswordRegex.test(newPassword) || !PasswordRegex.test(newPasswordConfirm)) {
+      isOk = false;
+      setErrors((prev) => {
+        return {
+          ...prev,
+          regexError: "Password only accept letter and number with atleast 6 charaters",
+        };
+      });
+    } else {
+      setErrors((prev) => {
+        return { ...prev, regexError: null };
+      });
+    }
+
+    if (newPasswordConfirm != newPassword) {
+      isOk = false;
+      setErrors((prev) => {
+        return { ...prev, confirmError: "Wrong password confirm" };
+      });
+    } else {
+      setErrors((prev) => {
+        return { ...prev, confirmError: null };
+      });
+    }
+
+    if (isOk) {
+      const formData = new FormData();
+      formData.append("PreviousPassword", previousPassword);
+      formData.append("NewPassword", newPassword);
+
+      changePasswordRequest.mutate(formData, {
+        onSuccess: (response) => {
+          if (response.status == 200) {
+            setSuccessPopUp(true);
+          }
+
+          if (response.status == 400) {
+            setErrorPopUp(true);
+          }
+        },
+      });
+    }
+  };
+
+  return (
+    <StyledPopUp action={() => {}}>
+      <Header>
+        <h4>Change password</h4>
+        <XButton action={action} />
+      </Header>
+      <Content>
+        <div>
+          <h4>Previous password</h4>
+          <TextInput type={"password"} state={previousPassword} setState={setPreviousPassword} />
+        </div>
+        <div>
+          <h4>New password</h4>
+          <TextInput type={"password"} state={newPassword} setState={setNewPassword} />
+        </div>
+        <div>
+          <h4>New password confirm</h4>
+          <TextInput
+            type={"password"}
+            state={newPasswordConfirm}
+            setState={setNewPasswordConfirm}
           />
-        </UserButton>
-        {dropDown && (
-          <DropDown ref={dropDownRef}>
-            <button>Change password</button>
-            <button onClick={onLogout}>Log out</button>
-          </DropDown>
-        )}
-      </RightContent>
-    </Container>
+        </div>
+        <div>
+          <p>{errors.regexError}</p>
+          <p>{errors.confirmError}</p>
+          <p>{errors.emptyError}</p>
+        </div>
+      </Content>
+      <Footer>
+        <button onClick={onChangePassword}>Change password</button>
+      </Footer>
+      {successPopUp && (
+        <SuccessPopUp
+          action={() => {
+            setSuccessPopUp(false);
+            action();
+          }}
+          message={"Your password has been successfully changed"}
+        />
+      )}
+      {errorPopUp && <ErrorPopUp action={() => setErrorPopUp(false)} message={"Wrong password"} />}
+    </StyledPopUp>
   );
 }

@@ -25,6 +25,7 @@ import { FinishOrderRequest } from "../admin-order/api/adminOrdersApi";
 import SuccessPopUp from "@/shared/components/PopUp/SuccessPopUp";
 import ErrorPopUp from "@/shared/components/PopUp/ErrorPopUp";
 import { useOutletContext } from "react-router-dom";
+import ConfirmPopUp from "@/shared/components/PopUp/ConfirmPopUp";
 
 const Container = styled.div`
   display: flex;
@@ -109,8 +110,8 @@ const TableContent = styled.table`
   }
 
   & .product-detail {
-    display: flex;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: 8rem auto;
     gap: 1rem;
 
     & .variant-text {
@@ -181,14 +182,13 @@ const Info = styled.div`
 `;
 
 const Image = styled.div`
-  width: 10rem !important;
   height: 5rem;
 
   > img {
     display: block;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
   }
 `;
 
@@ -238,6 +238,10 @@ export default function AdminOrderDetail() {
   const denyOrderRequest = DenyOrderRequest();
   const deliveryOrderRequest = DeliveryOrderRequest();
   const finishOrderRequest = FinishOrderRequest();
+  const [acceptConfirm, setAcceptConfirm] = useState([]);
+  const [denyConfirm, setDenyConfirm] = useState([]);
+  const [deliveryConfirm, setDeliveryConfirm] = useState([]);
+  const [successConfirm, setSuccessConfirm] = useState([]);
 
   const getOrderByIdRequest = GetOrderByIdRequest(searchParams.get("id"));
   const [success, setSuccess] = useState(false);
@@ -542,7 +546,7 @@ export default function AdminOrderDetail() {
 
                   <div>
                     <StyledLink
-                      to={`/admin/product?id=${getOrderByIdRequest.data.data.variant.product.id}`}
+                      to={`/productdetail?id=${getOrderByIdRequest.data.data.variant.product.id}`}
                     >
                       {getOrderByIdRequest.data.data.variant.product.name}
                     </StyledLink>
@@ -576,22 +580,22 @@ export default function AdminOrderDetail() {
             {getOrderByIdRequest.data.data.isCancel == false &&
               getOrderByIdRequest.data.data.orderStatusId == 13 && (
                 <>
-                  <button onClick={() => onAccept([getOrderByIdRequest.data.data.id])}>
+                  <button onClick={() => setAcceptConfirm([getOrderByIdRequest.data.data.id])}>
                     Accept order
                   </button>
-                  <button onClick={() => onDeny([getOrderByIdRequest.data.data.id])}>
+                  <button onClick={() => setDenyConfirm([getOrderByIdRequest.data.data.id])}>
                     Deny order
                   </button>
                 </>
               )}
 
             {getOrderByIdRequest.data.data.orderStatusId == 14 && (
-              <button onClick={() => onDelivery([getOrderByIdRequest.data.data.id])}>
+              <button onClick={() => setDeliveryConfirm([getOrderByIdRequest.data.data.id])}>
                 Delivery order
               </button>
             )}
             {getOrderByIdRequest.data.data.orderStatusId == 17 && (
-              <button onClick={() => onSuccess([getOrderByIdRequest.data.data.id])}>
+              <button onClick={() => setSuccessConfirm([getOrderByIdRequest.data.data.id])}>
                 Finish order
               </button>
             )}
@@ -600,6 +604,46 @@ export default function AdminOrderDetail() {
       </Content>
       {success && <SuccessPopUp action={() => setSuccess(false)} message={"Success"} />}
       {error && <ErrorPopUp action={() => setError(false)} message={"Error"} />}
+      {acceptConfirm.length != 0 && (
+        <ConfirmPopUp
+          cancel={() => setAcceptConfirm([])}
+          message={"Are you sure you want to accept this order"}
+          confirm={() => {
+            onAccept(acceptConfirm);
+            setAcceptConfirm([]);
+          }}
+        />
+      )}
+      {denyConfirm.length != 0 && (
+        <ConfirmPopUp
+          cancel={() => setDenyConfirm([])}
+          message={"Are you sure you want to deny this order"}
+          confirm={() => {
+            onDeny(denyConfirm);
+            setDenyConfirm([]);
+          }}
+        />
+      )}
+      {deliveryConfirm.length != 0 && (
+        <ConfirmPopUp
+          cancel={() => setDeliveryConfirm([])}
+          message={"Are you sure you want to delivery this order"}
+          confirm={() => {
+            onDelivery(deliveryConfirm);
+            setDeliveryConfirm([]);
+          }}
+        />
+      )}
+      {successConfirm.length != 0 && (
+        <ConfirmPopUp
+          cancel={() => setSuccessConfirm([])}
+          message={"Are you sure you want to finish this order"}
+          confirm={() => {
+            onSuccess(successConfirm);
+            setSuccessConfirm([]);
+          }}
+        />
+      )}
     </Container>
   );
 }

@@ -44,6 +44,10 @@ const OutletContainer = styled.div`
 const AdminBody = styled.div`
   display: grid;
   grid-template-columns: 240px 1fr;
+
+  @media (max-width: 1400px) {
+    grid-template-columns: 0px 1fr;
+  }
 `;
 
 export default function AdminLayout() {

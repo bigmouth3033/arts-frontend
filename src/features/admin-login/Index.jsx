@@ -7,6 +7,7 @@ import ErrorPopUp from "@/shared/components/PopUp/ErrorPopUp";
 import { AdminLoginRequest } from "./api/adminLoginApi";
 import { useNavigate } from "react-router-dom";
 import PositionAwareButton from "@/shared/components/Button/PositionAwareButton";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Container = styled.div`
   background-color: #6291e1;
@@ -62,11 +63,11 @@ const PositionAwareButtonCustom = styled(PositionAwareButton)`
 
 export default function AdminLogin() {
   const navigate = useNavigate();
-
+  const queryClient = useQueryClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorPopUp, setErrorPopUp] = useState(false);
-
+  const [activeError, setActiveError] = useState(false);
   const adminLoginRequest = AdminLoginRequest();
 
   useEffect(() => {
@@ -95,9 +96,15 @@ export default function AdminLogin() {
           return;
         }
 
+        if (response.status == 401) {
+          setActiveError(true);
+          return;
+        }
+
         if (response.status == 200) {
           localStorage.setItem("ADMIN_ACCESS_TOKEN", response.data);
           navigate("/admin");
+          // queryClient.invalidateQueries({ queryKey: ["admin"] });
         }
       },
     });
@@ -111,6 +118,9 @@ export default function AdminLogin() {
           message={"admin account: admin@admin.com, password:admin"}
           action={() => setErrorPopUp(false)}
         />
+      )}
+      {activeError && (
+        <ErrorPopUp message={"Your account is not active"} action={() => setActiveError(false)} />
       )}
       <LoginForm>
         <Header>

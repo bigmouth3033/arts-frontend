@@ -23,6 +23,7 @@ import { CiCircleRemove } from "react-icons/ci";
 import { useNavigate } from "react-router-dom";
 import WaitingIcon from "@/shared/components/AnimationIcon/WaitingIcon";
 import { useOutletContext } from "react-router-dom";
+import ConfirmPopUp from "@/shared/components/PopUp/ConfirmPopUp";
 
 const Container = styled.div`
   margin: auto;
@@ -297,6 +298,14 @@ const FilterTh = styled.th`
   }}
 `;
 
+const StyledLink = styled(Link)`
+  color: #731a8b;
+
+  &:active {
+    color: red;
+  }
+`;
+
 const pageAmount = [
   { value: 20, label: "20 items" },
   { value: 50, label: "50 items" },
@@ -337,6 +346,10 @@ export default function AdminOrder() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState(pageAmount[0]);
   const [IsClickDropDown, setIsClickDropDown] = useState(false);
+  const [acceptConfirm, setAcceptConfirm] = useState([]);
+  const [denyConfirm, setDenyConfirm] = useState([]);
+  const [deliveryConfirm, setDeliveryConfirm] = useState([]);
+  const [successConfirm, setSuccessConfirm] = useState([]);
 
   const [filterFocus, setFilterFocus] = useState({
     orderId: false,
@@ -662,11 +675,14 @@ export default function AdminOrder() {
                         <>
                           <button
                             disabled={checkBox.length == 0}
-                            onClick={() => onAccept(checkBox)}
+                            onClick={() => setAcceptConfirm(checkBox)}
                           >
                             ACCEPT
                           </button>
-                          <button disabled={checkBox.length == 0} onClick={() => onDeny(checkBox)}>
+                          <button
+                            disabled={checkBox.length == 0}
+                            onClick={() => setDenyConfirm(checkBox)}
+                          >
                             DENY
                           </button>
                         </>
@@ -674,13 +690,16 @@ export default function AdminOrder() {
                       {active == "Accepted" && (
                         <button
                           disabled={checkBox.length == 0}
-                          onClick={() => onDelivery(checkBox)}
+                          onClick={() => setDeliveryConfirm(checkBox)}
                         >
                           DELIVERY
                         </button>
                       )}
                       {active == "Delivery" && (
-                        <button disabled={checkBox.length == 0} onClick={() => onSuccess(checkBox)}>
+                        <button
+                          disabled={checkBox.length == 0}
+                          onClick={() => setSuccessConfirm(checkBox)}
+                        >
                           FINISH ORDER
                         </button>
                       )}
@@ -935,16 +954,16 @@ export default function AdminOrder() {
                           />
                         </td>
                         <td>
-                          <Link to={`/admin/order-detail?id=${item.id}`}>
+                          <StyledLink to={`/admin/order-detail?id=${item.id}`}>
                             {convertToLetterString(item.id, 8)}
-                          </Link>
+                          </StyledLink>
                         </td>
                         <td>{item.user.fullname}</td>
                         <td>{item.variant.product.category.name}</td>
                         <td>
-                          <Link to={`/admin/product?id=${item.variant.product.id}`}>
+                          <StyledLink to={`/admin/product?id=${item.variant.product.id}`}>
                             {convertToLetterString(item.variant.id, 5)}
-                          </Link>
+                          </StyledLink>
                         </td>
                         <td>{item.payment.paymentType.name}</td>
                         <td>{convertToLetterString(item.paymentId, 6)}</td>
@@ -957,33 +976,39 @@ export default function AdminOrder() {
                           </button>
                           {active == "Pending" && (
                             <>
-                              <button onClick={() => onAccept([item.id])}>ACCEPT</button>
-                              <button onClick={() => onDeny([item.id])}>DENY</button>
+                              <button onClick={() => setAcceptConfirm([item.id])}>ACCEPT</button>
+                              <button onClick={() => setDenyConfirm([item.id])}>DENY</button>
                             </>
                           )}
                           {active == "Accepted" && (
                             <>
-                              <button onClick={() => onDelivery([item.id])}>DELIVERY</button>
+                              <button onClick={() => setDeliveryConfirm([item.id])}>
+                                DELIVERY
+                              </button>
                             </>
                           )}
                           {active == "Delivery" && (
                             <>
-                              <button onClick={() => onSuccess([item.id])}>FINISH</button>
+                              <button onClick={() => setSuccessConfirm([item.id])}>FINISH</button>
                             </>
                           )}
                           {active == "All" && (
                             <>
                               {item.orderStatusType.id == 13 && item.isCancel == false && (
                                 <>
-                                  <button onClick={() => onAccept([item.id])}>ACCEPT</button>
-                                  <button onClick={() => onDeny([item.id])}>DENY</button>{" "}
+                                  <button onClick={() => setAcceptConfirm([item.id])}>
+                                    ACCEPT
+                                  </button>
+                                  <button onClick={() => setDenyConfirm([item.id])}>DENY</button>{" "}
                                 </>
                               )}
                               {item.orderStatusType.id == 14 && (
-                                <button onClick={() => onDelivery([item.id])}>DELIVERY</button>
+                                <button onClick={() => setDeliveryConfirm([item.id])}>
+                                  DELIVERY
+                                </button>
                               )}
                               {item.orderStatusType.id == 17 && (
-                                <button onClick={() => onSuccess([item.id])}>FINISH</button>
+                                <button onClick={() => setSuccessConfirm([item.id])}>FINISH</button>
                               )}
                             </>
                           )}
@@ -1007,6 +1032,46 @@ export default function AdminOrder() {
       </Container>
       {success && <SuccessPopUp message={"success"} action={() => setSuccess(false)} />}
       {error && <ErrorPopUp message={"error"} action={() => setError(false)} />}
+      {acceptConfirm.length != 0 && (
+        <ConfirmPopUp
+          cancel={() => setAcceptConfirm([])}
+          message={"Are you sure you want to accept these order"}
+          confirm={() => {
+            onAccept(acceptConfirm);
+            setAcceptConfirm([]);
+          }}
+        />
+      )}
+      {denyConfirm.length != 0 && (
+        <ConfirmPopUp
+          cancel={() => setDenyConfirm([])}
+          message={"Are you sure you want to deny these order"}
+          confirm={() => {
+            onDeny(denyConfirm);
+            setDenyConfirm([]);
+          }}
+        />
+      )}
+      {deliveryConfirm.length != 0 && (
+        <ConfirmPopUp
+          cancel={() => setDeliveryConfirm([])}
+          message={"Are you sure you want to delivery these order"}
+          confirm={() => {
+            onDelivery(deliveryConfirm);
+            setDeliveryConfirm([]);
+          }}
+        />
+      )}
+      {successConfirm.length != 0 && (
+        <ConfirmPopUp
+          cancel={() => setSuccessConfirm([])}
+          message={"Are you sure you want to finish these order"}
+          confirm={() => {
+            onSuccess(successConfirm);
+            setSuccessConfirm([]);
+          }}
+        />
+      )}
     </>
   );
 }

@@ -19,6 +19,8 @@ import { ReadCategoryRequest } from "@/shared/api/categoryApi";
 import ErrorPopUp from "@/shared/components/PopUp/ErrorPopUp";
 import { UpdateVariantRequest } from "./api/productAdminApi";
 import SuccessPopUp from "@/shared/components/PopUp/SuccessPopUp";
+import { AdminRequest } from "@/shared/api/adminApi";
+import ReviewPopUp from "./components/popup/ReviewPopUp";
 
 const Container = styled.div`
   margin: auto;
@@ -214,22 +216,43 @@ const StyledLink = styled(Link)`
   }
 `;
 
+const ShowReviewButton = styled.button`
+  &:hover {
+    color: red;
+  }
+`;
+
 const pageOptions = [
   { value: 20, label: "20 items" },
   { value: 50, label: "50 items" },
   { value: 100, label: "100 items" },
 ];
 
+const filterOption = [
+  { value: "none", label: "None" },
+  { value: "bestseller", label: "Best Seller" },
+  { value: "bestrating", label: "Best Rating" },
+  { value: "numbercomment", label: "Number of Comment" },
+];
+
 const moneyRegex = /^(?=.*\d)\d*(?:\.\d*)?$/;
 
 export default function AdminProductList() {
+  const adminRequest = AdminRequest();
+  const navigate = useNavigate();
+
+  if (adminRequest.data.data.roleTypeId == 5) {
+    navigate("/admin");
+    return;
+  }
+
+  const [showReview, setShowReview] = useState();
   const [successUpdate, setSuccessUpdate] = useState(false);
   const updateVariantRequest = UpdateVariantRequest();
   const [zeroPriceError, setZeroPriceError] = useState(false);
   const dropDownRef = useRef();
   const buttonRef = useRef();
   const readCategoryRequest = ReadCategoryRequest();
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentPage, setCurrentPage] = useState(searchParams.get("currentpage") || 1);
   const [pageSize, setPageSize] = useState(
@@ -244,12 +267,14 @@ export default function AdminProductList() {
   const [displaySearch, setDisplaySearch] = useState(searchParams.get("search") || "");
   const [onShowDropDown, setOnShowDropDown] = useState(false);
   const [categorySelect, setCategorySelect] = useState([]);
+  const [filterSelect, setFilterSelect] = useState(filterOption[0]);
 
   const getAdminProductRequest = GetAdminProductRequest(
     currentPage,
     pageSize?.value,
     categorySelect?.map((item) => item.value),
-    search
+    search,
+    filterSelect.value
   );
 
   const onChangePage = (page) => {
@@ -356,6 +381,12 @@ export default function AdminProductList() {
                     setState={setCategorySelect}
                     options={transformCategoriesData()}
                   />
+                  <h4>Order by </h4>
+                  <SelectInput
+                    state={filterSelect}
+                    setState={setFilterSelect}
+                    options={filterOption}
+                  />
                 </FilterDropDown>
               )}
             </FilterCotainer>
@@ -387,6 +418,7 @@ export default function AdminProductList() {
                 <th>ON STOCK</th>
                 <th>ACTIVE</th>
                 <th>TYPE</th>
+                <th>REVIEW</th>
                 <th>ACTION</th>
               </tr>
             </thead>
@@ -422,6 +454,11 @@ export default function AdminProductList() {
                         </td>
                         <td>{item.isActive == true ? "ACTIVE" : "UNACTIVE"}</td>
                         <td>{item.category.name}</td>
+                        <td>
+                          <ShowReviewButton onClick={() => setShowReview(item.id)}>
+                            Show({item.reviews.length})
+                          </ShowReviewButton>
+                        </td>
                         <td>
                           {!showMore.includes(index) && (
                             <button
@@ -556,6 +593,8 @@ export default function AdminProductList() {
         <ErrorPopUp message={"Price cannot be zero"} action={() => setZeroPriceError(false)} />
       )}
       {successUpdate && <SuccessPopUp action={() => setSuccessUpdate(false)} message={"success"} />}
+
+      {showReview && <ReviewPopUp productId={showReview} action={() => setShowReview(null)} />}
     </Container>
   );
 }

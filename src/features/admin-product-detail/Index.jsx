@@ -39,6 +39,7 @@ import formatDollar from "@/shared/utils/FormatDollar";
 import { EditProductRequest } from "./api/editProductApi";
 import SuccessPopUp from "@/shared/components/PopUp/SuccessPopUp";
 import { useNavigate } from "react-router-dom";
+import { AdminRequest } from "@/shared/api/adminApi";
 
 const StyledFaRegQuestionCircle = styled(FaRegQuestionCircle)`
   cursor: pointer;
@@ -560,6 +561,12 @@ const regex = /^-?\d+(\.\d+)?$/;
 const moneyRegex = /^(?=.*\d)\d*(?:\.\d*)?$/;
 
 export default function AdminProductDetail() {
+  const adminRequest = AdminRequest();
+  const navigate = useNavigate();
+  if (adminRequest.data.data.roleTypeId == 5) {
+    navigate("/");
+    return;
+  }
   const editProductRequest = EditProductRequest();
   const readCategoryRequest = ReadCategoryRequest();
   const readTypeRequest = ReadTypeRequest();
@@ -585,7 +592,6 @@ export default function AdminProductDetail() {
   const [editAmount, setEditAmount] = useState(false);
   const [showWarranty, setShowWarranty] = useState(false);
   const [variantChosen, setVariantChosen] = useState([]);
-  const navigate = useNavigate();
 
   const [state, dispatch, ACTIONS] = useCreateProductReducer();
   const inputRef = useRef();

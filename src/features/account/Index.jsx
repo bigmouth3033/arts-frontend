@@ -63,11 +63,18 @@ export default function Account() {
   return (
     <Container>
       <BreadCrumb>
-        <StyledLink>Home</StyledLink> <FaAngleRight />
+        <StyledLink to={"/"}>Home</StyledLink> <FaAngleRight />
         {location.pathname.includes("account-information") && (
           <StyledLink to={"/account/account-information"}>Account</StyledLink>
         )}
-        {(location.pathname.includes("order") || location.pathname.includes("exchange")) && (
+        {location.pathname.includes("manage-exchange") && (
+          <StyledLink onClick={(ev) => ev.preventDefault()}>Manage Returns</StyledLink>
+        )}
+        {location.pathname.includes("account-review") && (
+          <StyledLink onClick={(ev) => ev.preventDefault()}>Product Reviews</StyledLink>
+        )}
+        {(location.pathname.includes("order") ||
+          location.pathname.includes("exchange-request")) && (
           <StyledLink to={"/account/order"}>Order Management</StyledLink>
         )}
         {location.pathname.includes("address") && (

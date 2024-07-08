@@ -27,6 +27,7 @@ import { useEffect } from "react";
 import { MdCancelPresentation } from "react-icons/md";
 import OrderCancel from "./components/OrderCancel";
 import { useOutletContext } from "react-router-dom";
+import WaitingIcon from "@/shared/components/AnimationIcon/WaitingIcon";
 
 const Container = styled.div`
   display: flex;
@@ -170,6 +171,12 @@ const StyledLink = styled(Link)`
 
 const StyledLinkNoDecoration = styled(StyledLink)`
   text-decoration: none;
+
+  color: #8d1a8b;
+
+  &:active {
+    color: red;
+  }
 `;
 
 const OrderDetail = styled.div`
@@ -304,13 +311,13 @@ export default function AccountOrder() {
     return () => clearTimeout(delayDebounceFn);
   }, [searchOrderDisplay]);
 
-  if (optionValue.value == "order" && getAccountOrderRequest.isLoading) {
-    return <WaitingPopUp />;
-  }
+  // if (optionValue.value == "order" && getAccountOrderRequest.isLoading) {
+  //   return <WaitingPopUp />;
+  // }
 
-  if (optionValue.value == "payment" && getAccountOrderPayment.isLoading) {
-    return <WaitingPopUp />;
-  }
+  // if (optionValue.value == "payment" && getAccountOrderPayment.isLoading) {
+  //   return <WaitingPopUp />;
+  // }
 
   const totalPayment = (payment) => {
     let total = 0;
@@ -408,109 +415,114 @@ export default function AccountOrder() {
 
       {optionValue.value == "order" && (
         <Content>
-          {getAccountOrderRequest.data.data.map((item, index) => {
-            return (
-              <OrderDetail key={index}>
-                <div>
-                  <StyledLinkNoDecoration to={`/account/order-detail?id=${item.id}`}>
-                    #
-                    {convertToLetterString(item.payment.deliveryType.id, 1) +
-                      convertToLetterString(item.variant.product.categoryId, 2) +
-                      convertToLetterString(item.variant.id, 5) +
-                      convertToLetterString(item.id, 8)}
-                  </StyledLinkNoDecoration>
-                  <p>
-                    Order {item.isCancel == false && item.orderStatusType.name}{" "}
-                    {item.orderStatusType.id == 14 && <FaCheck />}
-                    {item.orderStatusType.id == 15 && <PiHandsPrayingLight size={"1.3rem"} />}
-                    {item.orderStatusType.id == 17 && <CiDeliveryTruck size={"1.3rem"} />}
-                    {item.orderStatusType.id == 16 && <GoThumbsup size={"1.3rem"} />}
-                    {item.orderStatusType.id == 13 && item.isCancel == false && (
-                      <CiTimer size={"1.3rem"} />
-                    )}
-                    {item.isCancel && (
-                      <>
-                        <span>Cancel</span> <MdCancelPresentation size={"1.3rem"} />
-                      </>
-                    )}
-                  </p>
-                </div>
-                <ProductDetail>
-                  <Image>
-                    <img
-                      src={
-                        import.meta.env.VITE_API_IMAGE_PATH +
-                        (item.variant.variantImage
-                          ? item.variant.variantImage
-                          : item.variant.product.productImages[0].imageName)
-                      }
-                    />
-                    <span>X{item.quanity}</span>
-                  </Image>
+          {optionValue.value == "order" && getAccountOrderRequest.isLoading && <WaitingIcon />}
+          {optionValue.value == "order" &&
+            getAccountOrderRequest.isSuccess &&
+            getAccountOrderRequest.data.data.map((item, index) => {
+              return (
+                <OrderDetail key={index}>
                   <div>
-                    <StyledLinkNoDecoration to={`/productdetail?id=${item.variant.product.id}`}>
-                      {item.variant.product.name}
+                    <StyledLinkNoDecoration to={`/account/order-detail?id=${item.id}`}>
+                      #
+                      {convertToLetterString(item.payment.deliveryType.id, 1) +
+                        convertToLetterString(item.variant.product.categoryId, 2) +
+                        convertToLetterString(item.variant.id, 5) +
+                        convertToLetterString(item.id, 8)}
                     </StyledLinkNoDecoration>
-                    <p className="variant-text">
-                      {item.variant.variantAttributes.map((item, index) => {
-                        return (
-                          <>
-                            {index != 0 && <span>/</span>}
-                            <span>{item.attributeValue}</span>
-                          </>
-                        );
-                      })}
-                    </p>
-                    {item.orderStatusId == 16 &&
-                      item.refund == null &&
-                      item.exchange == null &&
-                      item.newOrderExchange == null &&
-                      checkValidExchange(item.updatedAt) && (
-                        <p className="exchange">
-                          <RiExchangeDollarFill size={"1rem"} /> Exchangable in 7 days
-                        </p>
+                    <p>
+                      Order {item.isCancel == false && item.orderStatusType.name}{" "}
+                      {item.orderStatusType.id == 14 && <FaCheck />}
+                      {item.orderStatusType.id == 15 && <PiHandsPrayingLight size={"1.3rem"} />}
+                      {item.orderStatusType.id == 17 && <CiDeliveryTruck size={"1.3rem"} />}
+                      {item.orderStatusType.id == 16 && <GoThumbsup size={"1.3rem"} />}
+                      {item.orderStatusType.id == 13 && item.isCancel == false && (
+                        <CiTimer size={"1.3rem"} />
                       )}
-                    {item.orderStatusType.id == 13 && item.isCancel == false && (
-                      <p className="exchange">Cancelable</p>
-                    )}
+                      {item.isCancel && (
+                        <>
+                          <span>Cancel</span> <MdCancelPresentation size={"1.3rem"} />
+                        </>
+                      )}
+                    </p>
                   </div>
-                  <div>
-                    {item.newOrderExchange == null && (
-                      <p className="price">${formatDollar(item.totalPrice)}</p>
-                    )}
-                  </div>
-                </ProductDetail>
-                <Buttons>
-                  {item.orderStatusId == 13 && item.isCancel == false && (
-                    <button
-                      onClick={() => {
-                        setCancelPopUp(true);
-                        setCancelOrder(item);
-                      }}
-                    >
-                      Request Cancel
-                    </button>
-                  )}
-                  {checkValidExchange(item.updatedAt) &&
-                    item.orderStatusId == 16 &&
-                    item.refund == null &&
-                    item.exchange == null &&
-                    item.newOrderExchange == null && (
-                      <button onClick={() => navigtate(`/account/exchange-request?id=${item.id}`)}>
-                        Request Exchange
+                  <ProductDetail>
+                    <Image>
+                      <img
+                        src={
+                          import.meta.env.VITE_API_IMAGE_PATH +
+                          (item.variant.variantImage
+                            ? item.variant.variantImage
+                            : item.variant.product.productImages[0].imageName)
+                        }
+                      />
+                      <span>X{item.quanity}</span>
+                    </Image>
+                    <div>
+                      <StyledLinkNoDecoration to={`/productdetail?id=${item.variant.product.id}`}>
+                        {item.variant.product.name}
+                      </StyledLinkNoDecoration>
+                      <p className="variant-text">
+                        {item.variant.variantAttributes.map((item, index) => {
+                          return (
+                            <>
+                              {index != 0 && <span>/</span>}
+                              <span>{item.attributeValue}</span>
+                            </>
+                          );
+                        })}
+                      </p>
+                      {item.orderStatusId == 16 &&
+                        item.refund == null &&
+                        item.exchange == null &&
+                        item.newOrderExchange == null &&
+                        checkValidExchange(item.updatedAt) && (
+                          <p className="exchange">
+                            <RiExchangeDollarFill size={"1rem"} /> Exchangable in 7 days
+                          </p>
+                        )}
+                      {item.orderStatusType.id == 13 && item.isCancel == false && (
+                        <p className="exchange">Cancelable</p>
+                      )}
+                    </div>
+                    <div>
+                      {item.newOrderExchange == null && (
+                        <p className="price">${formatDollar(item.totalPrice)}</p>
+                      )}
+                    </div>
+                  </ProductDetail>
+                  <Buttons>
+                    {item.orderStatusId == 13 && item.isCancel == false && (
+                      <button
+                        onClick={() => {
+                          setCancelPopUp(true);
+                          setCancelOrder(item);
+                        }}
+                      >
+                        Request Cancel
                       </button>
                     )}
-                  {item.variant.availableQuanity > 0 && checkValidExchange(item.updatedAt) && (
-                    <button onClick={() => onAddToCart(item.variant)}>Re Purchase</button>
-                  )}
-                  <button onClick={() => navigtate(`/account/order-detail?id=${item.id}`)}>
-                    View Detail
-                  </button>
-                </Buttons>
-              </OrderDetail>
-            );
-          })}
-          {getAccountOrderRequest.data.data.length == 0 && (
+                    {checkValidExchange(item.updatedAt) &&
+                      item.orderStatusId == 16 &&
+                      item.refund == null &&
+                      item.exchange == null &&
+                      item.newOrderExchange == null && (
+                        <button
+                          onClick={() => navigtate(`/account/exchange-request?id=${item.id}`)}
+                        >
+                          Request Exchange
+                        </button>
+                      )}
+                    {item.variant.availableQuanity > 0 && checkValidExchange(item.updatedAt) && (
+                      <button onClick={() => onAddToCart(item.variant)}>Re Purchase</button>
+                    )}
+                    <button onClick={() => navigtate(`/account/order-detail?id=${item.id}`)}>
+                      View Detail
+                    </button>
+                  </Buttons>
+                </OrderDetail>
+              );
+            })}
+          {getAccountOrderRequest.isSuccess && getAccountOrderRequest.data.data.length == 0 && (
             <NoOrder>
               <img src={empty_image} />
               <p>There are no order</p>
@@ -521,136 +533,141 @@ export default function AccountOrder() {
 
       {optionValue.value == "payment" && (
         <Content>
-          {getAccountOrderPayment.data.data.map((item, index) => {
-            return (
-              <PaymentDetail key={index}>
-                <div>
-                  #{convertToLetterString(item.id, 8)}
-                  <p>Pay by {item.paymentType.name}</p>
-                </div>
-                <div>
-                  {item.orders.map((order, index) => {
-                    return (
-                      <ProductPayment>
-                        <p className="status">
-                          Order {order.isCancel == false && order.orderStatusType.name}{" "}
-                          {order.orderStatusType.id == 14 && <FaCheck />}
-                          {order.orderStatusType.id == 15 && (
-                            <PiHandsPrayingLight size={"1.3rem"} />
-                          )}
-                          {order.orderStatusType.id == 17 && <CiDeliveryTruck size={"1.3rem"} />}
-                          {order.orderStatusType.id == 16 && <GoThumbsup size={"1.3rem"} />}
-                          {order.orderStatusType.id == 13 && order.isCancel == false && (
-                            <CiTimer size={"1.3rem"} />
-                          )}
-                          {order.isCancel && (
-                            <>
-                              <span>Cancel</span> <MdCancelPresentation size={"1.3rem"} />
-                            </>
-                          )}
-                        </p>
-                        <ProductPaymentDetail key={index}>
-                          <Image>
-                            <img
-                              src={
-                                import.meta.env.VITE_API_IMAGE_PATH +
-                                (order.variant.variantImage
-                                  ? order.variant.variantImage
-                                  : order.variant.product.productImages[0].imageName)
-                              }
-                            />
-                            <span>X{order.quanity}</span>
-                          </Image>
-                          <div>
-                            <StyledLinkNoDecoration to={`/account/order-detail?id=${order.id}`}>
-                              #
-                              {convertToLetterString(item.deliveryType.id, 1) +
-                                convertToLetterString(order.variant.product.categoryId, 2) +
-                                convertToLetterString(order.variant.id, 5) +
-                                convertToLetterString(order.id, 8)}
-                            </StyledLinkNoDecoration>
-                            <StyledLinkNoDecoration
-                              to={`/productdetail?id=${order.variant.product.id}`}
-                            >
-                              {order.variant.product.name}
-                            </StyledLinkNoDecoration>
-                            <p className="variant-text">
-                              {order.variant.variantAttributes.map((item, index) => {
-                                return (
-                                  <>
-                                    {index != 0 && <span>/</span>}
-                                    <span>{item.attributeValue}</span>
-                                  </>
-                                );
-                              })}
-                            </p>
+          {optionValue.value == "payment" && getAccountOrderPayment.isLoading && <WaitingIcon />}
+          {optionValue.value == "payment" &&
+            getAccountOrderPayment.isSuccess &&
+            getAccountOrderPayment.data.data.map((item, index) => {
+              return (
+                <PaymentDetail key={index}>
+                  <div>
+                    #{convertToLetterString(item.id, 8)}
+                    <p>Pay by {item.paymentType.name}</p>
+                  </div>
+                  <div>
+                    {item.orders.map((order, index) => {
+                      return (
+                        <ProductPayment>
+                          <p className="status">
+                            Order {order.isCancel == false && order.orderStatusType.name}{" "}
+                            {order.orderStatusType.id == 14 && <FaCheck />}
+                            {order.orderStatusType.id == 15 && (
+                              <PiHandsPrayingLight size={"1.3rem"} />
+                            )}
+                            {order.orderStatusType.id == 17 && <CiDeliveryTruck size={"1.3rem"} />}
+                            {order.orderStatusType.id == 16 && <GoThumbsup size={"1.3rem"} />}
+                            {order.orderStatusType.id == 13 && order.isCancel == false && (
+                              <CiTimer size={"1.3rem"} />
+                            )}
+                            {order.isCancel && (
+                              <>
+                                <span>Cancel</span> <MdCancelPresentation size={"1.3rem"} />
+                              </>
+                            )}
+                          </p>
+                          <ProductPaymentDetail key={index}>
+                            <Image>
+                              <img
+                                src={
+                                  import.meta.env.VITE_API_IMAGE_PATH +
+                                  (order.variant.variantImage
+                                    ? order.variant.variantImage
+                                    : order.variant.product.productImages[0].imageName)
+                                }
+                              />
+                              <span>X{order.quanity}</span>
+                            </Image>
+                            <div>
+                              <StyledLinkNoDecoration to={`/account/order-detail?id=${order.id}`}>
+                                #
+                                {convertToLetterString(item.deliveryType.id, 1) +
+                                  convertToLetterString(order.variant.product.categoryId, 2) +
+                                  convertToLetterString(order.variant.id, 5) +
+                                  convertToLetterString(order.id, 8)}
+                              </StyledLinkNoDecoration>
+                              <StyledLinkNoDecoration
+                                to={`/productdetail?id=${order.variant.product.id}`}
+                              >
+                                {order.variant.product.name}
+                              </StyledLinkNoDecoration>
+                              <p className="variant-text">
+                                {order.variant.variantAttributes.map((item, index) => {
+                                  return (
+                                    <>
+                                      {index != 0 && <span>/</span>}
+                                      <span>{item.attributeValue}</span>
+                                    </>
+                                  );
+                                })}
+                              </p>
+                              {order.orderStatusId == 16 &&
+                                order.refund == null &&
+                                order.exchange == null &&
+                                order.newOrderExchange == null &&
+                                checkValidExchange(order.updatedAt) && (
+                                  <p className="exchange">
+                                    <RiExchangeDollarFill size={"1rem"} /> Exchangable in 7 days
+                                  </p>
+                                )}
+                              {order.orderStatusType.id == 13 && order.isCancel == false && (
+                                <p className="exchange">Cancelable</p>
+                              )}
+                            </div>
+                            <div>
+                              {order.newOrderExchange == null && (
+                                <p className="price">${formatDollar(order.totalPrice)}</p>
+                              )}
+                            </div>
+                          </ProductPaymentDetail>
+                          <Buttons>
+                            {order.orderStatusId == 13 && order.isCancel == false && (
+                              <button
+                                onClick={() => {
+                                  setCancelPopUp(true);
+                                  setCancelOrder(order);
+                                }}
+                              >
+                                Request Cancel
+                              </button>
+                            )}
                             {order.orderStatusId == 16 &&
                               order.refund == null &&
                               order.exchange == null &&
-                              order.newOrderExchange == null &&
-                              checkValidExchange(order.updatedAt) && (
-                                <p className="exchange">
-                                  <RiExchangeDollarFill size={"1rem"} /> Exchangable in 7 days
-                                </p>
+                              order.newOrderExchange == null && (
+                                <button
+                                  onClick={() =>
+                                    navigtate(`/account/exchange-request?id=${order.id}`)
+                                  }
+                                >
+                                  Request Exchange
+                                </button>
                               )}
-                            {order.orderStatusType.id == 13 && order.isCancel == false && (
-                              <p className="exchange">Cancelable</p>
-                            )}
-                          </div>
-                          <div>
-                            {order.newOrderExchange == null && (
-                              <p className="price">${formatDollar(order.totalPrice)}</p>
-                            )}
-                          </div>
-                        </ProductPaymentDetail>
-                        <Buttons>
-                          {order.orderStatusId == 13 && order.isCancel == false && (
+                            {order.variant.availableQuanity > 0 &&
+                              checkValidExchange(order.updatedAt) && (
+                                <button onClick={() => onAddToCart(order.variant)}>
+                                  Re Purchase
+                                </button>
+                              )}
                             <button
-                              onClick={() => {
-                                setCancelPopUp(true);
-                                setCancelOrder(order);
-                              }}
+                              onClick={() => navigtate(`/account/order-detail?id=${order.id}`)}
                             >
-                              Request Cancel
+                              View Detail
                             </button>
-                          )}
-                          {order.orderStatusId == 16 &&
-                            order.refund == null &&
-                            order.exchange == null &&
-                            order.newOrderExchange == null && (
-                              <button
-                                onClick={() =>
-                                  navigtate(`/account/exchange-request?id=${order.id}`)
-                                }
-                              >
-                                Request Exchange
-                              </button>
-                            )}
-                          {order.variant.availableQuanity > 0 &&
-                            checkValidExchange(order.updatedAt) && (
-                              <button onClick={() => onAddToCart(order.variant)}>
-                                Re Purchase
-                              </button>
-                            )}
-                          <button onClick={() => navigtate(`/account/order-detail?id=${order.id}`)}>
-                            View Detail
-                          </button>
-                        </Buttons>
-                      </ProductPayment>
-                    );
-                  })}
-                </div>
-                <PaymentTotal>
-                  <p>
-                    <span>Shipment fee</span> ${formatDollar(item.shipFee)}
-                  </p>
-                  <p>
-                    <span>Total</span> ${formatDollar(totalPayment(item) + item.shipFee)}
-                  </p>
-                </PaymentTotal>
-              </PaymentDetail>
-            );
-          })}
+                          </Buttons>
+                        </ProductPayment>
+                      );
+                    })}
+                  </div>
+                  <PaymentTotal>
+                    <p>
+                      <span>Shipment fee</span> ${formatDollar(item.shipFee)}
+                    </p>
+                    <p>
+                      <span>Total</span> ${formatDollar(totalPayment(item) + item.shipFee)}
+                    </p>
+                  </PaymentTotal>
+                </PaymentDetail>
+              );
+            })}
         </Content>
       )}
 

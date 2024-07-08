@@ -103,8 +103,8 @@ const TableContent = styled.table`
   }
 
   & .product-detail {
-    display: flex;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: 8rem auto;
     gap: 1rem;
 
     & .variant-text {
@@ -175,14 +175,13 @@ const Info = styled.div`
 `;
 
 const Image = styled.div`
-  width: 10rem !important;
   height: 5rem;
 
   > img {
     display: block;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
   }
 `;
 
@@ -311,9 +310,7 @@ export default function AccountOrderDetail() {
         -{" "}
         {getOrderDetailRequest.data.data.isCancel
           ? "Order Cancel"
-          : getOrderDetailRequest.data.data.refund == null
-          ? getOrderDetailRequest.data.data.orderStatusType.name
-          : getOrderDetailRequest.data.data.refund.status + " refund"}
+          : getOrderDetailRequest.data.data.orderStatusType.name}
       </h3>
       <Content>
         {getOrderDetailRequest.data.data.orderStatusType.name != "Denied" &&
@@ -392,12 +389,6 @@ export default function AccountOrderDetail() {
             <div>
               <h4>Cancel Reason</h4>
               <div>{getOrderDetailRequest.data.data.cancelReason}</div>
-            </div>
-          )}
-          {getOrderDetailRequest.data.data.refund != null && (
-            <div>
-              <h4>Refund Request</h4>
-              <div>Request: {getOrderDetailRequest.data.data.refund.reasonRefund}</div>
             </div>
           )}
         </Info>

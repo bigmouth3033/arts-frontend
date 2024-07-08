@@ -116,7 +116,7 @@ export default function AccountDetailSideBar({ data }) {
         </div>
         <span>Order Management</span>
       </WrapItem>
-      <WrapItem>
+      <WrapItem $active={location.pathname.includes("manage-exchange")} to="manage-exchange">
         <div>
           <MdAssignmentReturn />
         </div>
@@ -128,7 +128,7 @@ export default function AccountDetailSideBar({ data }) {
         </div>
         <span>Address book</span>
       </WrapItem>
-      <WrapItem to="account-review">
+      <WrapItem $active={location.pathname.includes("account-review")} to="account-review">
         <div>
           <MdReviews />
         </div>

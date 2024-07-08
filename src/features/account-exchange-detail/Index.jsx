@@ -1,18 +1,9 @@
 import styled from "styled-components";
 import { useSearchParams } from "react-router-dom";
-
 import { useState } from "react";
-import { GetOrderDetailRequest } from "../account-order-detail/api/orderDetailApi";
 import WaitingPopUp from "@/shared/components/PopUp/WaitingPopUp";
 import convertToLetterString from "../ProductDetail/utils/convertIdToStr";
-import { GetOrderByIdRequest } from "../admin-order-detail/api/adminOrderDetailApi";
 import formatDollar from "@/shared/utils/FormatDollar";
-import { GetExchangeById } from "./api/exchangeAdminApi";
-import "../account-order-detail/assets/css/progress.css";
-import { CiDeliveryTruck } from "react-icons/ci";
-import { GoThumbsup } from "react-icons/go";
-import { CiTimer } from "react-icons/ci";
-import { FaCheck } from "react-icons/fa";
 import dchc from "@/shared/data/dchc";
 import { Link } from "react-router-dom";
 import React from "react";
@@ -20,21 +11,19 @@ import { useQueryClient } from "@tanstack/react-query";
 import { RiExchangeDollarFill } from "react-icons/ri";
 import SuccessPopUp from "@/shared/components/PopUp/SuccessPopUp";
 import ErrorPopUp from "@/shared/components/PopUp/ErrorPopUp";
-import ExchangeDecisionPopUp from "./components/ExchangeDecisionPopUp";
 import { useNavigate } from "react-router-dom";
+import { GetUserExchangeDetailRequest } from "./api/accountExchangeDetailApi";
+import { GetOrderDetailRequest } from "../account-order-detail/api/orderDetailApi";
 
 const Container = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  max-width: 65rem;
   margin: auto;
-  padding: 3rem 0;
 
   > h3 {
-    font-size: 19px;
-    font-weight: 500;
-    color: rgba(0, 0, 0, 0.9);
+    font-size: 20px;
+    font-weight: 100;
   }
 `;
 
@@ -253,22 +242,21 @@ const Product = styled.div`
 
 const ExchangeTable = styled(TableContent)``;
 
-export default function AdminExchangeDetail() {
+export default function AccountExchangeDetail() {
   let [searchParams, setSearchParams] = useSearchParams();
-  const getExchangeById = GetExchangeById(searchParams.get("id"));
-  const getOrderByIdRequest = GetOrderByIdRequest(
-    getExchangeById.isSuccess && getExchangeById.data.data.originalOrderId
+  const getUserExchangeDetailRequest = GetUserExchangeDetailRequest(searchParams.get("id"));
+  const getOrderDetailRequest = GetOrderDetailRequest(
+    getUserExchangeDetailRequest.isSuccess && getUserExchangeDetailRequest.data.data.originalOrderId
   );
   const navigate = useNavigate();
 
-  const getNewOrderByIdRequest = GetOrderByIdRequest(
-    getExchangeById.isSuccess && getExchangeById.data.data.newOrderId
+  const getNewOrderDetailRequest = GetOrderDetailRequest(
+    getUserExchangeDetailRequest.isSuccess && getUserExchangeDetailRequest.data.data.newOrderId
   );
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
-  const [decisionPopUp, setDecisionPopUp] = useState(false);
 
-  if (getExchangeById.isLoading || getOrderByIdRequest.isLoading) {
+  if (getUserExchangeDetailRequest.isLoading || getOrderDetailRequest.isLoading) {
     return <WaitingPopUp />;
   }
   const getAddress = (address) => {
@@ -282,8 +270,8 @@ export default function AdminExchangeDetail() {
   return (
     <Container>
       <h3>
-        Exchange Code #{convertToLetterString(getExchangeById.data.data.id, 6)}-
-        {getExchangeById.data.data.status}
+        Exchange Code #{convertToLetterString(getUserExchangeDetailRequest.data.data.id, 6)}-
+        {getUserExchangeDetailRequest.data.data.status}
       </h3>
 
       <Content>
@@ -291,40 +279,40 @@ export default function AdminExchangeDetail() {
           <div>
             <h4>Customer Information</h4>
             <div>
-              <h4>{getOrderByIdRequest.data.data.user.fullname}</h4>
-              <p>Email: {getOrderByIdRequest.data.data.user.email}</p>
-              <p>Phone number: {getOrderByIdRequest.data.data.user.phoneNumber}</p>
+              <h4>{getOrderDetailRequest.data.data.user.fullname}</h4>
+              <p>Email: {getOrderDetailRequest.data.data.user.email}</p>
+              <p>Phone number: {getOrderDetailRequest.data.data.user.phoneNumber}</p>
             </div>
           </div>
           <div>
             <h4>Delivery Address</h4>
             <div>
-              <h4>{getOrderByIdRequest.data.data.payment.address.fullName}</h4>
-              <p>Address: {getAddress(getOrderByIdRequest.data.data.payment.address)}</p>
-              <p>Phone number: {getOrderByIdRequest.data.data.payment.address.phoneNumber}</p>
+              <h4>{getOrderDetailRequest.data.data.payment.address.fullName}</h4>
+              <p>Address: {getAddress(getOrderDetailRequest.data.data.payment.address)}</p>
+              <p>Phone number: {getOrderDetailRequest.data.data.payment.address.phoneNumber}</p>
             </div>
           </div>
           <div>
             <h4>Payment type</h4>
             <div>
-              <p>Pay by {getOrderByIdRequest.data.data.payment.paymentType.name}</p>
+              <p>Pay by {getOrderDetailRequest.data.data.payment.paymentType.name}</p>
             </div>
           </div>
           <div>
             <h4>Exchange reason</h4>
-            <div>Request: {getExchangeById.data.data.reasonExchange}</div>
+            <div>Request: {getUserExchangeDetailRequest.data.data.reasonExchange}</div>
           </div>
 
-          {getExchangeById.data.data.responseExchange && (
+          {getUserExchangeDetailRequest.data.data.responseExchange && (
             <div>
               <h4>Exchange response</h4>
-              <div>Response: {getExchangeById.data.data.responseExchange}</div>
+              <div>Response: {getUserExchangeDetailRequest.data.data.responseExchange}</div>
             </div>
           )}
         </Info>
 
         <Images>
-          {getExchangeById.data.data.images.map((item) => {
+          {getUserExchangeDetailRequest.data.data.images.map((item) => {
             return (
               <div>
                 <img src={import.meta.env.VITE_API_IMAGE_PATH + item.imageName} />
@@ -337,12 +325,17 @@ export default function AdminExchangeDetail() {
           <h4>
             Request Exchange Order -{" "}
             <Link
-              onClick={() => navigate(`/admin/order-detail?id=${getOrderByIdRequest.data.data.id}`)}
+              onClick={() =>
+                navigate(`/admin/order-detail?id=${getOrderDetailRequest.data.data.id}`)
+              }
             >
-              {convertToLetterString(getOrderByIdRequest.data.data.payment.deliveryType.id, 1) +
-                convertToLetterString(getOrderByIdRequest.data.data.variant.product.categoryId, 2) +
-                convertToLetterString(getOrderByIdRequest.data.data.variant.id, 5) +
-                convertToLetterString(getOrderByIdRequest.data.data.id, 8)}
+              {convertToLetterString(getOrderDetailRequest.data.data.payment.deliveryType.id, 1) +
+                convertToLetterString(
+                  getOrderDetailRequest.data.data.variant.product.categoryId,
+                  2
+                ) +
+                convertToLetterString(getOrderDetailRequest.data.data.variant.id, 5) +
+                convertToLetterString(getOrderDetailRequest.data.data.id, 8)}
             </Link>
           </h4>
           <TableContent>
@@ -362,9 +355,9 @@ export default function AdminExchangeDetail() {
                     <img
                       src={
                         import.meta.env.VITE_API_IMAGE_PATH +
-                        (getOrderByIdRequest.data.data.variant.variantImage
-                          ? getOrderByIdRequest.data.data.variant.variantImage
-                          : getOrderByIdRequest.data.data.variant.product.productImages[0]
+                        (getOrderDetailRequest.data.data.variant.variantImage
+                          ? getOrderDetailRequest.data.data.variant.variantImage
+                          : getOrderDetailRequest.data.data.variant.product.productImages[0]
                               .imageName)
                       }
                     />
@@ -372,12 +365,12 @@ export default function AdminExchangeDetail() {
 
                   <div>
                     <StyledLink
-                      to={`/admin/product?id=${getOrderByIdRequest.data.data.variant.product.id}`}
+                      to={`/admin/product?id=${getOrderDetailRequest.data.data.variant.product.id}`}
                     >
-                      {getOrderByIdRequest.data.data.variant.product.name}
+                      {getOrderDetailRequest.data.data.variant.product.name}
                     </StyledLink>
                     <p className="variant-text">
-                      {getOrderByIdRequest.data.data.variant.variantAttributes.map(
+                      {getOrderDetailRequest.data.data.variant.variantAttributes.map(
                         (item, index) => {
                           return (
                             <React.Fragment key={index}>
@@ -390,38 +383,39 @@ export default function AdminExchangeDetail() {
                     </p>
                   </div>
                 </td>
-                <td>{getOrderByIdRequest.data.data.payment.deliveryType.name}</td>
+                <td>{getOrderDetailRequest.data.data.payment.deliveryType.name}</td>
                 <td>
                   $
                   {formatDollar(
-                    getOrderByIdRequest.data.data.totalPrice / getOrderByIdRequest.data.data.quanity
+                    getOrderDetailRequest.data.data.totalPrice /
+                      getOrderDetailRequest.data.data.quanity
                   )}
                 </td>
-                <td>{getOrderByIdRequest.data.data.quanity}</td>
-                <td>${formatDollar(getOrderByIdRequest.data.data.totalPrice)}</td>
+                <td>{getOrderDetailRequest.data.data.quanity}</td>
+                <td>${formatDollar(getOrderDetailRequest.data.data.totalPrice)}</td>
               </tr>
             </tbody>
           </TableContent>
 
-          {getNewOrderByIdRequest.isSuccess && getNewOrderByIdRequest.data.data != null && (
+          {getNewOrderDetailRequest.isSuccess && getNewOrderDetailRequest.data.data != null && (
             <>
               <h4 style={{ marginTop: "3rem" }}>
                 Exchange Order -{" "}
                 <Link
                   onClick={() =>
-                    navigate(`/admin/order-detail?id=${getNewOrderByIdRequest.data.data.id}`)
+                    navigate(`/admin/order-detail?id=${getNewOrderDetailRequest.data.data.id}`)
                   }
                 >
                   {convertToLetterString(
-                    getNewOrderByIdRequest.data.data.payment.deliveryType.id,
+                    getNewOrderDetailRequest.data.data.payment.deliveryType.id,
                     1
                   ) +
                     convertToLetterString(
-                      getNewOrderByIdRequest.data.data.variant.product.categoryId,
+                      getNewOrderDetailRequest.data.data.variant.product.categoryId,
                       2
                     ) +
-                    convertToLetterString(getNewOrderByIdRequest.data.data.variant.id, 5) +
-                    convertToLetterString(getNewOrderByIdRequest.data.data.id, 8)}
+                    convertToLetterString(getNewOrderDetailRequest.data.data.variant.id, 5) +
+                    convertToLetterString(getNewOrderDetailRequest.data.data.id, 8)}
                 </Link>
               </h4>
               <ExchangeTable>
@@ -441,9 +435,9 @@ export default function AdminExchangeDetail() {
                         <img
                           src={
                             import.meta.env.VITE_API_IMAGE_PATH +
-                            (getNewOrderByIdRequest.data.data.variant.variantImage
-                              ? getNewOrderByIdRequest.data.data.variant.variantImage
-                              : getNewOrderByIdRequest.data.data.variant.product.productImages[0]
+                            (getNewOrderDetailRequest.data.data.variant.variantImage
+                              ? getNewOrderDetailRequest.data.data.variant.variantImage
+                              : getNewOrderDetailRequest.data.data.variant.product.productImages[0]
                                   .imageName)
                           }
                         />
@@ -451,12 +445,12 @@ export default function AdminExchangeDetail() {
 
                       <div>
                         <StyledLink
-                          to={`/admin/product?id=${getNewOrderByIdRequest.data.data.variant.product.id}`}
+                          to={`/admin/product?id=${getNewOrderDetailRequest.data.data.variant.product.id}`}
                         >
-                          {getNewOrderByIdRequest.data.data.variant.product.name}
+                          {getNewOrderDetailRequest.data.data.variant.product.name}
                         </StyledLink>
                         <p className="variant-text">
-                          {getNewOrderByIdRequest.data.data.variant.variantAttributes.map(
+                          {getNewOrderDetailRequest.data.data.variant.variantAttributes.map(
                             (item, index) => {
                               return (
                                 <React.Fragment key={index}>
@@ -469,37 +463,25 @@ export default function AdminExchangeDetail() {
                         </p>
                       </div>
                     </td>
-                    <td>{getNewOrderByIdRequest.data.data.payment.deliveryType.name}</td>
+                    <td>{getNewOrderDetailRequest.data.data.payment.deliveryType.name}</td>
                     <td>
                       $
                       {formatDollar(
-                        getNewOrderByIdRequest.data.data.totalPrice /
-                          getNewOrderByIdRequest.data.data.quanity
+                        getNewOrderDetailRequest.data.data.totalPrice /
+                          getNewOrderDetailRequest.data.data.quanity
                       )}
                     </td>
-                    <td>{getNewOrderByIdRequest.data.data.quanity}</td>
-                    <td>${formatDollar(getNewOrderByIdRequest.data.data.totalPrice)}</td>
+                    <td>{getNewOrderDetailRequest.data.data.quanity}</td>
+                    <td>${formatDollar(getNewOrderDetailRequest.data.data.totalPrice)}</td>
                   </tr>
                 </tbody>
               </ExchangeTable>
             </>
           )}
-          <Buttons>
-            {getExchangeById.data.data.status == "Pending" && (
-              <button onClick={() => setDecisionPopUp(true)}>Decision</button>
-            )}
-          </Buttons>
         </Product>
       </Content>
       {success && <SuccessPopUp action={() => setSuccess(false)} message={"Success"} />}
       {error && <ErrorPopUp action={() => setError(false)} message={"Error"} />}
-      {decisionPopUp && (
-        <ExchangeDecisionPopUp
-          order={getOrderByIdRequest}
-          action={() => setDecisionPopUp(false)}
-          exchange={getExchangeById}
-        />
-      )}
     </Container>
   );
 }

@@ -7,7 +7,7 @@ import { IoIosArrowDown } from "react-icons/io";
 import { IoIosArrowUp } from "react-icons/io";
 
 const Container = styled.div`
-  font-size: 15px;
+  font-size: 16px;
 `;
 
 const MainButton = styled.button`

@@ -35,6 +35,7 @@ import { FaRegQuestionCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import InputCheckBox from "@/shared/components/Input/InputCheckBox";
 import formatDollar from "@/shared/utils/FormatDollar";
+import { AdminRequest } from "@/shared/api/adminApi";
 
 const StyledFaRegQuestionCircle = styled(FaRegQuestionCircle)`
   cursor: pointer;
@@ -554,9 +555,15 @@ const moneyRegex = /^(?=.*\d)\d*(?:\.\d*)?$/;
 
 export default function AdminProductNew() {
   const navigate = useNavigate();
+  const adminRequest = AdminRequest();
+
+  if (adminRequest.data.data.roleTypeId == 5) {
+    return navigate("/admin");
+    return;
+  }
+
   const readCategoryRequest = ReadCategoryRequest();
   const readTypeRequest = ReadTypeRequest();
-
   const [showVariant, setShowVariant] = useState(false);
   const [showUnit, setShowUnit] = useState(false);
   const [imageError, setImageError] = useState(false);

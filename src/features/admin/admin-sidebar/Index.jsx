@@ -80,18 +80,20 @@ export default function AdminSideBar() {
           groupName={"Dashboard"}
           icon={<MdOutlineDashboard />}
         ></ButtonGroup>
-        <ButtonGroup
-          groupName={"Products"}
-          icon={<CiShoppingTag />}
-          link={"product-list"}
-        ></ButtonGroup>
-        <ButtonGroup groupName={"Account"} icon={<VscAccount />} active={true}>
-          {adminRequest.data.data.roleType.name == "Admin" && (
+        {adminRequest.data.data.roleType.name == "Admin" && (
+          <ButtonGroup
+            groupName={"Products"}
+            icon={<CiShoppingTag />}
+            link={"product-list"}
+          ></ButtonGroup>
+        )}
+        {adminRequest.data.data.roleType.name == "Admin" && (
+          <ButtonGroup groupName={"Account"} icon={<VscAccount />} active={true}>
             <StyledLink $active={location.pathname.includes("employee")} to={"employee"}>
               Employee
             </StyledLink>
-          )}
-        </ButtonGroup>
+          </ButtonGroup>
+        )}
         <ButtonGroup groupName={"Order"} icon={<FiShoppingCart />} active={true}>
           <StyledLink $active={location.pathname.includes("order")} to={"order"}>
             Order

@@ -11,6 +11,7 @@ import WaitingPopUp from "@/shared/components/PopUp/WaitingPopUp";
 import { ReadCustomerProductsRequest } from "./api/productApi";
 import productList from "@/features/listing-page/data/product.json";
 import { useSearchParams } from "react-router-dom";
+import WaitingIcon from "@/shared/components/AnimationIcon/WaitingIcon";
 
 const StyleListingPage = styled.div`
   background-color: white;
@@ -109,7 +110,7 @@ const ListingPage = () => {
     });
     setSearchValue(value);
   };
-  if (readCategories.isLoading || products.isLoading) {
+  if (readCategories.isLoading) {
     return <WaitingPopUp />;
   }
 
@@ -131,12 +132,12 @@ const ListingPage = () => {
             <Search searchValueSaved={searchValue} handleSearchChange={handleSearchChange} />
             <Sort switched={sort} setSwitched={setSort} />
           </FilterBar>
-          <ProductListing productList={products} pageSize={pageSize} />
+          {products.isLoading && <WaitingIcon />}
+          {products.isSuccess && <ProductListing productList={products} pageSize={pageSize} />}
         </StyleRight>
       </StyleListingPage>
     </>
   );
-  f;
 };
 
 export default ListingPage;

@@ -1,40 +1,28 @@
-import styled from "styled-components";
-
 import { useSearchParams } from "react-router-dom";
-import { GetRefundByIdRequest } from "./api/refundDetailApi";
 import { useState } from "react";
-import { GetOrderDetailRequest } from "../account-order-detail/api/orderDetailApi";
 import WaitingPopUp from "@/shared/components/PopUp/WaitingPopUp";
 import convertToLetterString from "../ProductDetail/utils/convertIdToStr";
-import { GetOrderByIdRequest } from "../admin-order-detail/api/adminOrderDetailApi";
+import { GetOrderDetailRequest } from "../account-order-detail/api/orderDetailApi";
 import formatDollar from "@/shared/utils/FormatDollar";
-import { ProgressBar } from "react-step-progress-bar";
-import { Step } from "react-step-progress-bar";
 import "../account-order-detail/assets/css/progress.css";
-import { CiDeliveryTruck } from "react-icons/ci";
-import { GoThumbsup } from "react-icons/go";
-import { CiTimer } from "react-icons/ci";
-import { FaCheck } from "react-icons/fa";
 import dchc from "@/shared/data/dchc";
 import { Link } from "react-router-dom";
 import React from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { RiExchangeDollarFill } from "react-icons/ri";
 import SuccessPopUp from "@/shared/components/PopUp/SuccessPopUp";
 import ErrorPopUp from "@/shared/components/PopUp/ErrorPopUp";
-import DecisionPopUp from "./components/DesicionPopUp";
+import { GetUserRefundDetailRequest } from "./api/accountRefundDetailApi";
+import styled from "styled-components";
 
 const Container = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  max-width: 65rem;
   margin: auto;
-  padding: 3rem 0;
 
   > h3 {
-    font-size: 20px;
-    font-weight: 100;
+    font-size: 19px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.9);
   }
 `;
 
@@ -255,17 +243,17 @@ const Images = styled.div`
 
 const Product = styled.div``;
 
-export default function AdminRefundDetail() {
+export default function AccountRefundDetail() {
   let [searchParams, setSearchParams] = useSearchParams();
-  const getRefundByIdRequest = GetRefundByIdRequest(searchParams.get("id"));
-  const getOrderByIdRequest = GetOrderByIdRequest(
-    getRefundByIdRequest.isSuccess && getRefundByIdRequest.data.data.orderId
+  const getUserRefundDetailRequest = GetUserRefundDetailRequest(searchParams.get("id"));
+  const getOrderDetailRequest = GetOrderDetailRequest(
+    getUserRefundDetailRequest.isSuccess && getUserRefundDetailRequest.data.data.orderId
   );
+
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
-  const [decisionPopUp, setDecisionPopUp] = useState(false);
 
-  if (getRefundByIdRequest.isLoading || getOrderByIdRequest.isLoading) {
+  if (getUserRefundDetailRequest.isLoading || getOrderDetailRequest.isLoading) {
     return <WaitingPopUp />;
   }
   const getAddress = (address) => {
@@ -279,49 +267,43 @@ export default function AdminRefundDetail() {
   return (
     <Container>
       <h3>
-        Refund Code #{convertToLetterString(getRefundByIdRequest.data.data.id, 6)}-
-        {getRefundByIdRequest.data.data.status}
+        Refund Code #{convertToLetterString(getUserRefundDetailRequest.data.data.id, 6)}-
+        {getUserRefundDetailRequest.data.data.status}
       </h3>
-      <h3>
-        Order Code #
-        {convertToLetterString(getOrderByIdRequest.data.data.payment.deliveryType.id, 1) +
-          convertToLetterString(getOrderByIdRequest.data.data.variant.product.categoryId, 2) +
-          convertToLetterString(getOrderByIdRequest.data.data.variant.id, 5) +
-          convertToLetterString(getOrderByIdRequest.data.data.id, 8)}
-      </h3>
+
       <Content>
         <Info>
           <div>
             <h4>Customer Information</h4>
             <div>
-              <h4>{getOrderByIdRequest.data.data.user.fullname}</h4>
-              <p>Email: {getOrderByIdRequest.data.data.user.email}</p>
-              <p>Phone number: {getOrderByIdRequest.data.data.user.phoneNumber}</p>
+              <h4>{getOrderDetailRequest.data.data.user.fullname}</h4>
+              <p>Email: {getOrderDetailRequest.data.data.user.email}</p>
+              <p>Phone number: {getOrderDetailRequest.data.data.user.phoneNumber}</p>
             </div>
           </div>
           <div>
             <h4>Delivery Address</h4>
             <div>
-              <h4>{getOrderByIdRequest.data.data.payment.address.fullName}</h4>
-              <p>Address: {getAddress(getOrderByIdRequest.data.data.payment.address)}</p>
-              <p>Phone number: {getOrderByIdRequest.data.data.payment.address.phoneNumber}</p>
+              <h4>{getOrderDetailRequest.data.data.payment.address.fullName}</h4>
+              <p>Address: {getAddress(getOrderDetailRequest.data.data.payment.address)}</p>
+              <p>Phone number: {getOrderDetailRequest.data.data.payment.address.phoneNumber}</p>
             </div>
           </div>
           <div>
             <h4>Payment type</h4>
             <div>
-              <p>Pay by {getOrderByIdRequest.data.data.payment.paymentType.name}</p>
+              <p>Pay by {getOrderDetailRequest.data.data.payment.paymentType.name}</p>
             </div>
           </div>
           <div>
             <h4>Refund reason</h4>
-            <div>Request: {getRefundByIdRequest.data.data.reasonRefund}</div>
+            <div>Request: {getUserRefundDetailRequest.data.data.reasonRefund}</div>
           </div>
 
-          {getRefundByIdRequest.data.data.responseRefund && (
+          {getUserRefundDetailRequest.data.data.responseRefund && (
             <div>
               <h4>Refund response</h4>
-              <div>Response: {getRefundByIdRequest.data.data.responseRefund}</div>
+              <div>Response: {getUserRefundDetailRequest.data.data.responseRefund}</div>
             </div>
           )}
         </Info>
@@ -329,7 +311,7 @@ export default function AdminRefundDetail() {
         <div>
           <h4>Refund Image</h4>
           <Images>
-            {getRefundByIdRequest.data.data.images.map((item) => {
+            {getUserRefundDetailRequest.data.data.images.map((item) => {
               return (
                 <div>
                   <img src={import.meta.env.VITE_API_IMAGE_PATH + item.imageName} />
@@ -356,9 +338,9 @@ export default function AdminRefundDetail() {
                     <img
                       src={
                         import.meta.env.VITE_API_IMAGE_PATH +
-                        (getOrderByIdRequest.data.data.variant.variantImage
-                          ? getOrderByIdRequest.data.data.variant.variantImage
-                          : getOrderByIdRequest.data.data.variant.product.productImages[0]
+                        (getOrderDetailRequest.data.data.variant.variantImage
+                          ? getOrderDetailRequest.data.data.variant.variantImage
+                          : getOrderDetailRequest.data.data.variant.product.productImages[0]
                               .imageName)
                       }
                     />
@@ -366,12 +348,12 @@ export default function AdminRefundDetail() {
 
                   <div>
                     <StyledLink
-                      to={`/admin/product?id=${getOrderByIdRequest.data.data.variant.product.id}`}
+                      to={`/admin/product?id=${getOrderDetailRequest.data.data.variant.product.id}`}
                     >
-                      {getOrderByIdRequest.data.data.variant.product.name}
+                      {getOrderDetailRequest.data.data.variant.product.name}
                     </StyledLink>
                     <p className="variant-text">
-                      {getOrderByIdRequest.data.data.variant.variantAttributes.map(
+                      {getOrderDetailRequest.data.data.variant.variantAttributes.map(
                         (item, index) => {
                           return (
                             <React.Fragment key={index}>
@@ -384,34 +366,23 @@ export default function AdminRefundDetail() {
                     </p>
                   </div>
                 </td>
-                <td>{getOrderByIdRequest.data.data.payment.deliveryType.name}</td>
+                <td>{getOrderDetailRequest.data.data.payment.deliveryType.name}</td>
                 <td>
                   $
                   {formatDollar(
-                    getOrderByIdRequest.data.data.totalPrice / getOrderByIdRequest.data.data.quanity
+                    getOrderDetailRequest.data.data.totalPrice /
+                      getOrderDetailRequest.data.data.quanity
                   )}
                 </td>
-                <td>{getOrderByIdRequest.data.data.quanity}</td>
-                <td>${formatDollar(getOrderByIdRequest.data.data.totalPrice)}</td>
+                <td>{getOrderDetailRequest.data.data.quanity}</td>
+                <td>${formatDollar(getOrderDetailRequest.data.data.totalPrice)}</td>
               </tr>
             </tbody>
           </TableContent>
-          <Buttons>
-            {getRefundByIdRequest.data.data.status == "Pending" && (
-              <button onClick={() => setDecisionPopUp(true)}>Decision</button>
-            )}
-          </Buttons>
         </Product>
       </Content>
       {success && <SuccessPopUp action={() => setSuccess(false)} message={"Success"} />}
       {error && <ErrorPopUp action={() => setError(false)} message={"Error"} />}
-      {decisionPopUp && (
-        <DecisionPopUp
-          refund={getRefundByIdRequest}
-          order={getOrderByIdRequest}
-          action={() => setDecisionPopUp(false)}
-        />
-      )}
     </Container>
   );
 }

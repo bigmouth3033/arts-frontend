@@ -133,7 +133,7 @@ export default function ProductRelated({ data }) {
     return minVariant;
   };
 
-  const getRelatedProductRequest = GetRelatedProductRequest(data.categoryId, data.id, 20);
+  const getRelatedProductRequest = GetRelatedProductRequest(data.categoryId, data.id, 10);
 
   return (
     <Suggestion>

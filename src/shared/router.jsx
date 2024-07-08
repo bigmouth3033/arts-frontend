@@ -32,6 +32,8 @@ import Return from "@/features/aboutUs-FAQ/Return";
 import AdminRefundDetail from "@/features/admin-refund-detail/Index";
 import AdminExchangeDetail from "@/features/admin-exchange-detail/Index";
 import AccountReview from "@/features/account-review/Index";
+import AccountRefundDetail from "@/features/account-refund-detail/Index";
+import AccountExchangeDetail from "@/features/account-exchange-detail/Index";
 
 const router = createBrowserRouter([
   {
@@ -105,6 +107,14 @@ const router = createBrowserRouter([
           {
             path: "account-review",
             element: <AccountReview />,
+          },
+          {
+            path: "account-refund-detail",
+            element: <AccountRefundDetail />,
+          },
+          {
+            path: "account-exchange-detail",
+            element: <AccountExchangeDetail />,
           },
         ],
       },

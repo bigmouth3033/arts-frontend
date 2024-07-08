@@ -19,8 +19,8 @@ const Container = styled.div`
   font-size: 14px;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
   justify-content: space-between;
+  min-height: 100vh;
   background-color: rgb(245, 245, 250);
   min-width: 1280px;
 `;
@@ -104,7 +104,6 @@ export default function UserLayout() {
         <Outlet context={connection} />
       </OutletContainer>
       <BackToTopButton />
-      <Footer />
       <ToastContainer
         position="bottom-right"
         autoClose={5000}
@@ -118,6 +117,7 @@ export default function UserLayout() {
         theme="colored"
         transition:Bounce
       />
+      <Footer />
     </Container>
   );
 }
