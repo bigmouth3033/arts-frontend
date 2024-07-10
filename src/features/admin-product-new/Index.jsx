@@ -782,6 +782,22 @@ export default function AdminProductNew() {
       return;
     }
 
+    const wrongVariantPrice = state.variant_detail.find((item) => {
+      return item.comparePrice != 0 && item.comparePrice < item.sellPrice;
+    });
+
+    if (wrongVariantPrice) {
+      setErrorMessage(`Variant price can't be larger than compare price`);
+      setError(true);
+      return;
+    }
+
+    if (state.salePrice != 0 && state.price > state.salePrice) {
+      setErrorMessage(`Price can't be larger than compare price`);
+      setError(true);
+      return;
+    }
+
     const formData = new FormData();
     formData.append("ProductName", state.productName);
     formData.append("Category", state.category.value);

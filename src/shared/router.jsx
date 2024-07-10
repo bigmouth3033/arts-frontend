@@ -34,6 +34,7 @@ import AdminExchangeDetail from "@/features/admin-exchange-detail/Index";
 import AccountReview from "@/features/account-review/Index";
 import AccountRefundDetail from "@/features/account-refund-detail/Index";
 import AccountExchangeDetail from "@/features/account-exchange-detail/Index";
+import PageNotFound from "@/features/page-error/PageNotFound";
 
 const router = createBrowserRouter([
   {
@@ -137,6 +138,10 @@ const router = createBrowserRouter([
     element: <AdminLayout />,
     children: [
       {
+        path: "dashboard",
+        element: <AdminDashBoard />,
+      },
+      {
         path: "",
         element: <AdminDashBoard />,
       },
@@ -169,6 +174,10 @@ const router = createBrowserRouter([
   {
     path: "admin-login",
     element: <AdminLogin />,
+  },
+  {
+    path: "*",
+    element: <PageNotFound />,
   },
 ]);
 

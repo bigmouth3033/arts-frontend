@@ -16,14 +16,8 @@ const Container = styled.div`
 
 const ChartBar = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 2rem;
-
-  > div:nth-of-type(1) {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
 `;
 
 const Content = styled.div`
@@ -33,16 +27,22 @@ const Content = styled.div`
 `;
 
 const Below = styled.div`
-  margin-top: 2rem;
+  margin-top: 1rem;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
+
+  > div:nth-of-type(1) {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
 `;
 
 const OrderStatus = styled.div`
   padding: 1rem;
   height: 30rem;
-  border-radius: 10px;
+  border-radius: 5px;
   box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
   background-color: white;
 `;
@@ -76,14 +76,14 @@ export default function AdminDashBoard() {
     <Container>
       <Content>
         <ChartBar>
-          <div>
-            <StreamRevenue />
-            <StreamNumberOfOrder />
-          </div>
           <CategoryPieChart />
           <RevenueBar />
         </ChartBar>
         <Below>
+          <div>
+            <StreamRevenue />
+            <StreamNumberOfOrder />
+          </div>
           <OrderStatus>
             <StatusHeader>
               <h4>Order Status</h4>
@@ -130,8 +130,8 @@ export default function AdminDashBoard() {
               </OrderStatusContent>
             )}
           </OrderStatus>
-          <GetRecentOrder />
         </Below>
+        <GetRecentOrder />
       </Content>
     </Container>
   );

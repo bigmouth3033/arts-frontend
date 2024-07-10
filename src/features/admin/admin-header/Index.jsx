@@ -13,6 +13,7 @@ import SuccessPopUp from "@/shared/components/PopUp/SuccessPopUp";
 import ErrorPopUp from "@/shared/components/PopUp/ErrorPopUp";
 import SideBarPopUp from "./components/SideBarPopUp";
 import { BsLayoutSidebarInsetReverse } from "react-icons/bs";
+import { FiMoreHorizontal } from "react-icons/fi";
 
 const Container = styled.div`
   height: 3.8rem;
@@ -120,7 +121,7 @@ export default function AdminHeader() {
           <ImageContainer src={logo} />
         </LeftContent>
         <ShowSideBarButton>
-          <BsLayoutSidebarInsetReverse onClick={() => setShowSideBar(true)} size={"1.5rem"} />
+          <FiMoreHorizontal onClick={() => setShowSideBar(true)} size={"1.5rem"} />
         </ShowSideBarButton>
         <RightContent>
           <UserButton ref={buttonRef} onClick={() => setDropDown((prev) => !prev)}>

@@ -65,6 +65,10 @@ export default function UserLayout() {
   useEffect(() => {
     if (customerRequest.isSuccess && customerRequest.data.data != null) {
       const startConnection = async () => {
+        if (connection) {
+          await connection.stop();
+        }
+
         const conn = new HubConnectionBuilder()
           .withUrl("https://localhost:7279/notification")
           .configureLogging(LogLevel.Information)
@@ -95,7 +99,7 @@ export default function UserLayout() {
         connection.stop();
       }
     };
-  }, [customerRequest.status]);
+  }, [customerRequest.isSuccess, customerRequest.data?.data?.id]);
 
   return (
     <Container>

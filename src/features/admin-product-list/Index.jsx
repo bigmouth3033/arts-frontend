@@ -260,6 +260,7 @@ export default function AdminProductList() {
       ? pageOptions.find((item) => item.value == searchParams.get("pagesize"))
       : null
   );
+  const [wrongVariantPrice, setWrongVariantPrice] = useState(false);
 
   const [showMore, setShowMore] = useState([]);
   const [inputs, setInputs] = useState({});
@@ -296,9 +297,14 @@ export default function AdminProductList() {
 
   const onMakeChanges = (product) => {
     const variants = product.variants;
-    console.log(variants);
+
     if (variants.find((item) => !item.price || item.price == 0)) {
       setZeroPriceError(true);
+      return;
+    }
+
+    if (variants.find((item) => item.salePrice != 0 && item.price > item.salePrice)) {
+      setWrongVariantPrice(true);
       return;
     }
 
@@ -330,7 +336,7 @@ export default function AdminProductList() {
       setSearch(displaySearch);
       setSearchParams({
         currentpage: currentPage,
-        pagesize: pageSize.value,
+        pagesize: pageSize,
         search: displaySearch,
       });
     }, 500);
@@ -593,7 +599,12 @@ export default function AdminProductList() {
         <ErrorPopUp message={"Price cannot be zero"} action={() => setZeroPriceError(false)} />
       )}
       {successUpdate && <SuccessPopUp action={() => setSuccessUpdate(false)} message={"success"} />}
-
+      {wrongVariantPrice && (
+        <ErrorPopUp
+          message={"price cant be larger than compare price"}
+          action={() => setWrongVariantPrice(false)}
+        />
+      )}
       {showReview && <ReviewPopUp productId={showReview} action={() => setShowReview(null)} />}
     </Container>
   );

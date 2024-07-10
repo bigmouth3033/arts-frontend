@@ -189,6 +189,11 @@ export default function CheckOut({ cartData, addressData, total, delivery, payme
   }, [address]);
 
   const onSubmit = () => {
+    if (!cartData.find((item) => item.isChecked == true)) {
+      alert("cart is empty");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("PaymentTypeId", payment);
     formData.append("AddressId", address.id);

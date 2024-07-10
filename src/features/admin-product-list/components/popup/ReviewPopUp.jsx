@@ -338,20 +338,12 @@ export default function ReviewPopUp({ productId, action }) {
           </CommentContainer>
           <div></div>
           <PaginationContainer>
-            {readAllReview.isSuccess && readAllReview.data.data.length > 0 ? (
+            {readAllReview.isSuccess && (
               <ProductPagination
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
                 totalPage={readAllReview.data.totalPages}
               />
-            ) : (
-              <StyledNotFoundComment>
-                {filterStar === 0 ? (
-                  <div>No Rating</div>
-                ) : (
-                  <div> No Rating have {filterStar} star</div>
-                )}
-              </StyledNotFoundComment>
             )}
           </PaginationContainer>
         </StyledContainer>

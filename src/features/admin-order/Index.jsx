@@ -184,8 +184,13 @@ const Buttons = styled.div`
 
 const Filter = styled.div`
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 1rem;
+
+  > div:nth-of-type(2) {
+    display: flex;
+    gap: 1rem;
+  }
 `;
 
 const DropDown = styled.div`
@@ -709,8 +714,10 @@ export default function AdminOrder() {
                     </DropDown>
                   )}
                 </ActionButton>
-                <SelectInput state={totalPage} setState={setTotalPage} options={pageAmount} />
-                <button onClick={() => setShowReport(true)}>Export File</button>
+                <div>
+                  <SelectInput state={totalPage} setState={setTotalPage} options={pageAmount} />
+                  <button onClick={() => setShowReport(true)}>Export File</button>
+                </div>
               </Filter>
             </FilterBar>
             <TableContent>

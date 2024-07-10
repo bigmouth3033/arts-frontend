@@ -145,6 +145,9 @@ const BannerHomePage = (props) => {
                         if (index == 0) {
                           navigate("/listing-page");
                         }
+                        if (index == 1) {
+                          navigate("/listing-page?categoryId=6");
+                        }
                       }}
                       src={image}
                     />

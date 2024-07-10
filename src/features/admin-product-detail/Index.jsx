@@ -578,7 +578,8 @@ export default function AdminProductDetail() {
   const [updateSuccess, setUpdateSuccess] = useState(false);
 
   const categoryRef = useRef(null);
-
+  const [errorMessage, setErrorMessage] = useState("");
+  const [error, setError] = useState(false);
   const [showVariant, setShowVariant] = useState(false);
   const [showUnit, setShowUnit] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -720,7 +721,7 @@ export default function AdminProductDetail() {
     }
 
     const variantWithOutPrice = state.variant_detail.find((item) => {
-      return item.sellPrice == 0;
+      return item.price == 0;
     });
 
     if (variantWithOutPrice) {
@@ -729,11 +730,27 @@ export default function AdminProductDetail() {
       return;
     }
 
+    const wrongVariantPrice = state.variant_detail.find((item) => {
+      return item.salePrice != 0 && item.salePrice < item.price;
+    });
+
+    if (wrongVariantPrice) {
+      setErrorMessage(`Variant price can't be larger than compare price`);
+      setError(true);
+      return;
+    }
+
+    if (state.salePrice != 0 && state.price > state.salePrice) {
+      setErrorMessage(`Price can't be larger than compare price`);
+      setError(true);
+      return;
+    }
+
     const formData = new FormData();
     formData.append("ProductId", searchParams.get("id"));
     formData.append("ProductName", state.productName);
     formData.append("Category", state.category.value);
-    formData.append("Description", state.description);
+    formData.append("Description", state.description ? state.description : "<p></p>");
     formData.append("Price", state.price ? state.price : 0);
     formData.append("SalePrice", state.salePrice ? state.salePrice : 0);
     formData.append("Amount", state.amount ? state.amount : 0);
@@ -1294,6 +1311,7 @@ export default function AdminProductDetail() {
       {updateSuccess && (
         <SuccessPopUp action={() => setUpdateSuccess(false)} message={"Update product success"} />
       )}
+      {error && <ErrorPopUp message={errorMessage} action={() => setError(false)} />}
     </>
   );
 }

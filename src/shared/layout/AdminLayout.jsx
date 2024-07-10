@@ -83,6 +83,10 @@ export default function AdminLayout() {
   useEffect(() => {
     if (getCustomerIdsRequest.isSuccess && getCustomerIdsRequest.data.data != null) {
       const startConnection = async () => {
+        if (connection) {
+          await connection.stop();
+        }
+
         const conn = new HubConnectionBuilder()
           .withUrl("https://localhost:7279/notification")
           .configureLogging(LogLevel.Information)

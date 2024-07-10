@@ -67,7 +67,9 @@ export default function Account() {
         {location.pathname.includes("account-information") && (
           <StyledLink to={"/account/account-information"}>Account</StyledLink>
         )}
-        {location.pathname.includes("manage-exchange") && (
+        {(location.pathname.includes("manage-exchange") ||
+          location.pathname.includes("account-exchange-detail") ||
+          location.pathname.includes("account-refund-detail")) && (
           <StyledLink onClick={(ev) => ev.preventDefault()}>Manage Returns</StyledLink>
         )}
         {location.pathname.includes("account-review") && (

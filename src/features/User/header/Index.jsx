@@ -204,7 +204,7 @@ const CartQuantity = styled.span`
   padding: 0 6px;
   font-weight: 700;
   color: white;
-  transform: translate(15px, -15px);
+  transform: translate(10px, -10px);
 `;
 
 const SearchContainer = styled.div`
