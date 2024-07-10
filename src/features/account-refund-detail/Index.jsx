@@ -348,7 +348,7 @@ export default function AccountRefundDetail() {
 
                   <div>
                     <StyledLink
-                      to={`/admin/product?id=${getOrderDetailRequest.data.data.variant.product.id}`}
+                      to={`/productdetail?id=${getOrderDetailRequest.data.data.variant.product.id}`}
                     >
                       {getOrderDetailRequest.data.data.variant.product.name}
                     </StyledLink>

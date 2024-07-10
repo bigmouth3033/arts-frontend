@@ -731,7 +731,7 @@ export default function AdminProductDetail() {
     }
 
     const wrongVariantPrice = state.variant_detail.find((item) => {
-      return item.salePrice != 0 && item.salePrice < item.price;
+      return Number(item.salePrice) != 0 && Number(item.salePrice) < Number(item.price);
     });
 
     if (wrongVariantPrice) {
@@ -740,7 +740,7 @@ export default function AdminProductDetail() {
       return;
     }
 
-    if (state.salePrice != 0 && state.price > state.salePrice) {
+    if (Number(state.salePrice) != 0 && Number(state.price) > Number(state.salePrice)) {
       setErrorMessage(`Price can't be larger than compare price`);
       setError(true);
       return;

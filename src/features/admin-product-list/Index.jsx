@@ -303,7 +303,11 @@ export default function AdminProductList() {
       return;
     }
 
-    if (variants.find((item) => item.salePrice != 0 && item.price > item.salePrice)) {
+    if (
+      variants.find(
+        (item) => Number(item.salePrice) != 0 && Number(item.price) > Number(item.salePrice)
+      )
+    ) {
       setWrongVariantPrice(true);
       return;
     }

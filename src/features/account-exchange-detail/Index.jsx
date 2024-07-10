@@ -330,7 +330,7 @@ export default function AccountExchangeDetail() {
             Request Exchange Order -{" "}
             <Link
               onClick={() =>
-                navigate(`/admin/order-detail?id=${getOrderDetailRequest.data.data.id}`)
+                navigate(`/account/order-detail?id=${getOrderDetailRequest.data.data.id}`)
               }
             >
               {convertToLetterString(getOrderDetailRequest.data.data.payment.deliveryType.id, 1) +
@@ -369,7 +369,7 @@ export default function AccountExchangeDetail() {
 
                   <div>
                     <StyledLink
-                      to={`/admin/product?id=${getOrderDetailRequest.data.data.variant.product.id}`}
+                      to={`/productdetail?id=${getOrderDetailRequest.data.data.variant.product.id}`}
                     >
                       {getOrderDetailRequest.data.data.variant.product.name}
                     </StyledLink>
@@ -407,7 +407,7 @@ export default function AccountExchangeDetail() {
                 Exchange Order -{" "}
                 <Link
                   onClick={() =>
-                    navigate(`/admin/order-detail?id=${getNewOrderDetailRequest.data.data.id}`)
+                    navigate(`/account/order-detail?id=${getNewOrderDetailRequest.data.data.id}`)
                   }
                 >
                   {convertToLetterString(
@@ -449,7 +449,7 @@ export default function AccountExchangeDetail() {
 
                       <div>
                         <StyledLink
-                          to={`/admin/product?id=${getNewOrderDetailRequest.data.data.variant.product.id}`}
+                          to={`/productdetail?id=${getNewOrderDetailRequest.data.data.variant.product.id}`}
                         >
                           {getNewOrderDetailRequest.data.data.variant.product.name}
                         </StyledLink>

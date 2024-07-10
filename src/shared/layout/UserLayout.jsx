@@ -99,7 +99,7 @@ export default function UserLayout() {
         connection.stop();
       }
     };
-  }, [customerRequest.isSuccess, customerRequest.data?.data?.id]);
+  }, [customerRequest.status, customerRequest.data?.data?.id]);
 
   return (
     <Container>

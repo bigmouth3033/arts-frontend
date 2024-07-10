@@ -4,11 +4,11 @@ export const getSalePrices = (product) => {
   let maxPrice = variants[0].salePrice;
 
   for (let i = 0; i < variants.length; i++) {
-    if (variants[i].salePrice > maxPrice) {
+    if (Number(variants[i].salePrice) > Number(maxPrice)) {
       maxPrice = variants[i].salePrice;
     }
 
-    if (variants[i].salePrice < minPrice) {
+    if (Number(variants[i].salePrice) < Number(minPrice)) {
       minPrice = variants[i].salePrice;
     }
   }
@@ -26,11 +26,11 @@ export const getPrices = (product) => {
   let maxPrice = variants[0].price;
 
   for (let i = 0; i < variants.length; i++) {
-    if (variants[i].price > maxPrice) {
+    if (Number(variants[i].price) > Number(maxPrice)) {
       maxPrice = variants[i].price;
     }
 
-    if (variants[i].price < minPrice) {
+    if (Number(variants[i].price) < Number(minPrice)) {
       minPrice = variants[i].price;
     }
   }
