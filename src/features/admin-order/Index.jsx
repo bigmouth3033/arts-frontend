@@ -274,12 +274,17 @@ const FilterTh = styled.th`
   > button {
     border-radius: 5px;
     border: none;
-    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 
     cursor: pointer;
     background-color: white;
     color: #0091ea;
     position: relative;
+  }
+
+  > button:hover {
+    color: red;
+    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
   }
 
   > svg {

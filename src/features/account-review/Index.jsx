@@ -34,7 +34,7 @@ const StyledNameImageProduct = styled.div`
   }
   > p {
     > p {
-      font-size: 1.5rem;
+      font-size: 1rem;
       font-weight: 600;
     }
   }
@@ -103,10 +103,7 @@ export default function AccountReview() {
                         <p>
                           Created at:
                           <StyledCreatedAt>
-                            {format(
-                              parseISO(item.createdAt),
-                              "yyyy-MM-dd HH:mm:ss"
-                            )}
+                            {format(parseISO(item.createdAt), "yyyy-MM-dd HH:mm:ss")}
                           </StyledCreatedAt>
                         </p>
                       )}
@@ -116,12 +113,7 @@ export default function AccountReview() {
                       {item.reviewImages.length > 0 &&
                         item.reviewImages.map((itemImage, indexImage) => (
                           <div key={indexImage}>
-                            <img
-                              src={
-                                import.meta.env.VITE_API_IMAGE_PATH +
-                                itemImage.imageName
-                              }
-                            />
+                            <img src={import.meta.env.VITE_API_IMAGE_PATH + itemImage.imageName} />
                           </div>
                         ))}
                     </StyledWrapImageComment>
