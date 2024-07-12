@@ -1,5 +1,4 @@
 import styled from "styled-components";
-
 import { useSearchParams } from "react-router-dom";
 import { GetRefundByIdRequest } from "./api/refundDetailApi";
 import { useState } from "react";

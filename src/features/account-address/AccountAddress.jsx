@@ -166,7 +166,11 @@ export default function AccountAddress() {
       </Content>
       {addressPopUp && <AddressPopUp action={() => setAddressPopUp(false)} />}
       {updateAddressPopUp && (
-        <UpdateAddressPopUp addressId={addressId} action={() => setUpdateAddressPopUp(false)} />
+        <UpdateAddressPopUp
+          getUserAddressRequest={getUserAddressRequest}
+          addressId={addressId}
+          action={() => setUpdateAddressPopUp(false)}
+        />
       )}
     </Container>
   );

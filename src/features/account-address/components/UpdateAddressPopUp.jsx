@@ -99,12 +99,10 @@ const Area = styled.textarea`
   }
 `;
 
-export default function UpdateAddressPopUp({ action, addressId }) {
+export default function UpdateAddressPopUp({ action, addressId, getUserAddressRequest }) {
   const queryClient = useQueryClient();
-
   const [start, setStart] = useState(true);
   const updateAddressRequest = UpdateAddressRequest();
-
   const [province, setProvince] = useState("");
   const [district, setDistrict] = useState("");
   const [ward, setWard] = useState("");
@@ -165,9 +163,11 @@ export default function UpdateAddressPopUp({ action, addressId }) {
     updateAddressRequest.mutate(formData, {
       onSuccess: (response) => {
         if (response.status == 200) {
-          action();
+          queryClient.invalidateQueries({ queryKey: ["address-id", "203"] });
           queryClient.invalidateQueries({ queryKey: ["address"] });
+          getUserAddressByIdRequest.refetch();
           setSuccess(true);
+          action();
         }
       },
     });
@@ -182,6 +182,7 @@ export default function UpdateAddressPopUp({ action, addressId }) {
       setProvince({ value: province.level1_id, label: province.name });
       setAddressDetail(data.addressDetail);
       setDefaultInput(data.isDefault);
+      console.log(data.isDefault);
     }
   }, [getUserAddressByIdRequest.status]);
 
