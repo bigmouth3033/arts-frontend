@@ -212,6 +212,9 @@ export default function CheckOut({ cartData, addressData, total, delivery, payme
           setPaySuccess(true);
           return;
         }
+        if (response.status == 400) {
+          alert(`${response.message}-${response.data}`);
+        }
       },
     });
   };

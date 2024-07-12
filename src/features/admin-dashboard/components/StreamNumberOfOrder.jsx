@@ -84,12 +84,28 @@ export default function StreamNumberOfOrder() {
           <ResponsiveStream
             data={getStreamNumberOfOrderRequest.data.data}
             keys={["value"]}
-            margin={{ top: -10, right: 0, bottom: -1, left: -1 }}
+            margin={{ top: -10, right: 10, bottom: 40, left: 50 }}
             axisTop={null}
             axisRight={null}
-            axisBottom={null}
-            axisLeft={null}
-            enableGridY={false}
+            axisBottom={{
+              orient: "bottom",
+              tickSize: 5,
+              tickPadding: 5,
+              tickRotation: 0,
+              legend: "",
+              legendOffset: 36,
+              truncateTickAt: 0,
+            }}
+            axisLeft={{
+              orient: "left",
+              tickSize: 5,
+              tickPadding: 5,
+              tickRotation: 0,
+              legend: "",
+              legendOffset: -40,
+              truncateTickAt: 0,
+            }}
+            enableGridY={true}
             curve="basis"
             offsetType="none"
             colors={{ scheme: "purple_blue_green" }}

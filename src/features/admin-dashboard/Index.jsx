@@ -80,10 +80,7 @@ export default function AdminDashBoard() {
           <RevenueBar />
         </ChartBar>
         <Below>
-          <div>
-            <StreamRevenue />
-            <StreamNumberOfOrder />
-          </div>
+          <GetRecentOrder />
           <OrderStatus>
             <StatusHeader>
               <h4>Order Status</h4>
@@ -131,7 +128,6 @@ export default function AdminDashBoard() {
             )}
           </OrderStatus>
         </Below>
-        <GetRecentOrder />
       </Content>
     </Container>
   );

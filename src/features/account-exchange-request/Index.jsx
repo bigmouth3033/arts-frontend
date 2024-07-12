@@ -226,6 +226,26 @@ const Images = styled.div`
   }
 `;
 
+const Input = styled.textarea`
+  padding: 8px;
+  border-radius: 3px;
+  width: 100%;
+
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  outline: none;
+  transition: all 0.3s;
+  height: 15rem;
+  resize: none;
+
+  &:focus {
+    border: 1px solid rgba(0, 0, 255, 0.4);
+  }
+
+  &:active {
+    border: 1px solid rgba(0, 0, 255, 0.4);
+  }
+`;
+
 const exchangeOptions = [
   { value: "exchange", label: "Exchage product" },
   { value: "refund", label: "Return the product" },
@@ -258,6 +278,7 @@ export default function AccountExchangeRequest() {
   let [searchParams, setSearchParams] = useSearchParams();
   const sendRefundRequest = SendRefundRequest();
   const [success, setSuccess] = useState(false);
+  const [otherReason, setOtherReason] = useState("");
 
   const sendExchangeRequest = SendExchangeRequest();
   const getOrderDetailRequest = GetOrderDetailRequest(searchParams.get("id"));
@@ -297,7 +318,7 @@ export default function AccountExchangeRequest() {
     if (exchangeChoice.value == "refund") {
       const formData = new FormData();
       formData.append("OrderId", getOrderDetailRequest.data.data.id);
-      formData.append("ReasonRefund", exchangeReason.value);
+      formData.append("ReasonRefund", otherReason ? otherReason : exchangeReason.value);
       images.forEach((item) => formData.append("Images", item));
 
       sendRefundRequest.mutate(formData, {
@@ -329,7 +350,7 @@ export default function AccountExchangeRequest() {
     if (exchangeChoice.value == "exchange") {
       const formData = new FormData();
       formData.append("OriginalOrderId", getOrderDetailRequest.data.data.id);
-      formData.append("ReasonExchange", exchangeReason.value);
+      formData.append("ReasonExchange", otherReason ? otherReason : exchangeReason.value);
 
       images.forEach((item) => formData.append("Images", item));
 
@@ -435,7 +456,7 @@ export default function AccountExchangeRequest() {
         </div>
 
         <div>
-          <h4>Image detail</h4>
+          <h4>Product error images</h4>
           <ImageContainer>
             {images.length > 0 && (
               <Images>
@@ -483,6 +504,10 @@ export default function AccountExchangeRequest() {
             setState={setExchangeChoice}
             options={exchangeOptions}
           />
+        </div>
+        <div>
+          <h4>Other reason</h4>
+          <Input value={otherReason} onChange={(ev) => setOtherReason(ev.target.value)} />
         </div>
         <Buttons>
           <button onClick={onReturn}>Submit</button>

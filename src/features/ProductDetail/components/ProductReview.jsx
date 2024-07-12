@@ -245,6 +245,7 @@ export default function ProductReview({ data, star }) {
           </StyledButtonRating>
           {showRating && (
             <RatingPopup
+              star={star}
               readAll={readAllReview}
               action={() => setShowRating(false)}
               data={data}

@@ -102,7 +102,7 @@ const StyledSubmit = styled.button`
   }
 `;
 
-export default function RatingPopup({ action, data, checkReviewQuery, readAll }) {
+export default function RatingPopup({ action, data, checkReviewQuery, readAll, star }) {
   const inputRef = useRef();
   const [images, setImages] = useState([]);
   const [imageError, setImageError] = useState(false);
@@ -154,6 +154,7 @@ export default function RatingPopup({ action, data, checkReviewQuery, readAll })
           setRatingSuccess(true);
           readAll.refetch();
           checkReviewQuery.refetch();
+          star.refetch();
           action();
         }
       },
